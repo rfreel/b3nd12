@@ -1,0 +1,90 @@
+diff --git a/bend2/main.ts b/bend2/main.ts
+--- a/bend2/main.ts
++++ b/bend2/main.ts
+@@
+   bend <file.bend> --publish  publish the file and its imports to the hub
++  bend <file.bend> --json     emit stable diagnostic events as JSON Lines
+@@
+ const DAY = 86400000;
++
++type DiagId = "BND000" | "BND101" | "BND102" | "BND103"
++  | "BND110" | "BND120" | "BND200" | "BND300";
++type Diag = { schema: "bend.diag.v1"; id: DiagId;
++  severity: "ok" | "info" | "warning" | "error"; message: string;
++  file?: string; unsafe?: number };
++type CliErr = { $: "CliErr"; id: DiagId; message: string };
++
++function cli_err(id: DiagId, message: string): CliErr {
++  return { $: "CliErr", id, message };
++}
++
++function diag_line(d: Diag): string {
++  return JSON.stringify(d) + "\n";
++}
++
++function diag_of(e: unknown, file?: string): Diag {
++  if ((e as CliErr)?.$ === "CliErr") {
++    const x = e as CliErr;
++    return { schema: "bend.diag.v1", id: x.id, severity: "error",
++      message: x.message, file };
++  }
++  if (e instanceof RangeError) {
++    return { schema: "bend.diag.v1", id: "BND120", severity: "error",
++      message: book_err(e), file };
++  }
++  const err = e as Bend.Err;
++  return { schema: "bend.diag.v1", id: "BND110", severity: "error",
++    message: err?.$ === "Err" ? Bend.err_show(err) : String(e), file };
++}
+@@
+   let file: string | undefined;
+   let checkup = false;
+   let publish = false;
++  let json = false;
+@@
+     } else if (a === "--publish") {
+       publish = true;
++    } else if (a === "--json") {
++      json = true;
+@@
+-    const book = await book_read(file, undefined, seen);
++    const book = await book_read(file, undefined, seen);
+@@
+-      cli_report(book, 2);
++      cli_report(book, 2, json);
+@@
+-      process.exitCode = book_run(book, argv);
++      process.exitCode = book_run(book, argv, json);
+@@
+   } catch (e) {
+-    cli_say(2, book_err(e) + "\n");
++    cli_say(2, json ? diag_line(diag_of(e, file)) : book_err(e) + "\n");
+     process.exitCode = 1;
+   }
+@@
+-function cli_report(book: Bend.Book, fd: number): void {
++function cli_report(book: Bend.Book, fd: number, json = false): void {
+   const uns  = Object.values(book.tlds).filter((t) =>
+     t.$ === "Def" && t.u === true).length;
++  if (json) {
++    cli_say(fd, diag_line({ schema: "bend.diag.v1", id: "BND000",
++      severity: "ok", message: "All terms check.", unsafe: uns }));
++    return;
++  }
+@@
+-    cli_fail("PROOF.bend must import ./LAWS.bend");
++    throw cli_err("BND101", "PROOF.bend must import ./LAWS.bend");
+@@
+-    throw "Error: " + String(hols) + " TODO" + (hols === 1 ? "" : "s")
+-      + " found.\nThe code is incomplete, and not a valid proof yet.";
++    throw cli_err("BND103", "Error: " + String(hols) + " TODO"
++      + (hols === 1 ? "" : "s")
++      + " found.\nThe code is incomplete, and not a valid proof yet.");
+@@
+-function book_run(book: Bend.Book, argv: string[]): number {
++function book_run(book: Bend.Book, argv: string[], json = false): number {
+   const main = book_main(book);
+   if (main === null) {
+-    cli_report(book, 1);
++    cli_report(book, 1, json);
+     return 0;

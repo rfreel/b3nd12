@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bend-lang.com/schema/diagnostic-v1.json",
+  "title": "Bend diagnostic event v1",
+  "type": "object",
+  "required": ["schema", "id", "severity", "message"],
+  "properties": {
+    "schema": { "const": "bend.diag.v1" },
+    "id": {
+      "enum": ["BND000","BND101","BND102","BND103","BND110","BND120","BND200","BND300"]
+    },
+    "severity": { "enum": ["ok","info","warning","error"] },
+    "message": { "type": "string" },
+    "file": { "type": "string" },
+    "unsafe": { "type": "integer", "minimum": 0 }
+  },
+  "additionalProperties": true
+}
