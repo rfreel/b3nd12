@@ -1,0 +1,168 @@
+name: pinned-bend-checker-receipts
+
+on:
+  push:
+    branches: [checker-receipts-20260918]
+
+permissions:
+  contents: read
+
+jobs:
+  checker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Verify sealed inputs
+        run: |
+          echo "395a57abf69cca8f4550a72f9118e0fb223a25d2b8eca351a8a6e485c8b03821  checker-inputs.tar.gz" | sha256sum -c -
+          mkdir checker-inputs
+          tar -xzf checker-inputs.tar.gz -C checker-inputs
+          find checker-inputs -type f -name '*.bend' | sort
+
+      - name: Acquire pinned Bend 2.0.9
+        run: |
+          git clone --quiet https://github.com/bendlang/bend.git bend-upstream
+          git -C bend-upstream checkout --quiet e5a4c4cfe980c2e4e70571562efb5197fe27b2f4
+          test "$(git -C bend-upstream rev-parse HEAD)" = "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4"
+          BEND_NO_TELEMETRY=1 bun bend-upstream/bend2/main.ts --version | tee checker-version.txt
+          grep -qx 'bend 2.0.9' checker-version.txt
+
+      - name: Run singular checker sequence and emit receipts
+        env:
+          BEND_NO_TELEMETRY: "1"
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, subprocess, sys, time
+
+          ROOT = pathlib.Path("checker-inputs").resolve()
+          CHECKER = [
+              "bun",
+              str(pathlib.Path("bend-upstream/bend2/main.ts").resolve()),
+          ]
+          PIN = "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4"
+          VERSION = "bend 2.0.9"
+          TARGETS = [
+              ("move", "affine_rebuild", ROOT / "moves/affine_rebuild"),
+              ("move", "compute_eq", ROOT / "moves/compute_eq"),
+              ("move", "equation_rewrite", ROOT / "moves/equation_rewrite"),
+              ("move", "forall_list", ROOT / "moves/forall_list"),
+              ("move", "list_ind", ROOT / "moves/list_ind"),
+              ("move", "nat_ind", ROOT / "moves/nat_ind"),
+              ("move", "open_hole", ROOT / "moves/open_hole"),
+              ("move", "pure_model", ROOT / "moves/pure_model"),
+              ("package", "alien-artifact", ROOT / "packages/alien-artifact"),
+              ("package", "taxonomy", ROOT / "packages/taxonomy"),
+          ]
+
+          out_dir = pathlib.Path("receipts")
+          raw_dir = out_dir / "raw"
+          raw_dir.mkdir(parents=True, exist_ok=True)
+
+          def sha_bytes(b):
+              return hashlib.sha256(b).hexdigest()
+
+          def sha_file(p):
+              return sha_bytes(p.read_bytes())
+
+          def law_count(d):
+              p = d / "LAWS.bend"
+              return sum(1 for line in p.read_text().splitlines()
+                         if re.match(r"^law\s+", line))
+
+          def source_hashes(d):
+              return {p.name: sha_file(p) for p in sorted(d.glob("*.bend"))}
+
+          receipts = []
+          seq = 0
+          for kind, name, directory in TARGETS:
+              laws = law_count(directory)
+              hashes = source_hashes(directory)
+              for phase, file_name in (("main", "main.bend"), ("proof", "PROOF.bend")):
+                  seq += 1
+                  started = time.time()
+                  proc = subprocess.run(
+                      CHECKER + [file_name],
+                      cwd=directory,
+                      text=True,
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE,
+                      env={**os.environ, "BEND_NO_TELEMETRY": "1"},
+                  )
+                  elapsed_ms = round((time.time() - started) * 1000)
+                  combined = proc.stdout + "\n" + proc.stderr
+                  unsafe = bool(re.search(r"unsafe annotation", combined, re.I))
+                  todo = bool(re.search(r"\bTODOs?\b|\?[A-Za-z_]", combined))
+                  proof_ok = phase == "proof" and proc.returncode == 0 and not unsafe and not todo
+                  safe = f"{seq:02d}-{kind}-{name}-{phase}"
+                  stdout_path = raw_dir / f"{safe}.stdout.txt"
+                  stderr_path = raw_dir / f"{safe}.stderr.txt"
+                  stdout_path.write_text(proc.stdout)
+                  stderr_path.write_text(proc.stderr)
+                  receipt = {
+                      "schema": "bend.checker-receipt.v1",
+                      "sequence": seq,
+                      "checker_version": VERSION,
+                      "checker_commit": PIN,
+                      "input_bundle_sha256": "395a57abf69cca8f4550a72f9118e0fb223a25d2b8eca351a8a6e485c8b03821",
+                      "target_kind": kind,
+                      "target": name,
+                      "phase": phase,
+                      "entry": file_name,
+                      "law_count": laws,
+                      "source_sha256": hashes,
+                      "exit_code": proc.returncode,
+                      "unsafe_detected": unsafe,
+                      "todo_detected": todo,
+                      "proof_ok": proof_ok,
+                      "laws_discharged": laws if proof_ok else 0,
+                      "stdout_sha256": sha_bytes(proc.stdout.encode()),
+                      "stderr_sha256": sha_bytes(proc.stderr.encode()),
+                      "elapsed_ms": elapsed_ms,
+                  }
+                  receipts.append(receipt)
+                  print("RECEIPT " + json.dumps(receipt, sort_keys=True))
+                  if proc.stdout:
+                      print("STDOUT_BEGIN", safe)
+                      print(proc.stdout.rstrip())
+                      print("STDOUT_END", safe)
+                  if proc.stderr:
+                      print("STDERR_BEGIN", safe)
+                      print(proc.stderr.rstrip())
+                      print("STDERR_END", safe)
+
+          (out_dir / "receipts.jsonl").write_text(
+              "".join(json.dumps(r, sort_keys=True) + "\n" for r in receipts)
+          )
+          summary = {
+              "schema": "bend.checker-sequence-summary.v1",
+              "checker_version": VERSION,
+              "checker_commit": PIN,
+              "input_bundle_sha256": "395a57abf69cca8f4550a72f9118e0fb223a25d2b8eca351a8a6e485c8b03821",
+              "targets": len(TARGETS),
+              "commands": len(receipts),
+              "proofs_passed": [r["target"] for r in receipts if r["proof_ok"]],
+              "proofs_failed": [r["target"] for r in receipts
+                                if r["phase"] == "proof" and not r["proof_ok"]],
+              "laws_discharged_total": sum(r["laws_discharged"] for r in receipts),
+              "alien_artifact_laws_discharged": next(
+                  r["laws_discharged"] for r in receipts
+                  if r["target"] == "alien-artifact" and r["phase"] == "proof"
+              ),
+              "taxonomy_laws_discharged": next(
+                  r["laws_discharged"] for r in receipts
+                  if r["target"] == "taxonomy" and r["phase"] == "proof"
+              ),
+          }
+          (out_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+          print("SUMMARY " + json.dumps(summary, sort_keys=True))
+          PY
+
+      - name: Publish receipt artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pinned-bend-2.0.9-checker-receipts
+          path: receipts/
+          if-no-files-found: error
+          retention-days: 30
