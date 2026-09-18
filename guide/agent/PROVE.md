@@ -9,13 +9,16 @@ Legal working set
 4. LAWS.bend
 5. PROOF.bend
 6. only definitions named by the target law or its current diagnostic
-7. one proof-move note at a time when the proof-move library is present
+7. one proof-move note at a time from guide/agent/proof/INDEX.md
 
 Proof contract
 - PROOF.bend beside LAWS.bend must import LAWS.bend.
 - A proof result is not trusted if its import graph contains @unsafe.
 - Preserve unresolved branches instead of replacing them with a plausible proof.
 - Prefer conversion and the smallest proof move before introducing helpers.
+
+Proof moves
+Load one at a time: conversion, case analysis, structural induction, rewrite, congruence, equality direction/chaining, witness construction, or contradiction. Recheck before stacking another move.
 
 Working loop
 1. Select one law.
