@@ -1,0 +1,101 @@
+diff --git a/bend2/main.ts b/bend2/main.ts
+--- a/bend2/main.ts
++++ b/bend2/main.ts
+@@
+   bend <file.bend> --json     emit stable diagnostic events as JSON Lines
++  bend <file.bend> --graph X  print the checked named dependency slice from X
+@@
+   let publish = false;
+   let json = false;
++  let graph: string[] | null = null;
+@@
+     } else if (a === "--json") {
+       json = true;
++    } else if (a === "--graph") {
++      i += 1;
++      graph = (args[i] ?? cli_fail("--graph needs a name"))
++        .split(",").filter((x) => x !== "");
+@@
+     const book = await book_read(file, undefined, seen);
++    if (graph !== null) {
++      cli_say(1, book_graph_show(book, graph, json));
++      return;
++    }
+@@
+ }
++
++function term_refs(tm: Bend.LTerm, out: Set<string>): void {
++  switch (tm.$) {
++    case "Ref":
++      out.add(tm.k); return;
++    case "Sub":
++      if (tm.v.$ !== "PVar" && tm.v.$ !== "PCtr") term_refs(tm.v, out);
++      term_refs(tm.f, out); return;
++    case "Let":
++      tm.v.forEach((x) => term_refs(x, out)); term_refs(tm.f, out); return;
++    case "Typ":
++      term_refs(tm.g, out); return;
++    case "Min":
++      term_refs(tm.a, out); term_refs(tm.b, out); return;
++    case "All":
++      term_refs(tm.A, out); term_refs(tm.B, out); return;
++    case "Lam":
++      term_refs(tm.f, out); return;
++    case "App":
++      term_refs(tm.f, out); term_refs(tm.x, out); return;
++    case "ADT":
++    case "Ctr":
++      tm.x.forEach((x) => term_refs(x, out)); return;
++    case "Mat":
++      term_refs(tm.h, out); term_refs(tm.m, out); return;
++    case "Eql":
++      term_refs(tm.a, out); term_refs(tm.b, out); term_refs(tm.T, out); return;
++    case "Rwt":
++      term_refs(tm.e, out); term_refs(tm.p, out); term_refs(tm.f, out); return;
++    case "Ann":
++      term_refs(tm.x, out); term_refs(tm.T, out); return;
++    default:
++      return;
++  }
++}
++
++function tld_refs(tld: Bend.TLD): string[] {
++  const out = new Set<string>();
++  term_refs(Bend.term_lower(tld.T), out);
++  if (tld.$ === "Def" && tld.v !== null) {
++    term_refs(Bend.term_lower(tld.v), out);
++  }
++  if (tld.$ === "ADT") {
++    tld.c.forEach((c) => term_refs(Bend.term_lower(c.T), out));
++  }
++  return [...out].sort();
++}
++
++function book_graph(book: Bend.Book, roots: string[]):
++  { schema: "bend.graph.v1"; roots: string[];
++    nodes: { name: string; refs: string[] }[] } {
++  for (const root of roots) {
++    if (book.tlds[root] === undefined) {
++      throw cli_err("BND200", "--graph has no checked name " + root);
++    }
++  }
++  const seen = new Set<string>();
++  const todo = [...roots];
++  const nodes: { name: string; refs: string[] }[] = [];
++  while (todo.length !== 0) {
++    const name = todo.shift() as string;
++    if (seen.has(name)) continue;
++    seen.add(name);
++    const refs = tld_refs(book.tlds[name]).filter((x) => book.tlds[x] !== undefined);
++    nodes.push({ name, refs });
++    for (const ref of refs) if (!seen.has(ref)) todo.push(ref);
++  }
++  return { schema: "bend.graph.v1", roots, nodes };
++}
++
++function book_graph_show(book: Bend.Book, roots: string[], json: boolean): string {
++  const graph = book_graph(book, roots);
++  if (json) return JSON.stringify(graph) + "\n";
++  return graph.nodes.map((n) => n.name
++    + (n.refs.length === 0 ? "" : " -> " + n.refs.join(", "))).join("\n") + "\n";
++}
