@@ -1,0 +1,29 @@
+diff --git a/evals/README.md b/evals/README.md
+new file mode 100644
+--- /dev/null
++++ b/evals/README.md
+@@
++# Eval sidecars
++
++An eval may keep a name.sidecar.json beside name.bend. The sidecar stores
++diagnostics, graph roots, attempted proof moves, residual distinctions,
++evidence, the next discriminator and a reopen trigger. It never replaces the
++.bend file and never upgrades UNRESOLVED residue into a decision.
+diff --git a/evals/_template.sidecar.json b/evals/_template.sidecar.json
+new file mode 100644
+--- /dev/null
++++ b/evals/_template.sidecar.json
+@@
++{
++  "schema": "bend.eval-sidecar.v1",
++  "target": "evals/example.bend",
++  "status": "UNRESOLVED",
++  "diagnostics": [],
++  "graphRoots": [],
++  "movesTried": [],
++  "residuals": [],
++  "irreversibleBoundaries": [],
++  "evidence": [],
++  "nextDiscriminator": null,
++  "reopenTrigger": null
++}
