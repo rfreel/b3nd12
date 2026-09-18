@@ -1,0 +1,39 @@
+diff --git a/bend2/main.ts b/bend2/main.ts
+--- a/bend2/main.ts
++++ b/bend2/main.ts
+@@
+-  bend guide                  print the small task router
+-  bend guide full             print the complete Bend guide
++  bend guide [program|prove]  print the router or one small task pack
++  bend guide full             print the complete Bend guide
+@@
+ const ROUTER = path.join(Bend.BEND_DIR, "..", "guide", "agent", "ROUTER.md");
++const PROGRAM = path.join(Bend.BEND_DIR, "..", "guide", "agent", "PROGRAM.md");
++const PROVE = path.join(Bend.BEND_DIR, "..", "guide", "agent", "PROVE.md");
+@@
+-    if (args[1] === undefined) {
+-      cli_say(1, fs.readFileSync(ROUTER, "utf8"));
+-    } else if (args[1] === "full") {
+-      cli_say(1, fs.readFileSync(GUIDE, "utf8"));
+-    } else {
++    const at = args[1] === undefined ? ROUTER
++      : args[1] === "program" ? PROGRAM
++      : args[1] === "prove" ? PROVE
++      : args[1] === "full" ? GUIDE : undefined;
++    if (at === undefined) {
+       cli_fail("unknown guide " + args[1]);
+     }
++    cli_say(1, fs.readFileSync(at, "utf8"));
+diff --git a/gates/ping.ts b/gates/ping.ts
+--- a/gates/ping.ts
++++ b/gates/ping.ts
+@@
+   const full = await bend(["guide", "full"]);
+   check("bend guide full prints the guide", full.code === 0
+     && full.out.includes("# "));
++  const program = await bend(["guide", "program"]);
++  check("bend guide program prints the program pack", program.code === 0
++    && program.out.includes("# PROGRAM pack"));
++  const prove = await bend(["guide", "prove"]);
++  check("bend guide prove prints the prove pack", prove.code === 0
++    && prove.out.includes("# PROVE pack"));
