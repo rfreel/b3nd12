@@ -1,0 +1,115 @@
+{
+  "schema": "bend.laws-index.v1",
+  "upstream": {
+    "repository": "bendlang/bend",
+    "commit": "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4"
+  },
+  "entries": [
+    {
+      "id": "conversion",
+      "move": "01-CONVERSION",
+      "tags": [
+        "equality",
+        "normalization",
+        "reflexivity"
+      ],
+      "sources": [
+        "tests/proof/equality_kit.bend",
+        "guide/GUIDE.md"
+      ]
+    },
+    {
+      "id": "case-analysis",
+      "move": "02-CASE",
+      "tags": [
+        "datatype",
+        "constructor",
+        "branch"
+      ],
+      "sources": [
+        "demos/proof_numerics/PROOF.bend",
+        "tests/proof/half_shift_hom.bend"
+      ]
+    },
+    {
+      "id": "structural-induction",
+      "move": "03-INDUCTION",
+      "tags": [
+        "recursive",
+        "nat",
+        "induction-hypothesis"
+      ],
+      "sources": [
+        "README.md",
+        "demos/proof_numerics/PROOF.bend"
+      ]
+    },
+    {
+      "id": "rewrite",
+      "move": "04-REWRITE",
+      "tags": [
+        "equality",
+        "motive",
+        "substitution"
+      ],
+      "sources": [
+        "guide/GUIDE.md",
+        "demos/proof_numerics/PROOF.bend"
+      ]
+    },
+    {
+      "id": "congruence",
+      "move": "05-CONGRUENCE",
+      "tags": [
+        "equality",
+        "function",
+        "transport"
+      ],
+      "sources": [
+        "tests/proof/equality_kit.bend",
+        "demos/io_http_fetch/PROOF.bend"
+      ]
+    },
+    {
+      "id": "equality-chain",
+      "move": "06-EQUALITY-CHAIN",
+      "tags": [
+        "symmetry",
+        "transitivity",
+        "intermediate"
+      ],
+      "sources": [
+        "tests/proof/from_to_injective.bend",
+        "tests/proof/half_shift_hom.bend"
+      ]
+    },
+    {
+      "id": "witness",
+      "move": "07-WITNESS",
+      "tags": [
+        "exists",
+        "exs",
+        "dependent-pair"
+      ],
+      "sources": [
+        "tests/proof/exists_witness.bend",
+        "tests/proof/nested_exists.bend",
+        "demos/io_http_fetch/LAWS.bend"
+      ]
+    },
+    {
+      "id": "contradiction",
+      "move": "08-CONTRADICTION",
+      "tags": [
+        "Empty",
+        "inequality",
+        "constructor-clash",
+        "boolean-reflection"
+      ],
+      "sources": [
+        "demos/app_win_is_bug_2d/PROOF.bend",
+        "guide/GUIDE.md"
+      ]
+    }
+  ]
+}

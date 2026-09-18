@@ -1,0 +1,59 @@
+diff --git a/bend2/main.ts b/bend2/main.ts
+--- a/bend2/main.ts
++++ b/bend2/main.ts
+@@
+   bend guide [program|prove]  print the router or one small task pack
+   bend guide full             print the complete Bend guide
++  bend --pack program|prove   print one agent working pack directly
++  bend --why BNDnnn           explain one stable diagnostic id
+@@
+ const PROVE = path.join(Bend.BEND_DIR, "..", "guide", "agent", "PROVE.md");
++const DIAGNOSTICS = path.join(Bend.BEND_DIR, "..", "guide", "agent",
++  "diagnostics.json");
+@@
+   if (args[0] === "--version" && args.length === 1) {
+     return cli_say(1, "bend " + VERSION + "\n");
+   }
++  if (args[0] === "--pack" && args.length === 2) {
++    return cli_pack(args[1]);
++  }
++  if (args[0] === "--why" && args.length === 2) {
++    return cli_why(args[1]);
++  }
+@@
+ }
++
++function cli_pack(name: string): void {
++  const at = name === "program" ? PROGRAM
++    : name === "prove" ? PROVE
++    : name === "router" ? ROUTER : undefined;
++  if (at === undefined) {
++    cli_fail("unknown pack " + name);
++  }
++  cli_say(1, fs.readFileSync(at, "utf8"));
++}
++
++function cli_why(id: string): void {
++  const doc = JSON.parse(fs.readFileSync(DIAGNOSTICS, "utf8")) as {
++    ids?: Record<string, { name?: string; why?: string; next?: string }>
++  };
++  const d = doc.ids?.[id];
++  if (d === undefined) {
++    cli_fail("unknown diagnostic " + id);
++  }
++  cli_say(1, id + " " + (d.name ?? "") + "\n"
++    + (d.why ?? "") + "\nnext: " + (d.next ?? "") + "\n");
++}
+diff --git a/gates/ping.ts b/gates/ping.ts
+--- a/gates/ping.ts
++++ b/gates/ping.ts
+@@
+   const prove = await bend(["guide", "prove"]);
+   check("bend guide prove prints the prove pack", prove.code === 0
+     && prove.out.includes("# PROVE pack"));
++  const pack = await bend(["--pack", "prove"]);
++  check("bend --pack prove prints the same pack", pack.code === 0
++    && pack.out.includes("# PROVE pack"));
++  const why = await bend(["--why", "BND101"]);
++  check("bend --why resolves a stable diagnostic", why.code === 0
++    && why.out.includes("proof.laws_import_missing"));

@@ -1,0 +1,5 @@
+RANK 10 COMPLETE: NO THEORY EDIT
+
+The deletion test passes. Ranks 1 through 9 provide the required agent ergonomics without modifying bend2/bend.ts. This file is intentionally not a patch.
+
+Invariant: applying this stack must leave bend2/bend.ts byte-for-byte unchanged from upstream e5a4c4cfe980c2e4e70571562efb5197fe27b2f4.

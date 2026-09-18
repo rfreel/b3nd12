@@ -1,0 +1,16 @@
+diff --git a/gates/ping.ts b/gates/ping.ts
+--- a/gates/ping.ts
++++ b/gates/ping.ts
+@@
+   const prove = await bend(["guide", "prove"]);
+   check("bend guide prove prints the prove pack", prove.code === 0
+     && prove.out.includes("# PROVE pack"));
++
++  const contract = path.join(TMP, "proof-contract");
++  fs.mkdirSync(contract, { recursive: true });
++  fs.writeFileSync(path.join(contract, "LAWS.bend"),
++    "import Base\nlaw still_open:\n  Nat\n");
++  fs.writeFileSync(path.join(contract, "PROOF.bend"), "import Base\n");
++  const missed = await bend([path.join(contract, "PROOF.bend")]);
++  check("PROOF beside LAWS must import it", missed.code !== 0
++    && missed.err.includes("PROOF.bend must import ./LAWS.bend"));

@@ -1,0 +1,72 @@
+name: verify-ranked-deepenings
+
+on:
+  push:
+    branches: [ranked-deepenings]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Acquire pinned Bend
+        run: |
+          git clone --quiet https://github.com/bendlang/bend.git upstream
+          git -C upstream checkout --quiet e5a4c4cfe980c2e4e70571562efb5197fe27b2f4
+      - name: Apply and structurally verify
+        run: ./apply.sh upstream
+      - name: Exercise router and packs
+        run: |
+          BEND_NO_TELEMETRY=1 bun upstream/bend2/main.ts guide | grep -q '^# Bend agent router'
+          BEND_NO_TELEMETRY=1 bun upstream/bend2/main.ts --pack prove | grep -q '^# PROVE pack'
+          BEND_NO_TELEMETRY=1 bun upstream/bend2/main.ts --why BND101 | grep -q 'proof.laws_import_missing'
+      - name: Exercise JSON diagnostics
+        run: |
+          cat >/tmp/bad.bend <<'EOF'
+          import Base
+          def main() -> Nat:
+            True{}
+          EOF
+          set +e
+          OUT=$(BEND_NO_TELEMETRY=1 bun upstream/bend2/main.ts /tmp/bad.bend --json 2>&1)
+          CODE=$?
+          set -e
+          test "$CODE" -ne 0
+          printf '%s\n' "$OUT" | grep -q '"schema":"bend.diag.v1"'
+          printf '%s\n' "$OUT" | grep -q '"id":"BND110"'
+      - name: Exercise named graph
+        run: |
+          cat >/tmp/graph.bend <<'EOF'
+          import Base
+          def leaf(x: Nat) -> Nat:
+            x
+          def root(x: Nat) -> Nat:
+            leaf(x)
+          EOF
+          OUT=$(BEND_NO_TELEMETRY=1 bun upstream/bend2/main.ts /tmp/graph.bend --graph root --json)
+          printf '%s\n' "$OUT" | grep -q '"schema":"bend.graph.v1"'
+          printf '%s\n' "$OUT" | grep -q '"name":"root"'
+          printf '%s\n' "$OUT" | grep -q '"leaf"'
+      - name: Exercise PROOF to LAWS contract
+        run: |
+          mkdir -p /tmp/proof-contract
+          cat >/tmp/proof-contract/LAWS.bend <<'EOF'
+          import Base
+          law still_open:
+            Nat
+          EOF
+          printf 'import Base\n' >/tmp/proof-contract/PROOF.bend
+          set +e
+          OUT=$(BEND_NO_TELEMETRY=1 bun upstream/bend2/main.ts /tmp/proof-contract/PROOF.bend --json 2>&1)
+          CODE=$?
+          set -e
+          test "$CODE" -ne 0
+          printf '%s\n' "$OUT" | grep -q '"id":"BND101"'
+      - name: Parse modified gate sources
+        run: |
+          bun build upstream/gates/repo.ts --target=bun --outfile=/tmp/repo-gate.js >/dev/null
+          bun build upstream/gates/ping.ts --target=bun --outfile=/tmp/ping-gate.js >/dev/null
+      - name: Confirm theory untouched
+        run: git -C upstream diff --exit-code -- bend2/bend.ts

@@ -1,0 +1,15 @@
+diff --git a/guide/agent/PROVE.md b/guide/agent/PROVE.md
+--- a/guide/agent/PROVE.md
++++ b/guide/agent/PROVE.md
+@@
+ 7. one proof-move note at a time when the proof-move library is present
++
++Proof moves live in guide/agent/proof/INDEX.md. Load one move at a time:
++conversion, case analysis, structural induction, rewrite, congruence,
++equality direction/chaining, witness construction, or contradiction.
+diff --git a/gates/repo.ts b/gates/repo.ts
+--- a/gates/repo.ts
++++ b/gates/repo.ts
+@@
+ allow(/^guide\/agent\/[A-Z_]+\.md$/, 4000);
++allow(/^guide\/agent\/proof\/[0-9A-Z_-]+\.md$/, 4000);

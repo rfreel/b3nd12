@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bend-lang.com/schema/eval-sidecar-v1.json",
+  "title": "Bend eval residue sidecar v1",
+  "type": "object",
+  "required": ["schema","target","status","residuals","evidence"],
+  "properties": {
+    "schema": { "const": "bend.eval-sidecar.v1" },
+    "target": { "type": "string" },
+    "status": { "enum": ["SOLVED","ROBUST","BRANCHED","UNRESOLVED","BLOCKED"] },
+    "diagnostics": { "type": "array", "items": { "type": "string" } },
+    "graphRoots": { "type": "array", "items": { "type": "string" } },
+    "movesTried": { "type": "array", "items": { "type": "string" } },
+    "residuals": { "type": "array", "items": { "type": "string" } },
+    "irreversibleBoundaries": { "type": "array", "items": { "type": "string" } },
+    "evidence": { "type": "array", "items": { "type": "string" } },
+    "nextDiscriminator": { "type": ["string","null"] },
+    "reopenTrigger": { "type": ["string","null"] }
+  },
+  "additionalProperties": false
+}

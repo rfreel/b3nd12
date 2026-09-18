@@ -1,0 +1,13 @@
+{
+  "schema": "bend.eval-sidecar.v1",
+  "target": "evals/example.bend",
+  "status": "UNRESOLVED",
+  "diagnostics": [],
+  "graphRoots": [],
+  "movesTried": [],
+  "residuals": [],
+  "irreversibleBoundaries": [],
+  "evidence": [],
+  "nextDiscriminator": null,
+  "reopenTrigger": null
+}

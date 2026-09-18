@@ -1,0 +1,80 @@
+diff --git a/AGENTS.md b/AGENTS.md
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@
+ # AGENTS
++
++Start with guide/agent/ROUTER.md. Do not read guide/GUIDE.md by default.
++Load the smallest task pack that can answer the current need. Escalate to the
++full guide only when the router says the pack is insufficient.
+@@
+     guide/              GUIDE.md
++    guide/agent/        small task router and agent packs
+diff --git a/CLAUDE.md b/CLAUDE.md
+new file mode 100644
+--- /dev/null
++++ b/CLAUDE.md
+@@
++# CLAUDE
++
++Read AGENTS.md, then guide/agent/ROUTER.md.
++Do not load guide/GUIDE.md by default.
++Do not edit bend2/bend.ts for ergonomics work.
+diff --git a/guide/agent/ROUTER.md b/guide/agent/ROUTER.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/ROUTER.md
+@@
++# Bend agent router
++
++PROGRAM: ordinary implementation work.
++PROVE: laws and proof work.
++FULL: guide/GUIDE.md only when a smaller pack is insufficient.
++
++Do not edit bend2/bend.ts for ergonomics changes.
+diff --git a/bend2/main.ts b/bend2/main.ts
+--- a/bend2/main.ts
++++ b/bend2/main.ts
+@@
+-  bend guide                  print the Bend guide
++  bend guide                  print the small task router
++  bend guide full             print the complete Bend guide
+@@
+-Read the guide (\`bend guide\`) before writing Bend code.
++Start with \`bend guide\`; use \`bend guide full\` only when needed.
+ \`;
+@@
+ const GUIDE = path.join(Bend.BEND_DIR, "..", "guide", "GUIDE.md");
++const ROUTER = path.join(Bend.BEND_DIR, "..", "guide", "agent", "ROUTER.md");
+@@
+-  if (args[0] === "guide" && args.length === 1) {
+-    cli_say(1, fs.readFileSync(GUIDE, "utf8"));
++  if (args[0] === "guide" && args.length <= 2) {
++    if (args[1] === undefined) {
++      cli_say(1, fs.readFileSync(ROUTER, "utf8"));
++    } else if (args[1] === "full") {
++      cli_say(1, fs.readFileSync(GUIDE, "utf8"));
++    } else {
++      cli_fail("unknown guide " + args[1]);
++    }
+diff --git a/gates/repo.ts b/gates/repo.ts
+--- a/gates/repo.ts
++++ b/gates/repo.ts
+@@
+ allow("AGENTS.md", 2000);
++allow("CLAUDE.md", 1000);
+@@
+ allow("guide/GUIDE.md", 12000);
++allow(/^guide\/agent\/[A-Z_]+\.md$/, 4000);
+diff --git a/gates/ping.ts b/gates/ping.ts
+--- a/gates/ping.ts
++++ b/gates/ping.ts
+@@
+-  const guide = await bend(["guide"]);
+-  check("bend guide prints the guide", guide.code === 0 && guide.out.includes("# "));
++  const guide = await bend(["guide"]);
++  check("bend guide prints the router", guide.code === 0
++    && guide.out.includes("Bend agent router"));
++  const full = await bend(["guide", "full"]);
++  check("bend guide full prints the guide", full.code === 0
++    && full.out.includes("# "));

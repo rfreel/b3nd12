@@ -1,0 +1,88 @@
+{
+  "schema": "b3nd12.ranked-deepenings.v1",
+  "upstream": "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4",
+  "completed": 10,
+  "theoryEdited": false,
+  "ranks": [
+    {
+      "rank": 1,
+      "status": "COMPLETE",
+      "evidence": [
+        "patches/01-router.patch",
+        "CLAUDE.md",
+        "guide/agent/ROUTER.md"
+      ]
+    },
+    {
+      "rank": 2,
+      "status": "COMPLETE",
+      "evidence": [
+        "patches/02-packs.patch",
+        "guide/agent/PROGRAM.md",
+        "guide/agent/PROVE.md"
+      ]
+    },
+    {
+      "rank": 3,
+      "status": "COMPLETE",
+      "evidence": [
+        "patches/03-diagnostics-json.patch",
+        "spec/diagnostic-v1.schema.json"
+      ]
+    },
+    {
+      "rank": 4,
+      "status": "COMPLETE",
+      "evidence": [
+        "guide/agent/proof/INDEX.md"
+      ]
+    },
+    {
+      "rank": 5,
+      "status": "COMPLETE",
+      "evidence": [
+        "patches/05-graph.patch",
+        "spec/graph-v1.schema.json"
+      ]
+    },
+    {
+      "rank": 6,
+      "status": "COMPLETE",
+      "evidence": [
+        "guide/agent/laws-index.json",
+        "guide/agent/diagnostics.json"
+      ]
+    },
+    {
+      "rank": 7,
+      "status": "COMPLETE",
+      "evidence": [
+        "patches/07-proof-import-pin.patch",
+        "guide/agent/UPSTREAM_DECISIONS.md"
+      ]
+    },
+    {
+      "rank": 8,
+      "status": "COMPLETE",
+      "evidence": [
+        "evals/_sidecar.schema.json",
+        "evals/_template.sidecar.json"
+      ]
+    },
+    {
+      "rank": 9,
+      "status": "COMPLETE",
+      "evidence": [
+        "patches/09-why-pack.patch"
+      ]
+    },
+    {
+      "rank": 10,
+      "status": "COMPLETE_NO_CHANGE",
+      "evidence": [
+        "guide/agent/THEORY_BOUNDARY.md",
+        "patches/10-no-theory-edit.txt"
+      ]
+    }
+  ]
+}
