@@ -1,0 +1,6 @@
+diff --git a/gates/repo.ts b/gates/repo.ts
+--- a/gates/repo.ts
++++ b/gates/repo.ts
+@@
+ allow(/^guide\/agent\/[A-Z_]+\.md$/, 4000);
++allow(/^guide\/agent\/(laws-index|diagnostics)\.json$/, 8000);
