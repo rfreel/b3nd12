@@ -14,31 +14,18 @@ test -z "$(git -C "$TARGET" status --porcelain)" || {
   exit 1
 }
 
-p() { git -C "$TARGET" apply "$SELF/patches/$1"; }
-
-p 01-router.patch
-mkdir -p "$TARGET/guide/agent"
-cp "$SELF/CLAUDE.md" "$TARGET/CLAUDE.md"
-cp "$SELF/guide/agent/ROUTER.md" "$TARGET/guide/agent/ROUTER.md"
-cp "$SELF/guide/agent/PROGRAM.md" "$TARGET/guide/agent/PROGRAM.md"
-cp "$SELF/guide/agent/PROVE.md" "$TARGET/guide/agent/PROVE.md"
-
-p 02-packs.patch
-p 03-diagnostics-json.patch
-p 04-proof-moves.patch
 mkdir -p "$TARGET/guide/agent/proof"
+cp "$SELF/overlay/AGENTS.md" "$TARGET/AGENTS.md"
+cp "$SELF/overlay/bend2/main.ts" "$TARGET/bend2/main.ts"
+cp "$SELF/overlay/gates/repo.ts" "$TARGET/gates/repo.ts"
+cp "$SELF/overlay/gates/ping.ts" "$TARGET/gates/ping.ts"
+cp "$SELF/CLAUDE.md" "$TARGET/CLAUDE.md"
+cp "$SELF"/guide/agent/*.md "$TARGET/guide/agent/"
+cp "$SELF"/guide/agent/*.json "$TARGET/guide/agent/"
 cp "$SELF"/guide/agent/proof/*.md "$TARGET/guide/agent/proof/"
-
-p 05-graph.patch
-p 06-indexes.patch
-cp "$SELF/guide/agent/laws-index.json" "$TARGET/guide/agent/laws-index.json"
-cp "$SELF/guide/agent/diagnostics.json" "$TARGET/guide/agent/diagnostics.json"
-p 07-proof-import-pin.patch
-
-p 08-eval-sidecars.patch
+cp "$SELF/evals/README.md" "$TARGET/evals/README.md"
+cp "$SELF/evals/_template.sidecar.json" "$TARGET/evals/_template.sidecar.json"
 cp "$SELF/evals/_sidecar.schema.json" "$TARGET/evals/_sidecar.schema.json"
-
-p 09-why-pack.patch
 
 "$SELF/verify.sh" "$TARGET"
 echo "apply: ranked deepenings installed"

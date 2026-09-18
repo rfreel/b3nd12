@@ -3,18 +3,44 @@
   "$id": "https://bend-lang.com/schema/graph-v1.json",
   "title": "Bend named dependency graph v1",
   "type": "object",
-  "required": ["schema", "roots", "nodes"],
+  "required": [
+    "schema",
+    "roots",
+    "open",
+    "nodes"
+  ],
   "properties": {
-    "schema": { "const": "bend.graph.v1" },
-    "roots": { "type": "array", "items": { "type": "string" } },
+    "schema": {
+      "const": "bend.graph.v1"
+    },
+    "roots": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "open": {
+      "type": "integer",
+      "minimum": 0
+    },
     "nodes": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "refs"],
+        "required": [
+          "name",
+          "refs"
+        ],
         "properties": {
-          "name": { "type": "string" },
-          "refs": { "type": "array", "items": { "type": "string" } }
+          "name": {
+            "type": "string"
+          },
+          "refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       }
     }

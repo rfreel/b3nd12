@@ -1,0 +1,312 @@
+#!/usr/bin/env bun
+// The installer, the compiled bend, its daily check and the hub, on this
+// machine: release.ts --dry (the site repo at lib.SITE) builds this host's
+// target into a temp DL_DIR (the archive, install.sh, bend.rb, latest.json);
+// a hub.ts on a random localhost port logs to a temp file; a Bun.serve plays
+// Caddy and GitHub in front of it (/install.sh with the GitHub URL turned
+// into this origin and the https-only flags dropped, since this origin is
+// plain http; the archive under /dl; /check and /ping to the hub); then
+// install.sh runs in a temp HOME over the old launcher's layout. Checks:
+// bashka (SKIP without it) calls the script green; the install replaces the
+// launcher with the executable, drops app/, current, id, last, rep and bad,
+// cleans its temp dir, writes no shell rc, names the version, the PATH line
+// and the Bun note in its card (a second install, bin on PATH, says
+// neither); bend --help prints the help and the disclosure, and its check
+// logs one line {v, os, arch, ip} with no id and no cmd; a second run and
+// bend --version log nothing; BEND_NO_TELEMETRY=1 asks nothing and writes
+// no cache; a newer release with a notice prints one line and the notice
+// (control characters stripped) on stderr, stdout and the exit code being
+// the command's own; a dead origin costs one run under four seconds; bend
+// update runs the installer again; guide, base and a program run through
+// the executable; a tampered sha256 installs nothing; a Windows or a MIPS
+// uname is refused in one line; a 2.0.0-2.0.7 launcher's ping and its
+// latest.json fallback name the version, no sha256 and the move notice; the
+// formula carries the sum. SKIP when the site repo is not at lib.SITE.
+
+import * as child from "node:child_process";
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
+
+import * as lib from "./_lib";
+
+// Constants
+// =========
+
+if (!fs.existsSync(path.join(lib.SITE, "deploy", "release.ts"))) {
+  console.log("SKIP the site repo is not at " + lib.SITE + " (set SITE_REPO)");
+  process.exit(0);
+}
+
+const PORT   = 20000 + Math.floor(Math.random() * 40000);
+const ORIGIN = "http://localhost:" + String(PORT);
+const HUB    = "http://localhost:" + String(PORT + 1);
+const TMP    = fs.mkdtempSync(path.join(os.tmpdir(), "bend-ping-"));
+const HOME   = path.join(TMP, "home");
+const BEND   = path.join(HOME, ".bend");
+const BIN    = path.join(BEND, "bin", "bend");
+const DL     = path.join(TMP, "dl");
+const LOG    = path.join(TMP, "check.jsonl");
+const TARGET = process.platform + "-" + process.arch;
+const SAID   = "Once a day, bend asks bend-lang.com";
+const MOVED  = "Bend's installer changed";
+const PATHS  = "/usr/bin:/bin";
+
+const fails: string[] = [];
+let total = 0;
+
+// Run
+// ===
+
+function run(bin: string, args: string[], env: Record<string, string> = {},
+  input?: string): Promise<lib.Exec> {
+  return lib.exec(bin, args, input, 25_000, { HOME, PATH: PATHS,
+    BEND_ORIGIN: ORIGIN, ...env }, TMP);
+}
+
+function bend(args: string[], env: Record<string, string> = {}):
+  Promise<lib.Exec> {
+  return run(BIN, args, env);
+}
+
+function install(env: Record<string, string> = {}): Promise<lib.Exec> {
+  return run("sh", ["-c", "curl -fsSL " + ORIGIN + "/install.sh | sh"], env);
+}
+
+function check(what: string, ok: boolean): void {
+  total += 1;
+  if (!ok) {
+    fails.push(what);
+  }
+}
+
+function release(ver: string, notice = ""): void {
+  fs.writeFileSync(path.join(DL, "latest.json"),
+    JSON.stringify({ ver, notice }));
+}
+
+function logs(): Record<string, unknown>[] {
+  try {
+    return fs.readFileSync(LOG, "utf8").trim().split("\n")
+      .map((l) => JSON.parse(l) as Record<string, unknown>);
+  } catch {
+    return [];
+  }
+}
+
+function fresh(): void {
+  fs.rmSync(path.join(BEND, "check.json"), { force: true });
+}
+
+async function hub_wait(): Promise<void> {
+  for (let i = 0; i < 50; i += 1) {
+    try {
+      await fetch(HUB + "/index.json");
+      return;
+    } catch {
+      await new Promise((wake) => setTimeout(wake, 100));
+    }
+  }
+  throw new Error("hub.ts did not come up on " + HUB);
+}
+
+// Server
+// ======
+
+let script = "";
+
+const caddy = Bun.serve({
+  port: PORT,
+  fetch(req) {
+    const url = new URL(req.url);
+    const at  = url.pathname;
+    if (at === "/install.sh") {
+      return new Response(script);
+    }
+    if (at.startsWith("/dl/")) {
+      const file = path.join(DL, path.basename(at));
+      return fs.existsSync(file) ? new Response(Bun.file(file))
+        : new Response(null, { status: 404 });
+    }
+    return fetch(HUB + at + url.search, { method: req.method,
+      headers: req.headers, body: req.body });
+  },
+});
+
+// Main
+// ====
+
+const hub = child.spawn(process.execPath, [path.join(lib.SITE, "deploy",
+  "hub.ts")], { stdio: "ignore", env: { ...process.env, HUB_PORT:
+  String(PORT + 1), HUB_STORE: path.join(TMP, "store"), CHECK_LOG: LOG,
+  DL_DIR: DL } });
+try {
+  await hub_wait();
+  const rel = await lib.exec(process.execPath, [path.join(lib.SITE, "deploy",
+    "release.ts"), "--dry", TARGET], undefined, 25_000, { DL_DIR: DL,
+    BEND_REPO: lib.ROOT });
+  const ver = (JSON.parse(fs.readFileSync(path.join(DL, "latest.json"),
+    "utf8")) as { ver: string }).ver;
+  const tgz = "bend-" + ver + "-" + TARGET + ".tar.gz";
+  check("release.ts --dry " + TARGET + ": " + rel.err, rel.code === 0
+    && rel.out.includes(tgz) && fs.existsSync(path.join(DL, "bend.rb")));
+  const sum = /^SHA_[A-Z0-9_]+="([0-9a-f]{64})"$/m.exec(
+    fs.readFileSync(path.join(DL, "install.sh"), "utf8"))?.[1] ?? "";
+  check("bend.rb carries the version and the sum",
+    fs.readFileSync(path.join(DL, "bend.rb"), "utf8").includes('sha256 "' + sum)
+    && fs.readFileSync(path.join(DL, "bend.rb"), "utf8").includes(ver));
+  const orig = fs.readFileSync(path.join(DL, "install.sh"), "utf8");
+  script = orig.replace("https://github.com/$REPO/releases/download/v$VER",
+    ORIGIN + "/dl").replace("--proto '=https' --tlsv1.2 ", "");
+  const bashka = Bun.which("bashka");
+  if (bashka === null) {
+    console.log("SKIP bashka is not installed (cargo build in its checkout,"
+      + " then put it on PATH)");
+  } else {
+    const vet = await lib.exec(bashka, ["--check", "--non-interactive"], orig,
+      25_000, { NO_COLOR: "1" });
+    check("bashka calls install.sh green: " + vet.err.split("\n").pop(),
+      vet.code === 0 && vet.err.includes("GREEN"));
+  }
+  for (const f of ["id", "last", "rep", "bad"]) {
+    fs.mkdirSync(BEND, { recursive: true });
+    fs.writeFileSync(path.join(BEND, f), "old\n");
+  }
+  fs.mkdirSync(path.join(BEND, "app", "2.0.7", "x"), { recursive: true });
+  fs.symlinkSync("app/2.0.7/x", path.join(BEND, "current"));
+  fs.mkdirSync(path.join(BEND, "bin"));
+  fs.writeFileSync(BIN, "#!/bin/sh\necho launcher\n", { mode: 0o755 });
+  const ins = await install();
+  check("install.sh over the old layout: " + ins.err, ins.code === 0);
+  const vers = await bend(["--version"]);
+  check("bin/bend is the executable", vers.code === 0
+    && vers.out === "bend " + ver + "\n"
+    && fs.statSync(BIN).size > 1_000_000);
+  check("the old layout is gone", ["app", "current", "id", "last", "rep",
+    "bad"].every((f) => !fs.existsSync(path.join(BEND, f)))
+    && !fs.readdirSync(BEND).some((f) => f.startsWith("tmp.")));
+  check("no shell rc is written", !fs.readdirSync(HOME).some((f) =>
+    f !== ".bend"));
+  check("the card names the version, the PATH line and the Bun note",
+    ins.out.includes("Bend " + ver) && ins.out.includes("export PATH=\"")
+    && ins.out.includes("~/.bun") && ins.out.includes(SAID));
+  const again = await install({ PATH: path.dirname(BIN) + ":" + PATHS });
+  check("a second install, bin on PATH, says neither", again.code === 0
+    && !again.out.includes("PATH=") && !again.out.includes("~/.bun")
+    && fs.statSync(BIN).size > 1_000_000);
+  check("bend --version logs nothing", logs().length === 0
+    && !fs.existsSync(path.join(BEND, "check.json")));
+  const help = await bend(["--help"]);
+  const line = logs().pop() ?? {};
+  check("bend --help prints the help and the disclosure", help.code === 0
+    && help.out.includes("usage:") && help.out.includes(SAID));
+  check("the check logs {v, os, arch, ip} and nothing else",
+    logs().length === 1 && line.v === ver && line.os === process.platform
+    && line.arch === process.arch && typeof line.ip === "string"
+    && Object.keys(line).sort().join() === "arch,ip,os,t,v");
+  await bend(["--help"]);
+  check("a second run logs nothing", logs().length === 1);
+  fresh();
+  const mute = await bend(["--help"], { BEND_NO_TELEMETRY: "1" });
+  check("BEND_NO_TELEMETRY=1 asks nothing and writes no cache",
+    mute.code === 0 && logs().length === 1
+    && !fs.existsSync(path.join(BEND, "check.json")));
+  release("99.0.0", "hello\u001b\nworld");
+  fresh();
+  fs.writeFileSync(path.join(TMP, "bad.bend"),
+    "import Base\ndef main() -> Nat:\n  True{}\n");
+  await bend(["guide"]);
+  const bad = await bend([path.join(TMP, "bad.bend")]);
+  check("a newer release prints its line and the notice on stderr, the"
+    + " command's stdout and exit code untouched", bad.code === 1
+    && bad.out === "" && bad.err.includes("bend 99.0.0 is available: run"
+    + " bend update\nhelloworld\n"));
+  release(ver);
+  fresh();
+  const t0 = Date.now();
+  const dead = await bend(["--help"], { BEND_ORIGIN: "http://127.0.0.1:1" });
+  check("a dead origin costs one run under four seconds", dead.code === 0
+    && dead.out.includes("usage:") && Date.now() - t0 < 4000);
+  const was = fs.statSync(BIN).ino;
+  const upd = await bend(["update"]);
+  check("bend update runs the installer again: " + upd.err, upd.code === 0
+    && upd.err.startsWith("curl -fsSL " + ORIGIN + "/install.sh | sh\n")
+    && upd.out.includes("Bend " + ver) && fs.statSync(BIN).ino !== was);
+  const guide = await bend(["guide"]);
+  const program = await bend(["guide", "program"]);
+  const prove = await bend(["guide", "prove"]);
+  const full = await bend(["guide", "full"]);
+  const pack = await bend(["--pack", "prove"]);
+  const why = await bend(["--why", "BND101"]);
+  const base  = await bend(["base", "Map"]);
+  fs.writeFileSync(path.join(TMP, "sum.bend"),
+    "import Base\ndef main() -> Nat:\n  2n + 3n\n");
+  const sum5 = await bend([path.join(TMP, "sum.bend")]);
+  check("router, packs, full guide, base and a program run through the executable",
+    guide.out.startsWith("# Bend agent router")
+    && program.out.startsWith("# PROGRAM pack")
+    && prove.out.startsWith("# PROVE pack")
+    && full.out.startsWith("# Bend")
+    && pack.out.startsWith("# PROVE pack")
+    && why.out.includes("proof.laws_import_missing")
+    && base.out.startsWith("type Map")
+    && sum5.code === 0 && sum5.out === "5n\n");
+
+  const contract = path.join(TMP, "proof-contract");
+  fs.mkdirSync(contract, { recursive: true });
+  fs.writeFileSync(path.join(contract, "LAWS.bend"),
+    "import Base\nlaw still_open:\n  Nat\n");
+  fs.writeFileSync(path.join(contract, "PROOF.bend"), "import Base\n");
+  const missed = await bend([path.join(contract, "PROOF.bend")]);
+  check("PROOF beside LAWS must import it", missed.code !== 0
+    && missed.err.includes("PROOF.bend must import ./LAWS.bend"));
+
+  const gfile = path.join(TMP, "graph.bend");
+  fs.writeFileSync(gfile, "import Base\n"
+    + "def leaf(x: Nat) -> Nat:\n  x\n"
+    + "def root(x: Nat) -> Nat:\n  leaf(x)\n");
+  const graph = await bend([gfile, "--graph", "root", "--json"]);
+  check("bend --graph emits a named checked slice", graph.code === 0
+    && graph.out.includes('"schema":"bend.graph.v1"')
+    && graph.out.includes('"name":"root"')
+    && graph.out.includes('"leaf"'));
+  script = script.replace(sum, "0".repeat(64));
+  const fake = await install();
+  script = script.replace("0".repeat(64), sum);
+  check("a tampered sha256 installs nothing", fake.code === 1
+    && fake.err.includes("does not match") && (await bend(["--version"]))
+    .out === "bend " + ver + "\n");
+  const fakes = path.join(TMP, "fakes");
+  fs.mkdirSync(fakes);
+  fs.writeFileSync(path.join(fakes, "uname"), "#!/bin/sh\n"
+    + "case $1 in -s) echo \"$OS\";; *) echo \"$CPU\";; esac\n",
+  { mode: 0o755 });
+  const win  = await install({ PATH: fakes + ":" + PATHS,
+    OS: "MINGW64_NT-10.0", CPU: "x86_64" });
+  const mips = await install({ PATH: fakes + ":" + PATHS, OS: "Linux",
+    CPU: "mips" });
+  check("a Windows or a MIPS uname is refused in one line", win.code === 1
+    && win.err === "bend: Bend needs Linux, macOS or WSL.\n" && mips.code === 1
+    && mips.err === "bend: mips is not supported: Bend runs on arm64 and"
+    + " x64.\n");
+  const ping = await (await fetch(ORIGIN + "/ping", { method: "POST",
+    body: "{}" })).json() as Record<string, string>;
+  const fall = await (await fetch(ORIGIN + "/dl/latest.json"))
+    .json() as Record<string, string>;
+  check("an old launcher's ping and its fallback name no sha256 and the"
+    + " move", ping.ver === ver && ping.notice.includes(MOVED)
+    && ping.sha256 === undefined && fall.ver === ver
+    && fall.sha256 === undefined);
+} catch (e) {
+  check(String(e), false);
+} finally {
+  hub.kill();
+  caddy.stop(true);
+  fs.rmSync(TMP, { recursive: true, force: true });
+}
+if (!lib.GATE) {
+  for (const f of fails) {
+    console.log("FAIL " + f);
+  }
+}
+lib.verdict(total - fails.length, total);

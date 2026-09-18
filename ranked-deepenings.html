@@ -1,12 +1,12 @@
-<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bend ranked deepenings</title><style>body{font:15px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;margin:32px;max-width:1100px;color:#111;background:#fafafa}h1{font-size:22px}table{border-collapse:collapse;width:100%;background:white}th,td{border:1px solid #ccc;padding:9px;vertical-align:top;text-align:left}.done{font-weight:700}.up{font-size:13px;color:#444;margin:12px 0 22px}.note{margin-top:20px;padding:12px;border:1px solid #bbb;background:white}</style><h1>Ranked deepenings</h1><div class="up">Upstream: bendlang/bend 2.0.9 @ e5a4c4c · branch: ranked-deepenings · completed: 10/10</div><table><thead><tr><th>#</th><th>Change</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
-<tr><td>1</td><td>Router rewrite + CLAUDE.md + stop dumping GUIDE</td><td class="done">COMPLETE</td><td>01-router.patch</td></tr>
-<tr><td>2</td><td>Packs PROGRAM/PROVE</td><td class="done">COMPLETE</td><td>02-packs.patch</td></tr>
-<tr><td>3</td><td>Stable diagnostic ids + --json</td><td class="done">COMPLETE</td><td>03-diagnostics-json.patch</td></tr>
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bend ranked deepenings</title><style>body{font:15px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;margin:32px;max-width:1100px;color:#111;background:#fafafa}h1{font-size:22px}table{border-collapse:collapse;width:100%;background:white}th,td{border:1px solid #ccc;padding:9px;vertical-align:top;text-align:left}.done{font-weight:700}.up{font-size:13px;color:#444;margin:12px 0 22px}.note{margin-top:20px;padding:12px;border:1px solid #bbb;background:white}</style><h1>Ranked deepenings</h1><div class="up">Upstream: bendlang/bend 2.0.9 @ e5a4c4c · delivery: exact overlay · completed: 10/10</div><table><thead><tr><th>#</th><th>Change</th><th>Status</th><th>Implementation</th></tr></thead><tbody>
+<tr><td>1</td><td>Router rewrite + CLAUDE.md + stop dumping GUIDE</td><td class="done">COMPLETE</td><td>overlay/main.ts + ROUTER + CLAUDE</td></tr>
+<tr><td>2</td><td>Packs PROGRAM/PROVE</td><td class="done">COMPLETE</td><td>PROGRAM.md + PROVE.md</td></tr>
+<tr><td>3</td><td>Stable diagnostic ids + --json</td><td class="done">COMPLETE</td><td>overlay/main.ts + diagnostic schema</td></tr>
 <tr><td>4</td><td>Proof-move eight-file library</td><td class="done">COMPLETE</td><td>8 proof moves + INDEX</td></tr>
-<tr><td>5</td><td>bend --graph</td><td class="done">COMPLETE</td><td>05-graph.patch + graph-v1 schema</td></tr>
-<tr><td>6</td><td>laws-index.json + diagnostics pin</td><td class="done">COMPLETE</td><td>laws-index.json + diagnostics.json</td></tr>
-<tr><td>7</td><td>PROOF must import LAWS</td><td class="done">COMPLETE</td><td>upstream guard pinned + ping regression</td></tr>
-<tr><td>8</td><td>Eval sidecars as residue sink</td><td class="done">COMPLETE</td><td>sidecar schema + template + residue rules</td></tr>
-<tr><td>9</td><td>bend --why / --pack</td><td class="done">COMPLETE</td><td>09-why-pack.patch</td></tr>
-<tr><td>10</td><td>Anything that edits bend.ts theory</td><td class="done">COMPLETE: NO CHANGE</td><td>deletion test passed; theory boundary pinned</td></tr>
-</tbody></table><div class="note"><strong>Invariant</strong><br>bend2/bend.ts remains unchanged. apply.sh pins upstream, installs the ordered patch stack, and runs structural verification.</div>
+<tr><td>5</td><td>bend --graph</td><td class="done">COMPLETE</td><td>overlay/main.ts + graph-v1 schema</td></tr>
+<tr><td>6</td><td>laws-index.json + diagnostics pin</td><td class="done">COMPLETE</td><td>pinned JSON indexes</td></tr>
+<tr><td>7</td><td>PROOF must import LAWS</td><td class="done">COMPLETE</td><td>upstream guard + overlay ping regression</td></tr>
+<tr><td>8</td><td>Eval sidecars as residue sink</td><td class="done">COMPLETE</td><td>schema + template + residue rules</td></tr>
+<tr><td>9</td><td>bend --why / --pack</td><td class="done">COMPLETE</td><td>overlay/main.ts + pinned data</td></tr>
+<tr><td>10</td><td>Anything that edits bend.ts theory</td><td class="done">COMPLETE: NO CHANGE</td><td>deletion test passed; verify.sh forbids theory diff</td></tr>
+</tbody></table><div class="note"><strong>Delivery correction</strong><br>The final review replaced executable use of the review-only patch files with exact full-file overlays generated from the pinned upstream source. The install path now has deterministic source identity and no ambiguous patch hunks.</div>

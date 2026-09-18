@@ -28,4 +28,10 @@ git -C "$TARGET" diff --quiet -- bend2/bend.ts || {
   exit 1
 }
 
+if command -v bun >/dev/null 2>&1; then
+  BEND_NO_TELEMETRY=1 bun "$TARGET/bend2/main.ts" --help >/dev/null
+  BEND_NO_TELEMETRY=1 bun "$TARGET/bend2/main.ts" guide >/dev/null
+  BEND_NO_TELEMETRY=1 bun "$TARGET/bend2/main.ts" --why BND101 >/dev/null
+fi
+
 echo "verify: structure PASS; bend2/bend.ts unchanged"
