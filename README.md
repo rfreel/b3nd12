@@ -51,11 +51,9 @@ bounded experiments, repeated observations and evidence receipts. Its final task
 produces a successor proposal without authorizing another workload. The replay
 leaves accepted routes unchanged.
 
-The [100-task backlog](docs/TODO_100.md) lists proposed engineering work and
-measurable acceptance criteria. The [six-worker evaluation](docs/PARALLEL_TEST.md)
-records baseline tests and open findings. The backlog does not replace the
-executable frozen contract.
-Current implementation receipts are in [BACKLOG_PROGRESS.md](docs/BACKLOG_PROGRESS.md).
+The [progress ledger](docs/BACKLOG_PROGRESS.md) records completed, open and blocked
+work against the immutable [100-task proposal](docs/TODO_100.md). That proposal
+does not replace the executable frozen contract.
 
 ## Install the pinned delivery
 
@@ -93,14 +91,29 @@ python3 tests/ci_contract.py
 
 Put Bun on PATH for the installed Bend contracts. Tests cover exact installation,
 refusals, terminal and pipe output, proof checking, graph output, interpretation,
-emitted JavaScript, and acceptance/rejection of routing changes. Native/GPU and
-upstream cluster checks remain unverified.
+emitted JavaScript, and acceptance/rejection of routing changes. A separate native
+check covers the frozen sum and a bounded Nat corpus with an explicitly supplied
+Clang compiler. GPU and upstream cluster checks remain unverified.
 
-The workflow lists the complete acceptance suite. Schema tests use the pinned
+The [workflow](.github/workflows/verify.yml) lists the complete acceptance suite;
+the commands above are the core checks. [The acceptance record](docs/ACCEPTANCE_RUN.md)
+identifies the tested source and coverage limits. Schema tests use the pinned
 test-only dependency; the management commands use Python's standard library.
 [Evidence protocol](docs/EVIDENCE_PROTOCOL.md) documents independent verification,
 proof reconstruction, bounded storage and archive round trips. A retained digest
 detects packet changes; it does not authenticate the measurements themselves.
+
+On Linux x86-64, prepared checks can run with inherited network denial:
+`python3 offline.py -- python3 tests/patch_stack.py /path/to/pinned/bend`.
+Acquire dependencies first. The guard denies network socket creation and
+connections in its process and descendants. Anonymous Unix socket pairs remain
+available for local subprocess streams. Filesystem access and other agents are
+not isolated.
+
+Run the optional CPU-native corpus with
+`python3 tests/native_backend.py /path/to/pinned/bend /path/to/bun /path/to/clang --output /path/outside/repository/new-native-evidence`.
+The compiler must satisfy the pinned Bend prerequisites. This check records
+tool identities and exact backend outputs; it makes no GPU or performance claim.
 
 For repeatable management measurements, run
 `python3 benchmarks/management.py /path/to/pinned/bend --output /path/outside/repository/new-benchmark --runs 10 --warmup 1`.

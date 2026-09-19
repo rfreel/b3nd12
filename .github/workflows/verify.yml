@@ -24,9 +24,13 @@ jobs:
           git -C upstream checkout --quiet e5a4c4cfe980c2e4e70571562efb5197fe27b2f4
       - name: Verify acceptance suite orchestration
         run: python3 tests/ci_contract.py
+      - name: Verify inherited offline boundary
+        run: python3 tests/offline.py "$(command -v bun)"
       - name: Run all acceptance suites against pristine pin
         shell: bash
         run: |
+          set -euo pipefail
+          python3 offline.py -- bash <<'OFFLINE_ACCEPTANCE'
           set -euo pipefail
           python3 tests/patch_stack.py upstream
           python3 tests/cli.py upstream
@@ -51,6 +55,8 @@ jobs:
           python3 tests/benchmark_contract.py upstream
           python3 tests/install_receipt.py upstream
           python3 tests/controller_model.py upstream "$(command -v bun)"
+          python3 tests/documentation.py upstream "$(command -v bun)"
+          OFFLINE_ACCEPTANCE
       - name: Apply and structurally verify
         run: ./apply.sh upstream
       - name: Exercise router and packs

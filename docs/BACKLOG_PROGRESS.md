@@ -69,7 +69,7 @@ working-tree changes. Workers and reviewers share filesystem authority.
 | T029 | OPEN | Child-process cleanup is implemented; distributed worker cancellation and durable cancellation semantics still need a reviewed design. |
 | T030 | BLOCKED | Depends on T021/T022; proposal-only behavior does not authenticate contract activation authority. |
 | T031 | DONE | Explicit 25-file manifest replaces scope discovery; manifest/mode/role mutation fixtures. |
-| T032 | OPEN | Review staged non-theory verification policy; existing installation preserves a clean real index. |
+| T032 | DONE | Real index must match the pin; staged delivery, unrelated drift, hidden gitlinks and intent-to-add entries are refused without changing index bytes. Patch-stack and adversarial suites pass under the offline guard. |
 | T033 | OPEN | Review rollback policy; post-write failure intentionally leaves the target for diagnosis. |
 | T034 | OPEN | Design lock ownership and recovery; exclusive access remains an assumption. |
 | T035 | DONE | Preflight and installation consume the same temporary patch copies; source mutation fixture confirms installed identity. |
@@ -77,14 +77,14 @@ working-tree changes. Workers and reviewers share filesystem authority.
 | T037 | DONE | Explicit Git environment/configuration/filter matrix and linked-worktree checks; not an audit of every Git feature. |
 | T038 | DONE | Binary, path, rank, symlink, deletion and scope mutation controls in installation suites. |
 | T039 | DONE | Installation receipts bind inputs and tool identities and replay into independent clones; `tests/install_receipt.py`. |
-| T040 | OPEN | Shell static/runtime reporting and smoke tests exist; confirm hung-runtime behavior and consistent machine-readable runtime status before completion. |
+| T040 | DONE | Shell and JSON tests pass with absent, failing, hung and real Bun; static-only verify reports runtime `not_run`. Integrated smoke checks pass. |
 | T041 | DONE | Previously accepted global-help behavior; current CLI suites rerun its contract. |
 | T042 | DONE | Strict command-specific success schemas validate existing outputs and reject malformed results. |
 | T043 | DONE | Full Draft 2020-12 validation replaces key-only assertions; malformed payload controls in `tests/cli_schema.py`. |
 | T044 | DONE | 102 generated parser cases; semantic command arrays replay with an inserted `--`, not as raw argv. |
 | T045 | DONE | Every declared Failure code has format-parity coverage; some causes are injected rather than reproduced as real outages. |
 | T046 | DONE | Every read-only command and representative errors run through real PTYs, pipes and explicit format overrides. |
-| T047 | OPEN | Review bootstrap/import failure output policy; the normal envelope begins after imports succeed. |
+| T047 | DONE | Documented initialization exception tested with missing/corrupt configuration, import and syntax errors; nonzero exit and empty stdout in both formats. Integrated CLI checks pass. |
 | T048 | DONE | Invalid user tasks remain exit 2; malformed routes and wrong content produce configuration errors, exit 3. |
 | T049 | DONE | File/mode/Git-control and copied-management snapshots remain unchanged across read-only success/failure calls. |
 | T050 | DONE | Unicode, trailing newline, leading-dash, symlink and non-root path tests; newline root parsing repaired. |
@@ -94,8 +94,8 @@ working-tree changes. Workers and reviewers share filesystem authority.
 | T054 | OPEN | Review transitive import parsing and authorization policy; lexical checks are not that policy. |
 | T055 | OPEN | Review the statement of a separate TODO-accounting Bend book; routing law remains unchanged. |
 | T056 | DONE | Independent model and real frozen controller agree on 1,213 reachable prefix/terminal traces and 910 terminal branches; checker outcomes are controlled inputs. |
-| T057 | BLOCKED | Pinned native compiler/toolchain execution evidence is absent. |
-| T058 | BLOCKED | Complete interpreted/JavaScript/native corpus comparison depends on the native lane. |
+| T057 | DONE | Clang 18.1.3 native run checks the frozen book and prints 2147450880 with threads 1 and 4; source seals preserved. Independent review and repaired offline run pass. |
+| T058 | DONE | Sixteen Nat programs over eight `(d,i)` pairs agree across interpreter, JavaScript and native CPU execution; 48 backend observations retained. Reviewed offline run passes; no GPU or general equivalence claim. |
 | T059 | BLOCKED | Matching GPU hardware/backend and pinned execution evidence are unavailable. |
 | T060 | OPEN | No tested backend counterexample minimizer with retained regression fixture has been delivered. |
 | T061 | DONE | Versioned management benchmark records commands, identities, raw timings and resource observations; benchmark contract test. |
@@ -118,16 +118,16 @@ working-tree changes. Workers and reviewers share filesystem authority.
 | T078 | OPEN | Design and review the planted reviewer-challenge corpus and scoring rules. |
 | T079 | BLOCKED | Repository-injection study and enforced protected-state boundary require review. |
 | T080 | BLOCKED | Complete provider-reconciled worker/tool/retry usage telemetry is unavailable. |
-| T081 | DONE | Original lane passed locally and in hosted run 35426650861; expanded lane still needs its own hosted result. |
+| T081 | DONE | Original lane passed in hosted run 35426650861; expanded published head `0b20423` passed [run 35431837293](https://github.com/rfreel/b3nd12/actions/runs/35431837293). |
 | T082 | BLOCKED | Immutable runner/toolchain identity policy and reproduction on two clean workers remain unestablished. |
 | T083 | BLOCKED | No macOS execution evidence; Linux-only results cannot establish cross-platform conformance. |
 | T084 | DONE | Independent `--no-local` clone has no alternates and installs without origin access; installation adversarial suite. |
-| T085 | OPEN | Documentation commands have focused tests, but no complete declared-example inventory and clean-checkout runner. |
+| T085 | DONE | Nineteen blocks in four operating documents are inventoried; disposable recipes, prerequisite refusal, stale-example controls and JSON-schema validation pass in the integrated run. Acquisition and historical examples are excluded. |
 | T086 | DONE | Bounded operational probes distinguish unusable tools; deliberate spoofing and native/GPU readiness remain outside their scope. |
 | T087 | OPEN | No complete bounded failure-artifact publication lane with source/command binding and redaction tests. |
 | T088 | BLOCKED | Download provenance approval and trust source are not established by observed executable hashes. |
-| T089 | OPEN | No prepared acceptance run under enforced network denial has demonstrated independence from provider calls. |
-| T090 | OPEN | Several suites contain planted mutations; a complete cross-suite catalog with surviving-mutation accounting remains unfinished. |
+| T089 | DONE | Inherited Linux x86-64 syscall denial passes Python/Git/Bun network probes and independent review; 26 ordinary checks and the native corpus pass under the repaired guard. This is not worker isolation. |
+| T090 | DONE | Explicit mutation catalog and five detecting suites pass; missed and checker-surviving mutations remain distinguishable. Named family suites pass in the integrated run. |
 | T091 | OPEN | Design and review general typed task receipts and task/source binding. |
 | T092 | OPEN | Review general dependency admission and impossible-budget rules. |
 | T093 | OPEN | Review cross-task benefit attribution; existing duplicate completion checks cover only the frozen replay. |
@@ -142,7 +142,7 @@ working-tree changes. Workers and reviewers share filesystem authority.
 ## Current focused evidence
 
 The checks below map implemented behavior to its executable evidence. The
-coordinator's final 24-suite rerun passed after the subprocess repair, and
+coordinator's repaired offline rerun passed all 26 ordinary checks and the native corpus, and
 independent reviewers accepted the completed changes with the stated limits.
 See [ACCEPTANCE_RUN.md](ACCEPTANCE_RUN.md) for commands and results. Install
 `requirements-test.txt` into the test interpreter and put Bun on PATH for
@@ -158,7 +158,9 @@ installed CLI smoke coverage.
 | Proof | `tests/routing_domain.py`, `tests/law_conjuncts.py`, `tests/translation.py`, `tests/spec_twin.py` | Finite routing law and official frozen example; no native/GPU or general productivity result. |
 | Controller model | `tests/controller_model.py` | Complete reachable six-attempt four-outcome tree, pruned at the third productive result or first UNKNOWN; controlled checker with real controller/storage. |
 | Measurement | `tests/benchmark_contract.py` | Reproducible measurement entry point; no optimization or statistically established speedup claim. |
-| Runtime smoke | `tests/smoke.py` | Static success remains visible with missing or failed Bun; T040's full acceptance remains open. |
+| Runtime smoke | `tests/smoke.py` | Static success remains visible with missing, failed or hung Bun; runtime status is explicit in shell and JSON results. |
+| Native CPU | `tests/native_backend.py` | Frozen sum plus 16 Nat programs; exact interpreter/JavaScript/native agreement, no GPU or general compiler-correctness claim. |
+| Prepared offline checks | `tests/offline.py`, `offline.py` | Linux x86-64 syscall denial inherited by tested descendants; no filesystem or hostile-worker isolation. |
 
 ## Combined acceptance and publication
 
@@ -167,7 +169,11 @@ termination race. The general T006 obligation remains open because the helper's
 cooperative, depth-limited cleanup and separate benchmark runner do not establish
 universal child-process coverage. The separate final controller-model run passed
 all 1,213 reachable prefix/terminal traces and 910 terminal branches in 127.82
-seconds. No REVIEW rows remain. Totals are 36 DONE, 35 OPEN and 29 BLOCKED.
+seconds. At publication `0b20423`, totals were 36 DONE, 35 OPEN and 29 BLOCKED.
+The subsequent repaired offline run passed 26 ordinary checks and the native
+corpus. Independent review accepted eight further tasks. Current totals are
+44 DONE, 29 OPEN and 27 BLOCKED. These local results do not extend the hosted
+acceptance result for `0b20423`; publication of this source is recorded separately.
 
 The [acceptance run](ACCEPTANCE_RUN.md) records integrated checks and review
 findings. These coherent commits identify the tested implementation. Together
@@ -182,8 +188,21 @@ combined source, not separately on every intermediate commit.
 | CLI contracts and readiness | [fa8569d](https://github.com/rfreel/b3nd12/commit/fa8569d143ed98f9600be0d07ad05154d8d2c726) | T042–T046, T048–T050, T086 |
 | Reproducible management benchmark | [14e99c8](https://github.com/rfreel/b3nd12/commit/14e99c861efd829107e9696d1366f1b3d5f4dad2) | T061 |
 
+The subsequent implementation is organized into these reviewed units:
+
+| Change | Commit | Tasks |
+|---|---|---|
+| Pinned real-index verification | [532cb17](https://github.com/rfreel/b3nd12/commit/532cb177165768b28287082603dabee1e76c8466) | T032 |
+| Runtime status and initialization contract | [fb62c94](https://github.com/rfreel/b3nd12/commit/fb62c9480f8a0a2271ba5b75b6c6dc13ec57a0a0) | T040, T047 |
+| Native CPU corpus | [b6556f5](https://github.com/rfreel/b3nd12/commit/b6556f57d77762b824f06924e81a2f1c48ac990e) | T057, T058 |
+| Prepared-check network denial | [64bb7df](https://github.com/rfreel/b3nd12/commit/64bb7df249a72a1d9a799ae900e1c4bf3789adac) | T089 |
+| Documentation and mutation contracts | [f6eed95](https://github.com/rfreel/b3nd12/commit/f6eed95a8e4e7fd35b06979d48e97cbf6647f7ae) | T085, T090 |
+
 The branch is `improve/verified-stack-and-cli`. The final publication report
-records the branch-head identity and push result. Unfinished criteria retain
+records the branch-head identity and push result. Published head `0b20423` passed
+[hosted run 35431837293](https://github.com/rfreel/b3nd12/actions/runs/35431837293).
+That result covers the published source, not subsequent working-tree edits.
+Unfinished criteria retain
 their OPEN or BLOCKED status; supporting infrastructure does not count as their
 completion.
 

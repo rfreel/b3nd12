@@ -6,6 +6,7 @@ Controlled executables test orchestration, not GitHub Actions or Bend behavior.
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,19 +21,22 @@ suites = ["patch_stack", "cli", "bend_contracts", "accretion", "program",
           "process", "cli_schema", "cli_properties", "install_adversarial",
           "checker_failures", "evidence", "recheck", "archive", "storage", "output_bounds",
           "routing_domain", "law_conjuncts", "spec_twin", "translation", "smoke",
-          "benchmark_contract", "install_receipt", "controller_model"]
+          "benchmark_contract", "install_receipt", "controller_model", "documentation"]
 needs_bun = {"accretion", "program", "checker_failures", "evidence", "recheck", "archive",
              "storage", "output_bounds", "routing_domain", "law_conjuncts", "spec_twin",
-             "translation", "smoke", "controller_model"}
+             "translation", "smoke", "controller_model", "documentation"}
 commands = [f"python3 tests/{name}.py" + ("" if name in {"process", "cli_schema"} else " upstream") +
             (' "$(command -v bun)"' if name in needs_bun else "") for name in suites]
-assert script.splitlines() == ["set -euo pipefail", *commands]
+assert script.splitlines() == ["set -euo pipefail",
+    "python3 offline.py -- bash <<'OFFLINE_ACCEPTANCE'", "set -euo pipefail",
+    *commands, "OFFLINE_ACCEPTANCE"]
 assert workflow.index(marker) < workflow.index("      - name: Apply and structurally verify\n")
 
 with tempfile.TemporaryDirectory(prefix="b3nd12-ci-contract-") as temporary:
     directory = Path(temporary)
     python = directory / "python3"
-    python.write_text('#!/bin/sh\nprintf "%s\\n" "$1" >> "$CALL_LOG"\n'
+    python.write_text('#!/bin/sh\nif [ "$1" = offline.py ]; then exec "$REAL_PYTHON" "$@"; fi\n'
+                      'printf "%s\\n" "$1" >> "$CALL_LOG"\n'
                       'if [ "$1" = "$FAIL_SUITE" ]; then exit 17; fi\n')
     python.chmod(0o755)
     bun = directory / "bun"
@@ -42,11 +46,11 @@ with tempfile.TemporaryDirectory(prefix="b3nd12-ci-contract-") as temporary:
     for failing in [None, *range(len(suites))]:
         log.write_text("")
         env = {**os.environ, "PATH": str(directory) + os.pathsep + os.environ["PATH"],
-               "CALL_LOG": str(log),
+               "CALL_LOG": str(log), "REAL_PYTHON": sys.executable,
                "FAIL_SUITE": "" if failing is None else f"tests/{suites[failing]}.py"}
         result = subprocess.run(["bash", "--noprofile", "--norc", "-c", script],
-                                env=env, capture_output=True, text=True, timeout=10)
+                                cwd=ROOT, env=env, capture_output=True, text=True, timeout=10)
         count = len(suites) if failing is None else failing + 1
         assert log.read_text().splitlines() == [f"tests/{s}.py" for s in suites[:count]]
         assert result.returncode == (0 if failing is None else 17), result
-print(f"PASS workflow includes {len(suites)} suites before installation; each injected failure stops later suites")
+print(f"PASS workflow includes {len(suites)} offline suites before installation; each injected failure stops later suites")

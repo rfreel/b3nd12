@@ -78,11 +78,15 @@ POSIX permission bit or ACL entry.
 
 `bend2/bend.ts` is compared with the pin in both the working tree and the real
 index. Temporary-index preflight checks all staged delivery content and modes.
-After installation, exact delivery bytes are checked in the worktree. Arbitrary
-staged content outside the protected theory is not independently certified by
-that final worktree check. Installation starts from a clean index and preserves
-it; verification is not a general audit of unrelated staging history. Ignored
-artifacts outside the declared delivery are outside the path-set check.
+After installation, exact delivery bytes are checked in the worktree. The real
+index must still describe the pinned tree. For an otherwise valid delivery,
+staged differences, including a correctly staged delivery file, are refused with
+`STAGED_INDEX`. Earlier scope, content or theory failures may take precedence.
+Verification leaves the index bytes untouched. Installation starts from a clean
+index and preserves it.
+Intent-to-add entries and staged gitlinks are also refused, even when Git's
+submodule-diff configuration would hide the staged change.
+Ignored artifacts outside the declared delivery are outside the path-set check.
 
 `verify.sh` reports static verification separately from runtime smoke checks.
 When Bun is on PATH, it runs installed `--help`, `guide` and `--why BND101` commands.

@@ -93,11 +93,6 @@ Reports contain exact hashes, commands, per-task reads and checker output.
 Temporary book paths expire after evaluation; the fixed inputs and evidence
 values are sufficient to regenerate them. No timing or GPU claim is made.
 
-## Cleanup scope
-
-The root README and documentation index now distinguish delivery, acceptance,
-examples, current verification and historical research. Existing installed guides,
-patch ranks, overlays, schemas and the 25-file delivery remain intact. No speculative
-compiler changes, file moves, dependency upgrades or deletion of provenance are
-included. The earlier frozen sum example is preserved as a separate source-level
-spec-twin demonstration; it does not serve as the environment evaluator.
+The [frozen sum example](../examples/frozen-spec-twin/) is a separate
+source-level spec-twin demonstration. It does not serve as the environment
+evaluator.

@@ -3,8 +3,9 @@
 ## Decision
 
 Keep the current file layout. No move, merge, or split is proposed for execution.
-The requested improvement program does not establish a navigation or ownership
-problem large enough to justify changing installed paths.
+Documentation navigation is being corrected through a single entry point and
+explicit current and historical evidence labels. This does not require changing
+installed paths or Python imports.
 
 ## Responsibility and dependency map
 
@@ -14,13 +15,20 @@ problem large enough to justify changing installed paths.
 - `spec/`: JSON contracts for management, diagnostics, and graph output.
 - `stack.py`: pin, path-set and byte-equivalence checks.
 - `b3nd12.py`: management command parsing and presentation.
+- `bounded.py`: cooperative subprocess deadlines and captured-output limits.
+- `delivery-manifest.json`: declared installed paths, source bytes and modes.
+- `installation_receipt.py`: recorded installation identities and replay.
+- `accretion/`: frozen routing law, trial controller, durable evidence,
+  independent verification, rechecking and archive transfer.
+- `benchmarks/`: management measurements with explicit source identities.
 - `apply.sh`, `verify.sh`: compatibility entry points.
 - `tests/`: independent installation and executable behavior oracles.
 - `docs/`: command contract, investigation, and verification evidence summaries.
 
 There is no affected source area requiring a move. The proposed folder tree is
-the current tree with the new management module, tests, schemas and docs placed
-under these responsibilities. Existing imports and installed paths stay stable.
+the current tree. Existing imports and installed paths stay stable. No merge or
+split is proposed, so no import migration, build rewrite or move-specific test
+changes are required.
 
 ## Alternatives and risks
 

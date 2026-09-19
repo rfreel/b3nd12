@@ -2,7 +2,9 @@
 
 This repository is an ordered patch stack over the Bend upstream pinned in upstream.json.
 
-Start at guide/agent/ROUTER.md. Load the smallest legal working set. Do not dump the full Bend guide into agent context unless the router explicitly escalates to it.
+Start repository maintenance at README.md and docs/INDEX.md. For writing or
+checking Bend programs, start at guide/agent/ROUTER.md and load only the routed
+working set. Load the full Bend guide only when the router escalates to it.
 
 Hard boundary: bend2/bend.ts is theory and checker source. Ergonomics changes do not edit it.
 
@@ -18,12 +20,14 @@ Run tests/patch_stack.py and tests/cli.py against a repository containing the
 pin. Run tests/bend_contracts.py with Bun for executable behavior evidence.
 Management files are not added to the installed Bend tree. Keep the declared
 25-file delivery and protected theory boundary unless a separate scope change
-is authorized. Read docs/VERIFICATION.md before making coverage claims.
+is authorized. Use docs/BACKLOG_PROGRESS.md for task status and
+docs/ACCEPTANCE_RUN.md for the published acceptance record. Historical reports
+certify only their named source revisions.
 
 ## Environment improvement contract
 
-Start repository work with docs/ACCRETION.md. The executable law covers only the
-three-task routing workload. Use `python3 b3nd12.py task prove` for proof work;
+Read docs/ACCRETION.md before changing the acceptance experiment. Its law covers
+only the three-task routing workload. Use `python3 b3nd12.py task prove` for proof work;
 the other task names are implement and diagnose. Propose routing data, not
 executable evaluator changes.
 Do not weaken accretion/LAWS.bend, replace the oracle, or reset accepted routes
@@ -44,5 +48,9 @@ projection. Independently verify packets against separately retained terminal
 and contract digests. Preserve checker malfunction as UNKNOWN, not law refusal.
 Install requirements-test.txt in an external virtual environment before running
 CLI schema tests. The workflow enumerates the acceptance suites.
+Prepared CI checks run through offline.py on Linux x86-64. Dependency acquisition
+precedes the guard; its own network-refusal test runs outside the guard so it can
+create the loopback listener used as a negative control. Network denial does not
+establish worker isolation or promotion authority.
 Read docs/INSTALLATION.md before changing installation. Keep delivery-manifest.json
 at the declared 25 paths and install only the patch bytes that passed preflight.
