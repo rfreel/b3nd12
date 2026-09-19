@@ -28,3 +28,12 @@ See [the pilot documentation](docs/supermodularity.md) for proof scope and comma
 and [the completion checklist](TODO-supermodularity.md) for work status.
 The workflow runs these checks on pushes and pull requests. Requiring its status
 for merge remains a repository-host policy, not a guarantee supplied by this code.
+
+## Three-domain admission
+
+The [admission extension](docs/admission.md) adds nine finite Bend laws,
+manifest-bound authenticated receipts, and an atomic local Git executor with
+replay and stale-base rejection. Run `./scripts/verify-admission.sh` with the same
+patched upstream path. Its bounded campaign includes 1,024 decision cases,
+real Git transactions, and seeded gate mutations. Host merge enforcement and
+producer isolation remain external integration requirements.

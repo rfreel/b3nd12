@@ -3,6 +3,7 @@ name: verify-supermodularity
 on:
   push:
   pull_request:
+  merge_group:
 
 permissions:
   contents: read
@@ -35,6 +36,10 @@ jobs:
         env:
           SUPERMODULARITY_RESULTS_DIR: ${{ runner.temp }}/supermodularity-results
         run: ./scripts/verify-supermodularity.sh upstream
+      - name: Verify admission laws and adversarial campaign
+        env:
+          ADMISSION_RESULTS: ${{ runner.temp }}/supermodularity-results/admission.json
+        run: ./scripts/verify-admission.sh upstream
       - name: Preserve experiment evidence
         if: always()
         uses: actions/upload-artifact@v4
