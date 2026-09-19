@@ -1,0 +1,44 @@
+name: verify-supermodularity
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.2.22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Acquire pinned Bend
+        shell: bash
+        run: |
+          pin=$(python3 -c 'import json; print(json.load(open("upstream.json"))["commit"])')
+          git init upstream
+          git -C upstream remote add origin https://github.com/bendlang/bend.git
+          git -C upstream fetch --depth=1 origin "$pin"
+          git -C upstream checkout --detach FETCH_HEAD
+      - name: Apply patch stack
+        run: ./apply.sh upstream
+      - name: Verify pilot
+        env:
+          SUPERMODULARITY_RESULTS_DIR: ${{ runner.temp }}/supermodularity-results
+        run: ./scripts/verify-supermodularity.sh upstream
+      - name: Preserve experiment evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: supermodularity-results
+          path: ${{ runner.temp }}/supermodularity-results
+          if-no-files-found: ignore

@@ -1,0 +1,19 @@
+Rank 11: repair admission and measured interaction pilot
+
+This addition lives in the overlay repository, not the upstream checker.
+
+pilot/supermodularity/: finite executable repair model, eight laws, proofs,
+and rejection fixtures.
+tools/: strict supplied-evidence admission and exact interaction calculation.
+tests/: acceptance, rejection, unresolved, schema, and checker-boundary regressions.
+experiments/: reproducible CLI comparisons and real checker-guard repair evidence.
+scripts/verify-supermodularity.sh: combined verification against the upstream pin.
+.github/workflows/supermodularity.yml: CI execution and evidence retention.
+docs/supermodularity.md: scope, commands, limitations, and measured results.
+
+verify.sh now compares the checker against the pinned revision rather than only
+the index. Staging a checker edit cannot hide it from the guard.
+
+The finite model proves only its declared properties. External reports are
+consistency-checked, not authenticated. The diagnostic experiment may report
+zero or negative interaction; no positive result is required or assumed.
