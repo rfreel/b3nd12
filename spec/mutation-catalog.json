@@ -1,0 +1,75 @@
+{
+  "schema": "b3nd12.mutation-catalog.v1",
+  "scope": "Five reviewed defect families. This is a bounded regression corpus, not a mutation score for every possible source edit.",
+  "cases": [
+    {
+      "id": "scope",
+      "suite": "tests/patch_stack.py",
+      "arguments": "pin",
+      "defects": [
+        "extra delivery scope",
+        "expected mode drift",
+        "manifest role drift"
+      ],
+      "oracle": "Exact pinned delivery comparison and pre-write refusal assertions",
+      "survivors": "The suite raises if its planted negative controls survive; no universal scope-mutation count is claimed."
+    },
+    {
+      "id": "parser",
+      "suite": "tests/cli_properties.py",
+      "arguments": "pin",
+      "defects": [
+        "ambiguous output formats",
+        "noncanonical mutation command",
+        "literal delimiter operand confusion",
+        "production parser strips significant trailing newline from literal operand"
+      ],
+      "oracle": "Unchanged property suite passes reference and fails literal operand equality after the exact production normalization mutant",
+      "survivors": "Passing assertions cover the declared generated corpus; no exhaustive argument-language proof is claimed."
+    },
+    {
+      "id": "proof",
+      "suite": "tests/law_conjuncts.py",
+      "arguments": "pin_bun",
+      "defects": [
+        "false preservation",
+        "per-task regression",
+        "equal total cost",
+        "worse total cost",
+        "oversized candidate"
+      ],
+      "oracle": "Real Bend rejects each independently false conjunction; positive boundary passes",
+      "survivors": "Zero permitted across the five explicit negative books."
+    },
+    {
+      "id": "oracle",
+      "suite": "tests/translation.py",
+      "arguments": "pin_bun",
+      "defects": [
+        "false preservation translation",
+        "false nonregression translation",
+        "inflated before",
+        "understated after",
+        "oversized translation",
+        "understated size",
+        "swapped cost binding",
+        "swapped size binding"
+      ],
+      "oracle": "Independent literal generated-source hash and real pinned checker",
+      "survivors": "Four survive the checker alone; zero survive the independent literal oracle. Runtime measurement authenticity remains unproved."
+    },
+    {
+      "id": "accounting",
+      "suite": "tests/evidence.py",
+      "arguments": "pin_bun",
+      "defects": [
+        "duplicate task credit",
+        "forged verdict",
+        "forged metric",
+        "changed unbound manifest"
+      ],
+      "oracle": "Independent reconstruction rejects internally rehashed false claims even against a newly supplied terminal digest",
+      "survivors": "No listed false claim may pass; retained observations remain conditional on the external trust boundary."
+    }
+  ]
+}

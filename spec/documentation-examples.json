@@ -1,0 +1,195 @@
+{
+  "schema": "b3nd12.documentation-examples.v1",
+  "documents": {
+    "README.md": [
+      {
+        "language": "sh",
+        "sha256": "1a30d5e6ab101725f310f3c47c514db8419992f96a5191d98dbe859363bfb7e9",
+        "coverage": "recipe",
+        "evidence": "doctor and all three task commands",
+        "limit": "Operational tools only; no authenticity claim",
+        "suites": []
+      },
+      {
+        "language": "sh",
+        "sha256": "6f46d450c234f3c6fed8e42aa81f8b0270393ae0b0e383496641e6c663a2d499",
+        "coverage": "suite",
+        "evidence": "tests/accretion.py executes rounds and candidate admission",
+        "limit": "Documentation recipe runner does not repeat candidate CLI; linked suite supplies coverage",
+        "suites": [
+          "tests/accretion.py"
+        ]
+      },
+      {
+        "language": "sh",
+        "sha256": "1fc6753d8749589073e96ffb7d3c733d98b5216ee2dd02c0c4f4198607e795ec",
+        "coverage": "recipe",
+        "evidence": "apply and verify in independent disposable checkout",
+        "limit": "Exclusive access; runtime depends on provided Bun",
+        "suites": []
+      },
+      {
+        "language": "sh",
+        "sha256": "9429b55e82cfbbce3f69c0c24c3e10ff62cf8d52b75f2955cd3e352f06c29d51",
+        "coverage": "prerequisite",
+        "evidence": "External venv and declared acceptance commands",
+        "limit": "Network dependency acquisition excluded; individual suites run by CI",
+        "suites": [
+          "tests/patch_stack.py",
+          "tests/cli.py",
+          "tests/bend_contracts.py",
+          "tests/accretion.py",
+          "tests/program.py",
+          "tests/backlog.py",
+          "tests/ci_contract.py"
+        ]
+      }
+    ],
+    "docs/CLI.md": [
+      {
+        "language": "sh",
+        "sha256": "88e1104a2e9ee151c5eeaf098e67c84d6921d6dc18d1d6c82440b36b6569e94f",
+        "coverage": "recipe",
+        "evidence": "doctor apply verify guide and task invocations",
+        "limit": "Placeholders replaced with explicit temporary paths",
+        "suites": []
+      },
+      {
+        "language": "json",
+        "sha256": "659d2619e54b71f84cf51ab23f5cd23c59227874c81cb79487ba8a227331fb77",
+        "coverage": "suite",
+        "evidence": "Strict command response schema",
+        "limit": "Illustrated path is a placeholder",
+        "suites": [
+          "tests/cli_schema.py"
+        ]
+      },
+      {
+        "language": "python",
+        "sha256": "6f6bed273981f07141dad1d504f40e6d0266e06031c8cadc96e4cf50868f6421",
+        "coverage": "suite",
+        "evidence": "Canonical command replay with literal operand delimiter",
+        "limit": "Empty quick-start command requires separate handling",
+        "suites": [
+          "tests/cli_properties.py"
+        ]
+      },
+      {
+        "language": "sh",
+        "sha256": "46f39b94a41316048ab42d6e9729e966f3cf5869f037160a370a7910688605f4",
+        "coverage": "prerequisite",
+        "evidence": "Pinned schema dependency and contract commands",
+        "limit": "No repeated package acquisition in offline runner",
+        "suites": [
+          "tests/cli_schema.py",
+          "tests/cli.py",
+          "tests/cli_properties.py"
+        ]
+      }
+    ],
+    "docs/INSTALLATION.md": [
+      {
+        "language": "sh",
+        "sha256": "1d6f25115c65f0af4ef83723da164774a308fce5742b777926237f1657315a19",
+        "coverage": "recipe",
+        "evidence": "apply then human verify in independent clone",
+        "limit": "No mutation of caller checkout",
+        "suites": []
+      },
+      {
+        "language": "text",
+        "sha256": "0bd10d70eada8b46bbc1903a3acd694baeae52a40d4de1cb64c7b04a0ccaec5a",
+        "coverage": "suite",
+        "evidence": "Ambient authority variable refusal matrix",
+        "limit": "Declared matrix only; not all Git settings",
+        "suites": [
+          "tests/install_adversarial.py"
+        ]
+      },
+      {
+        "language": "sh",
+        "sha256": "7961c3d2e7762f8f2e345fe009fded85873e36ccad7327a2359d5a8cf3bba09f",
+        "coverage": "recipe",
+        "evidence": "Record receipt from installed disposable checkout",
+        "limit": "Retained digest is test-process-local",
+        "suites": []
+      },
+      {
+        "language": "sh",
+        "sha256": "961dbfe72ae2c62ca0ca7c6bc7c6402c83c77012b7fee4ca734506e5cd12e036",
+        "coverage": "recipe",
+        "evidence": "Replay receipt into second independent disposable clone",
+        "limit": "No external authentication claim",
+        "suites": []
+      },
+      {
+        "language": "sh",
+        "sha256": "6ce679452d346e22aadc40211b057b5c849dc62f76171c63ba3e560da4da7670",
+        "coverage": "suite",
+        "evidence": "Declared installation suites",
+        "limit": "Executed separately by CI",
+        "suites": [
+          "tests/patch_stack.py",
+          "tests/install_adversarial.py",
+          "tests/install_receipt.py"
+        ]
+      }
+    ],
+    "docs/EVIDENCE_PROTOCOL.md": [
+      {
+        "language": "sh",
+        "sha256": "07b62fb911bb9f1ce65300779ffb890d9fdcd17e4b4451d169764a41027768f7",
+        "coverage": "recipe",
+        "evidence": "Produce real pinned-checker packet",
+        "limit": "Frozen workload only",
+        "suites": []
+      },
+      {
+        "language": "sh",
+        "sha256": "905aad0a161a8153313fc56501384d05030640607760619f8f5eaac3125ac46d",
+        "coverage": "recipe",
+        "evidence": "Extract terminal hash using identical ledger fields",
+        "limit": "Local extraction is not authentication",
+        "suites": []
+      },
+      {
+        "language": "sh",
+        "sha256": "a06804541c9000183d1ab633409cb5841268cb74186ab7975a2496e9f3075f7b",
+        "coverage": "recipe",
+        "evidence": "Independently verify packet with retained digest",
+        "limit": "Conditional integrity only",
+        "suites": []
+      },
+      {
+        "language": "sh",
+        "sha256": "639a35350698d4d613dcede25fb801b20ed6cf2b1b05a5fb2b8ac10b74b4fe08",
+        "coverage": "recipe",
+        "evidence": "Recheck accepted reconstructed books",
+        "limit": "No original failure reproduction",
+        "suites": []
+      },
+      {
+        "language": "sh",
+        "sha256": "b94eef2bedee679bcb4338d69d663df7b253d3e07e62a18247c92aae8b13c5a7",
+        "coverage": "recipe",
+        "evidence": "Export import then independently verify",
+        "limit": "Cooperative temporary filesystem",
+        "suites": []
+      },
+      {
+        "language": "sh",
+        "sha256": "17713940e846a03dea5b759a220b6c7700dd8dd7c0b6eeab0c8a7cc1d19c7ea2",
+        "coverage": "suite",
+        "evidence": "Declared evidence suites",
+        "limit": "Executed separately by CI",
+        "suites": [
+          "tests/evidence.py",
+          "tests/archive.py",
+          "tests/recheck.py",
+          "tests/storage.py",
+          "tests/output_bounds.py"
+        ]
+      }
+    ]
+  }
+}
