@@ -1,6 +1,190 @@
 diff --git a/gates/repo.ts b/gates/repo.ts
 --- a/gates/repo.ts
 +++ b/gates/repo.ts
-@@
+@@ -60,6 +60,7 @@
+ allow("guide/GUIDE.md", 12000);
  allow(/^guide\/agent\/[A-Z_]+\.md$/, 4000);
+ allow(/^guide\/agent\/proof\/[0-9A-Z_-]+\.md$/, 4000);
 +allow(/^guide\/agent\/(laws-index|diagnostics)\.json$/, 8000);
+ allow(/^paper\/(BendRT|BendTT)\.pdf$/, 400000, true);
+ allow(/^media\/intro\.(gif|mp4)$/, 25000000, true);
+ allow(/^media\/(runtime|checker|parallel)\.gif$/, 6000000, true);
+diff --git a/guide/agent/diagnostics.json b/guide/agent/diagnostics.json
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/diagnostics.json
+@@ -0,0 +1,54 @@
++{
++  "schema": "bend.diagnostics.v1",
++  "upstreamCommit": "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4",
++  "ids": {
++    "BND000": {
++      "name": "check.ok",
++      "severity": "ok",
++      "why": "The checked book has no open goals.",
++      "next": "No repair required."
++    },
++    "BND101": {
++      "name": "proof.laws_import_missing",
++      "severity": "error",
++      "why": "PROOF.bend sits beside LAWS.bend but did not import it.",
++      "next": "Import ./LAWS.bend as a module, then recheck."
++    },
++    "BND102": {
++      "name": "proof.unsafe_import",
++      "severity": "error",
++      "why": "The proof import graph contains @unsafe, so the proof is outside Bend's trusted live theory.",
++      "next": "Remove the unsafe dependency or prove the required lemma without it."
++    },
++    "BND103": {
++      "name": "check.incomplete",
++      "severity": "error",
++      "why": "One or more TODO or open law goals remain.",
++      "next": "Inspect the first residual goal and select one proof move."
++    },
++    "BND110": {
++      "name": "checker.error",
++      "severity": "error",
++      "why": "The Bend checker rejected a term, type, quantity, rewrite, pattern, or proof obligation.",
++      "next": "Use the reported expected/observed terms, then load only the proof move or Base name needed by that distinction."
++    },
++    "BND120": {
++      "name": "host.stack",
++      "severity": "error",
++      "why": "Host recursion or literal expansion exhausted the machine stack.",
++      "next": "Reduce recursion depth or literal expansion before changing proof structure."
++    },
++    "BND200": {
++      "name": "cli.usage",
++      "severity": "error",
++      "why": "The requested CLI form or named graph root is invalid.",
++      "next": "Correct the command or request a checked name."
++    },
++    "BND300": {
++      "name": "build.failed",
++      "severity": "error",
++      "why": "The external compiler or backend build failed after Bend checking.",
++      "next": "Inspect the build lane; do not change proof theory."
++    }
++  }
++}
+diff --git a/guide/agent/laws-index.json b/guide/agent/laws-index.json
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/laws-index.json
+@@ -0,0 +1,115 @@
++{
++  "schema": "bend.laws-index.v1",
++  "upstream": {
++    "repository": "bendlang/bend",
++    "commit": "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4"
++  },
++  "entries": [
++    {
++      "id": "conversion",
++      "move": "01-CONVERSION",
++      "tags": [
++        "equality",
++        "normalization",
++        "reflexivity"
++      ],
++      "sources": [
++        "tests/proof/equality_kit.bend",
++        "guide/GUIDE.md"
++      ]
++    },
++    {
++      "id": "case-analysis",
++      "move": "02-CASE",
++      "tags": [
++        "datatype",
++        "constructor",
++        "branch"
++      ],
++      "sources": [
++        "demos/proof_numerics/PROOF.bend",
++        "tests/proof/half_shift_hom.bend"
++      ]
++    },
++    {
++      "id": "structural-induction",
++      "move": "03-INDUCTION",
++      "tags": [
++        "recursive",
++        "nat",
++        "induction-hypothesis"
++      ],
++      "sources": [
++        "README.md",
++        "demos/proof_numerics/PROOF.bend"
++      ]
++    },
++    {
++      "id": "rewrite",
++      "move": "04-REWRITE",
++      "tags": [
++        "equality",
++        "motive",
++        "substitution"
++      ],
++      "sources": [
++        "guide/GUIDE.md",
++        "demos/proof_numerics/PROOF.bend"
++      ]
++    },
++    {
++      "id": "congruence",
++      "move": "05-CONGRUENCE",
++      "tags": [
++        "equality",
++        "function",
++        "transport"
++      ],
++      "sources": [
++        "tests/proof/equality_kit.bend",
++        "demos/io_http_fetch/PROOF.bend"
++      ]
++    },
++    {
++      "id": "equality-chain",
++      "move": "06-EQUALITY-CHAIN",
++      "tags": [
++        "symmetry",
++        "transitivity",
++        "intermediate"
++      ],
++      "sources": [
++        "tests/proof/from_to_injective.bend",
++        "tests/proof/half_shift_hom.bend"
++      ]
++    },
++    {
++      "id": "witness",
++      "move": "07-WITNESS",
++      "tags": [
++        "exists",
++        "exs",
++        "dependent-pair"
++      ],
++      "sources": [
++        "tests/proof/exists_witness.bend",
++        "tests/proof/nested_exists.bend",
++        "demos/io_http_fetch/LAWS.bend"
++      ]
++    },
++    {
++      "id": "contradiction",
++      "move": "08-CONTRADICTION",
++      "tags": [
++        "Empty",
++        "inequality",
++        "constructor-clash",
++        "boolean-reflection"
++      ],
++      "sources": [
++        "demos/app_win_is_bug_2d/PROOF.bend",
++        "guide/GUIDE.md"
++      ]
++    }
++  ]
++}

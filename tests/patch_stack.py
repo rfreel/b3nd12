@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+"""Verify ordered installation against the existing delivery, offline."""
+
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+
+
+ROOT = Path(__file__).resolve().parents[1]
+PIN = json.loads((ROOT / "upstream.json").read_text())["commit"]
+
+
+def run(*args, cwd=None, ok=True):
+    result = subprocess.run(args, cwd=cwd, capture_output=True, text=True)
+    if ok and result.returncode:
+        raise RuntimeError(f"{args}:\n{result.stdout}{result.stderr}")
+    return result
+
+
+def require(condition, message):
+    if not condition:
+        raise AssertionError(message)
+
+
+def main():
+    source = Path(sys.argv[1]).resolve()
+    expected = {
+        p: ROOT / "overlay" / p
+        for p in ("AGENTS.md", "bend2/main.ts", "gates/repo.ts", "gates/ping.ts")
+    }
+    for pattern in ("CLAUDE.md", "guide/agent/*.md", "guide/agent/*.json",
+                    "guide/agent/proof/*.md", "evals/README.md",
+                    "evals/_template.sidecar.json", "evals/_sidecar.schema.json"):
+        for file in ROOT.glob(pattern):
+            expected[file.relative_to(ROOT).as_posix()] = file
+    patches = sorted((ROOT / "patches").glob("[0-9][0-9]-*.patch"))
+    require([int(p.name[:2]) for p in patches] == list(range(1, 10)),
+            "Expected exactly ranks 1 through 9")
+
+    with tempfile.TemporaryDirectory(prefix="bend-patch-test-") as tmp:
+        tmp = Path(tmp)
+
+        def checkout(name):
+            target = tmp / name
+            run("git", "clone", "--shared", "--no-checkout", str(source), str(target))
+            run("git", "checkout", "--detach", PIN, cwd=target)
+            return target
+
+        def verify(target):
+            changed = set(run("git", "diff", "--name-only", "HEAD", cwd=target)
+                          .stdout.splitlines())
+            added = set(run("git", "ls-files", "--others", "--exclude-standard",
+                            cwd=target).stdout.splitlines())
+            require(changed | added == set(expected), "Installed path set differs")
+            for path, reference in expected.items():
+                require((target / path).read_bytes() == reference.read_bytes(),
+                        f"Content mismatch: {path}")
+            require(run("git", "diff", "--summary", "HEAD", cwd=target).stdout == "",
+                    "Upstream file modes changed")
+            original = subprocess.check_output(
+                ["git", "show", f"{PIN}:bend2/bend.ts"], cwd=target)
+            require((target / "bend2/bend.ts").read_bytes() == original,
+                    "Theory source changed")
+            require(run("git", "diff", "--cached", "--name-only", cwd=target).stdout == "",
+                    "Installer changed the real index")
+            run("git", "diff", "--check", cwd=target)
+
+        direct = checkout("direct")
+        for patch in patches:
+            run("git", "apply", "--check", "--whitespace=error", str(patch), cwd=direct)
+            run("git", "apply", "--whitespace=error", str(patch), cwd=direct)
+            print(f"PASS direct {patch.name}")
+        verify(direct)
+
+        installed = checkout("installed")
+        result = run(str(ROOT / "apply.sh"), str(installed))
+        print(result.stdout, end="")
+        verify(installed)
+        print(f"PASS both installation paths match all {len(expected)} delivery files")
+        print("PASS exact file scope, upstream modes, real index, and theory bytes")
+
+        before = run("git", "status", "--porcelain", cwd=installed).stdout
+        result = run(str(ROOT / "apply.sh"), str(installed), ok=False)
+        require(result.returncode != 0 and "not clean" in result.stderr,
+                "Dirty checkout was not rejected")
+        require(run("git", "status", "--porcelain", cwd=installed).stdout == before,
+                "Rejected reapplication changed the worktree")
+        print("PASS dirty checkout rejected")
+
+        clean = checkout("rejected")
+        broken = tmp / "broken-installer"
+        broken.mkdir()
+        shutil.copy2(ROOT / "apply.sh", broken / "apply.sh")
+        shutil.copytree(ROOT / "patches", broken / "patches")
+        last = broken / "patches" / patches[-1].name
+        last.write_text("diff --git a/AGENTS.md b/AGENTS.md\n"
+                        "--- a/AGENTS.md\n+++ b/AGENTS.md\n@@\n+broken\n")
+        result = run(str(broken / "apply.sh"), str(clean), ok=False)
+        require(result.returncode != 0 and "garbage" in result.stderr,
+                "Malformed late patch was not rejected during preflight")
+        require(run("git", "status", "--porcelain", cwd=clean).stdout == "",
+                "Failed preflight modified the target")
+        print("PASS malformed rank 9 rejected before any target changes")
+
+        run("git", "checkout", "--detach", f"{PIN}^", cwd=clean)
+        result = run(str(ROOT / "apply.sh"), str(clean), ok=False)
+        require(result.returncode != 0 and "must be pinned" in result.stderr,
+                "Wrong upstream commit was not rejected")
+        require(run("git", "status", "--porcelain", cwd=clean).stdout == "",
+                "Wrong-pin rejection modified the target")
+        print("PASS wrong pin rejected")
+
+    if shutil.which("bun") is None:
+        print("SKIP Bun CLI smoke checks: bun is not installed")
+
+
+if __name__ == "__main__":
+    main()

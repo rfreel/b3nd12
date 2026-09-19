@@ -1,16 +1,25 @@
 diff --git a/bend2/main.ts b/bend2/main.ts
 --- a/bend2/main.ts
 +++ b/bend2/main.ts
-@@
+@@ -45,6 +45,8 @@
+   bend base [--types|<name>]  print Base, its types, or a name and its subnames
    bend guide [program|prove]  print the router or one small task pack
    bend guide full             print the complete Bend guide
 +  bend --pack program|prove   print one agent working pack directly
 +  bend --why BNDnnn           explain one stable diagnostic id
-@@
+   bend update                 install the latest bend (curl | sh, shown first)
+   bend --version              print the version
+ 
+@@ -57,6 +59,8 @@
+ const ROUTER = path.join(Bend.BEND_DIR, "..", "guide", "agent", "ROUTER.md");
+ const PROGRAM = path.join(Bend.BEND_DIR, "..", "guide", "agent", "PROGRAM.md");
  const PROVE = path.join(Bend.BEND_DIR, "..", "guide", "agent", "PROVE.md");
 +const DIAGNOSTICS = path.join(Bend.BEND_DIR, "..", "guide", "agent",
 +  "diagnostics.json");
-@@
+ 
+ const ORIGIN = process.env.BEND_ORIGIN ?? "https://bend-lang.com";
+ 
+@@ -132,6 +136,12 @@
    if (args[0] === "--version" && args.length === 1) {
      return cli_say(1, "bend " + VERSION + "\n");
    }
@@ -20,8 +29,14 @@ diff --git a/bend2/main.ts b/bend2/main.ts
 +  if (args[0] === "--why" && args.length === 2) {
 +    return cli_why(args[1]);
 +  }
-@@
- }
+   if (args[0] === "update" && args.length === 1) {
+     return cli_update();
+   }
+@@ -150,6 +160,28 @@
+     await cli_file(args);
+   }
+   await check();
++}
 +
 +function cli_pack(name: string): void {
 +  const at = name === "program" ? PROGRAM
@@ -43,17 +58,27 @@ diff --git a/bend2/main.ts b/bend2/main.ts
 +  }
 +  cli_say(1, id + " " + (d.name ?? "") + "\n"
 +    + (d.why ?? "") + "\nnext: " + (d.next ?? "") + "\n");
-+}
+ }
+ 
+ // cli_update runs the installer again: the one way bend changes. The
 diff --git a/gates/ping.ts b/gates/ping.ts
 --- a/gates/ping.ts
 +++ b/gates/ping.ts
-@@
+@@ -236,6 +236,8 @@
+   const program = await bend(["guide", "program"]);
    const prove = await bend(["guide", "prove"]);
-   check("bend guide prove prints the prove pack", prove.code === 0
-     && prove.out.includes("# PROVE pack"));
+   const full = await bend(["guide", "full"]);
 +  const pack = await bend(["--pack", "prove"]);
-+  check("bend --pack prove prints the same pack", pack.code === 0
-+    && pack.out.includes("# PROVE pack"));
 +  const why = await bend(["--why", "BND101"]);
-+  check("bend --why resolves a stable diagnostic", why.code === 0
-+    && why.out.includes("proof.laws_import_missing"));
+   const base  = await bend(["base", "Map"]);
+   fs.writeFileSync(path.join(TMP, "sum.bend"),
+     "import Base\ndef main() -> Nat:\n  2n + 3n\n");
+@@ -245,6 +247,8 @@
+     && program.out.startsWith("# PROGRAM pack")
+     && prove.out.startsWith("# PROVE pack")
+     && full.out.startsWith("# Bend")
++    && pack.out.startsWith("# PROVE pack")
++    && why.out.includes("proof.laws_import_missing")
+     && base.out.startsWith("type Map")
+     && sum5.code === 0 && sum5.out === "5n\n");
+ 

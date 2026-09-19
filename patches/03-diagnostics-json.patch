@@ -1,10 +1,17 @@
 diff --git a/bend2/main.ts b/bend2/main.ts
 --- a/bend2/main.ts
 +++ b/bend2/main.ts
-@@
+@@ -39,6 +39,7 @@
+   bend <file.bend> -o <out>   build a binary; <out>.c emits C, <out>.js JS
+   bend <file.bend> --checkup  check and run each import alone
    bend <file.bend> --publish  publish the file and its imports to the hub
 +  bend <file.bend> --json     emit stable diagnostic events as JSON Lines
-@@
+   bend <page.html> -o <dir>   bundle a page that imports .bend files
+   bend base [--types|<name>]  print Base, its types, or a name and its subnames
+   bend guide [program|prove]  print the router or one small task pack
+@@ -62,6 +63,36 @@
+ const CHECK = path.join(os.homedir(), ".bend", "check.json");
+ 
  const DAY = 86400000;
 +
 +type DiagId = "BND000" | "BND101" | "BND102" | "BND103"
@@ -36,32 +43,52 @@ diff --git a/bend2/main.ts b/bend2/main.ts
 +  return { schema: "bend.diag.v1", id: "BND110", severity: "error",
 +    message: err?.$ === "Err" ? Bend.err_show(err) : String(e), file };
 +}
-@@
+ 
+ // A package's proof of work is a nonce whose sha256(hash + " " + nonce)
+ // opens (its top 53 bits) with a number under 2^53 / work, where work is
+@@ -178,6 +209,7 @@
    let file: string | undefined;
    let checkup = false;
    let publish = false;
 +  let json = false;
-@@
+   for (let i = 0; i < args.length; i += 1) {
+     const a = args[i];
+     if (a === "--help" || a === "-h") {
+@@ -186,6 +218,8 @@
+       checkup = true;
      } else if (a === "--publish") {
        publish = true;
 +    } else if (a === "--json") {
 +      json = true;
-@@
--    const book = await book_read(file, undefined, seen);
-+    const book = await book_read(file, undefined, seen);
-@@
+     } else if (a === "-o") {
+       i += 1;
+       outs.push(args[i] ?? cli_fail("-o needs an output file"));
+@@ -229,10 +263,10 @@
+     const seen = new Map<string, string | null>();
+     const book = await book_read(file, undefined, seen);
+     if (outs.length !== 0 || book_main(book) !== null) {
 -      cli_report(book, 2);
 +      cli_report(book, 2, json);
-@@
+     }
+     if (outs.length === 0) {
 -      process.exitCode = book_run(book, argv);
 +      process.exitCode = book_run(book, argv, json);
-@@
+       return;
+     }
+     const ins = new Set([...seen.keys(), ...Object.values(book.tlds).flatMap((t) =>
+@@ -245,7 +279,7 @@
+       cli_emit(book, out);
+     }
    } catch (e) {
 -    cli_say(2, book_err(e) + "\n");
 +    cli_say(2, json ? diag_line(diag_of(e, file)) : book_err(e) + "\n");
      process.exitCode = 1;
    }
-@@
+ }
+@@ -488,9 +522,14 @@
+ 
+ // cli_report prints the unsafe count: the verdict of a check on stdout, a
+ // note before a run, an emit or a publish on stderr (silent at zero).
 -function cli_report(book: Bend.Book, fd: number): void {
 +function cli_report(book: Bend.Book, fd: number, json = false): void {
    const uns  = Object.values(book.tlds).filter((t) =>
@@ -71,16 +98,31 @@ diff --git a/bend2/main.ts b/bend2/main.ts
 +      severity: "ok", message: "All terms check.", unsafe: uns }));
 +    return;
 +  }
-@@
+   if (uns > 0) {
+     cli_say(fd, `All terms check, with ${uns} unsafe annotation`
+       + `${uns === 1 ? "" : "s"}.\n`);
+@@ -528,13 +567,14 @@
+   const laws = path.join(path.dirname(file), "LAWS.bend");
+   if (path.basename(file) === "PROOF.bend" && fs.existsSync(laws)
+     && !seen.has(fs.realpathSync(laws))) {
 -    cli_fail("PROOF.bend must import ./LAWS.bend");
 +    throw cli_err("BND101", "PROOF.bend must import ./LAWS.bend");
-@@
+   }
+   Bend.book_valid(book, base?.order.length ?? 0);
+   const hols = book.hols + book.open;
+   if (hols > 0) {
 -    throw "Error: " + String(hols) + " TODO" + (hols === 1 ? "" : "s")
 -      + " found.\nThe code is incomplete, and not a valid proof yet.";
 +    throw cli_err("BND103", "Error: " + String(hols) + " TODO"
 +      + (hols === 1 ? "" : "s")
 +      + " found.\nThe code is incomplete, and not a valid proof yet.");
-@@
+   }
+   return book;
+ }
+@@ -559,10 +599,10 @@
+     || (main.v === null && main.i === undefined) ? null : main;
+ }
+ 
 -function book_run(book: Bend.Book, argv: string[]): number {
 +function book_run(book: Bend.Book, argv: string[], json = false): number {
    const main = book_main(book);
@@ -88,3 +130,32 @@ diff --git a/bend2/main.ts b/bend2/main.ts
 -    cli_report(book, 1);
 +    cli_report(book, 1, json);
      return 0;
+   }
+   if (Comp.io_type(book) !== null) {
+@@ -575,6 +615,9 @@
+ 
+ function book_err(e: unknown): string {
+   const err = e as Bend.Err;
++  if ((e as CliErr)?.$ === "CliErr") {
++    return "bend: " + (e as CliErr).message;
++  }
+   if (e instanceof RangeError) {
+     return "Error: the machine stack overflowed (a deep recursion, or a"
+       + " literal too large to expand)";
+diff --git a/guide/agent/DIAGNOSTIC_IDS.md b/guide/agent/DIAGNOSTIC_IDS.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/DIAGNOSTIC_IDS.md
+@@ -0,0 +1,12 @@
++# Diagnostic ids
++
++BND000 check.ok
++BND101 proof.laws_import_missing
++BND102 proof.unsafe_import
++BND103 check.incomplete
++BND110 checker.error
++BND120 host.stack
++BND200 cli.usage
++BND300 build.failed
++
++Ids name stable machine classes. Human messages may improve without changing the id.

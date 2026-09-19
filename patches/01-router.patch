@@ -1,52 +1,61 @@
 diff --git a/AGENTS.md b/AGENTS.md
 --- a/AGENTS.md
 +++ b/AGENTS.md
-@@
+@@ -1,4 +1,8 @@
  # AGENTS
 +
 +Start with guide/agent/ROUTER.md. Do not read guide/GUIDE.md by default.
 +Load the smallest task pack that can answer the current need. Escalate to the
 +full guide only when the router says the pack is insufficient.
-@@
-     guide/              GUIDE.md
-+    guide/agent/        small task router and agent packs
+ 
+ Bend is a dependently typed, affine language that checks in one linear
+ bidirectional pass and runs massively parallel on CPU threads and GPUs.
+@@ -31,7 +35,7 @@
+                         check and a release, on a localhost hub
+     gates/_run.ts       the four gates with --gate
+     demos/              one dir per demo
+-    guide/              GUIDE.md
++    guide/              GUIDE.md; agent/ holds the small router and packs
+     paper/              BendTT.pdf, BendRT.pdf
+     media/              the film and the charts
+     .github/            ISSUE_TEMPLATE/bug.yml, the bug report form, and
 diff --git a/CLAUDE.md b/CLAUDE.md
 new file mode 100644
 --- /dev/null
 +++ b/CLAUDE.md
-@@
+@@ -0,0 +1,7 @@
 +# CLAUDE
 +
 +Read AGENTS.md, then guide/agent/ROUTER.md.
-+Do not load guide/GUIDE.md by default.
-+Do not edit bend2/bend.ts for ergonomics work.
-diff --git a/guide/agent/ROUTER.md b/guide/agent/ROUTER.md
-new file mode 100644
---- /dev/null
-+++ b/guide/agent/ROUTER.md
-@@
-+# Bend agent router
 +
-+PROGRAM: ordinary implementation work.
-+PROVE: laws and proof work.
-+FULL: guide/GUIDE.md only when a smaller pack is insufficient.
++Do not load guide/GUIDE.md by default. Route to the smallest task pack that can answer the current need. Escalate to the full guide only when the router says the pack is insufficient.
 +
-+Do not edit bend2/bend.ts for ergonomics changes.
++Do not edit bend2/bend.ts for ergonomics work. Prefer CLI, compiler metadata, documentation, indexes, tests, and residue sidecars.
 diff --git a/bend2/main.ts b/bend2/main.ts
 --- a/bend2/main.ts
 +++ b/bend2/main.ts
-@@
+@@ -41,7 +41,8 @@
+   bend <file.bend> --publish  publish the file and its imports to the hub
+   bend <page.html> -o <dir>   bundle a page that imports .bend files
+   bend base [--types|<name>]  print Base, its types, or a name and its subnames
 -  bend guide                  print the Bend guide
 +  bend guide                  print the small task router
 +  bend guide full             print the complete Bend guide
-@@
--Read the guide (\`bend guide\`) before writing Bend code.
-+Start with \`bend guide\`; use \`bend guide full\` only when needed.
- \`;
-@@
+   bend update                 install the latest bend (curl | sh, shown first)
+   bend --version              print the version
+ 
+@@ -51,6 +52,7 @@
+ const BASE = Bend.BASE_BEND;
+ 
  const GUIDE = path.join(Bend.BEND_DIR, "..", "guide", "GUIDE.md");
 +const ROUTER = path.join(Bend.BEND_DIR, "..", "guide", "agent", "ROUTER.md");
-@@
+ 
+ const ORIGIN = process.env.BEND_ORIGIN ?? "https://bend-lang.com";
+ 
+@@ -99,8 +101,14 @@
+   if (args[0] === "update" && args.length === 1) {
+     return cli_update();
+   }
 -  if (args[0] === "guide" && args.length === 1) {
 -    cli_say(1, fs.readFileSync(GUIDE, "utf8"));
 +  if (args[0] === "guide" && args.length <= 2) {
@@ -57,24 +66,68 @@ diff --git a/bend2/main.ts b/bend2/main.ts
 +    } else {
 +      cli_fail("unknown guide " + args[1]);
 +    }
-diff --git a/gates/repo.ts b/gates/repo.ts
---- a/gates/repo.ts
-+++ b/gates/repo.ts
-@@
- allow("AGENTS.md", 2000);
-+allow("CLAUDE.md", 1000);
-@@
- allow("guide/GUIDE.md", 12000);
-+allow(/^guide\/agent\/[A-Z_]+\.md$/, 4000);
+   } else if (args[0] === "base" && args.length <= 2) {
+     cli_base(args[1]);
+   } else {
 diff --git a/gates/ping.ts b/gates/ping.ts
 --- a/gates/ping.ts
 +++ b/gates/ping.ts
-@@
--  const guide = await bend(["guide"]);
--  check("bend guide prints the guide", guide.code === 0 && guide.out.includes("# "));
-+  const guide = await bend(["guide"]);
-+  check("bend guide prints the router", guide.code === 0
-+    && guide.out.includes("Bend agent router"));
+@@ -233,12 +233,15 @@
+     && upd.err.startsWith("curl -fsSL " + ORIGIN + "/install.sh | sh\n")
+     && upd.out.includes("Bend " + ver) && fs.statSync(BIN).ino !== was);
+   const guide = await bend(["guide"]);
 +  const full = await bend(["guide", "full"]);
-+  check("bend guide full prints the guide", full.code === 0
-+    && full.out.includes("# "));
+   const base  = await bend(["base", "Map"]);
+   fs.writeFileSync(path.join(TMP, "sum.bend"),
+     "import Base\ndef main() -> Nat:\n  2n + 3n\n");
+   const sum5 = await bend([path.join(TMP, "sum.bend")]);
+-  check("guide, base and a program run through the executable",
+-    guide.out.startsWith("# Bend") && base.out.startsWith("type Map")
++  check("router, full guide, base and a program run through the executable",
++    guide.out.startsWith("# Bend agent router")
++    && full.out.startsWith("# Bend")
++    && base.out.startsWith("type Map")
+     && sum5.code === 0 && sum5.out === "5n\n");
+   script = script.replace(sum, "0".repeat(64));
+   const fake = await install();
+diff --git a/gates/repo.ts b/gates/repo.ts
+--- a/gates/repo.ts
++++ b/gates/repo.ts
+@@ -32,6 +32,7 @@
+ allow(".gitattributes", 200);
+ allow(".gitignore", 100);
+ allow("AGENTS.md", 2000);
++allow("CLAUDE.md", 1000);
+ allow("README.md", 3000);
+ allow("WONTFIX.txt", 1500);
+ allow("LICENSE", 4000);
+@@ -57,6 +58,7 @@
+ allow(/^demos\/[a-z0-9_]+\/[A-Za-z_]+\.(c|sh|md)$/, 4000);
+ allow(/^demos\/[a-z0-9_]+\/web\/(index\.html|main\.js|bunfig\.toml)$/, 4000);
+ allow("guide/GUIDE.md", 12000);
++allow(/^guide\/agent\/[A-Z_]+\.md$/, 4000);
+ allow(/^paper\/(BendRT|BendTT)\.pdf$/, 400000, true);
+ allow(/^media\/intro\.(gif|mp4)$/, 25000000, true);
+ allow(/^media\/(runtime|checker|parallel)\.gif$/, 6000000, true);
+diff --git a/guide/agent/ROUTER.md b/guide/agent/ROUTER.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/ROUTER.md
+@@ -0,0 +1,17 @@
++# Bend agent router
++
++Load one route, not the whole guide.
++
++PROGRAM
++Use for implementation, compilation, runtime, IO, tests, and ordinary Bend code.
++Read: guide/agent/PROGRAM.md when present.
++
++PROVE
++Use for LAWS.bend, PROOF.bend, equality, induction, rewrite, contradiction, witnesses, and proof repair.
++Read: guide/agent/PROVE.md when present.
++
++FULL
++Use guide/GUIDE.md only when PROGRAM or PROVE cannot answer a material question, or when language semantics themselves are under investigation.
++
++Kernel boundary
++Do not edit bend2/bend.ts for ergonomics changes. Escalate a theory edit only after the deletion test shows the task cannot be solved in routing, packs, CLI seams, compiler metadata, indexes, tests, or sidecars.

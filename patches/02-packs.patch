@@ -1,16 +1,28 @@
 diff --git a/bend2/main.ts b/bend2/main.ts
 --- a/bend2/main.ts
 +++ b/bend2/main.ts
-@@
+@@ -41,7 +41,7 @@
+   bend <file.bend> --publish  publish the file and its imports to the hub
+   bend <page.html> -o <dir>   bundle a page that imports .bend files
+   bend base [--types|<name>]  print Base, its types, or a name and its subnames
 -  bend guide                  print the small task router
--  bend guide full             print the complete Bend guide
 +  bend guide [program|prove]  print the router or one small task pack
-+  bend guide full             print the complete Bend guide
-@@
+   bend guide full             print the complete Bend guide
+   bend update                 install the latest bend (curl | sh, shown first)
+   bend --version              print the version
+@@ -53,6 +53,8 @@
+ 
+ const GUIDE = path.join(Bend.BEND_DIR, "..", "guide", "GUIDE.md");
  const ROUTER = path.join(Bend.BEND_DIR, "..", "guide", "agent", "ROUTER.md");
 +const PROGRAM = path.join(Bend.BEND_DIR, "..", "guide", "agent", "PROGRAM.md");
 +const PROVE = path.join(Bend.BEND_DIR, "..", "guide", "agent", "PROVE.md");
-@@
+ 
+ const ORIGIN = process.env.BEND_ORIGIN ?? "https://bend-lang.com";
+ 
+@@ -102,13 +104,14 @@
+     return cli_update();
+   }
+   if (args[0] === "guide" && args.length <= 2) {
 -    if (args[1] === undefined) {
 -      cli_say(1, fs.readFileSync(ROUTER, "utf8"));
 -    } else if (args[1] === "full") {
@@ -24,16 +36,107 @@ diff --git a/bend2/main.ts b/bend2/main.ts
        cli_fail("unknown guide " + args[1]);
      }
 +    cli_say(1, fs.readFileSync(at, "utf8"));
+   } else if (args[0] === "base" && args.length <= 2) {
+     cli_base(args[1]);
+   } else {
 diff --git a/gates/ping.ts b/gates/ping.ts
 --- a/gates/ping.ts
 +++ b/gates/ping.ts
-@@
-   const full = await bend(["guide", "full"]);
-   check("bend guide full prints the guide", full.code === 0
-     && full.out.includes("# "));
+@@ -233,13 +233,17 @@
+     && upd.err.startsWith("curl -fsSL " + ORIGIN + "/install.sh | sh\n")
+     && upd.out.includes("Bend " + ver) && fs.statSync(BIN).ino !== was);
+   const guide = await bend(["guide"]);
 +  const program = await bend(["guide", "program"]);
-+  check("bend guide program prints the program pack", program.code === 0
-+    && program.out.includes("# PROGRAM pack"));
 +  const prove = await bend(["guide", "prove"]);
-+  check("bend guide prove prints the prove pack", prove.code === 0
-+    && prove.out.includes("# PROVE pack"));
+   const full = await bend(["guide", "full"]);
+   const base  = await bend(["base", "Map"]);
+   fs.writeFileSync(path.join(TMP, "sum.bend"),
+     "import Base\ndef main() -> Nat:\n  2n + 3n\n");
+   const sum5 = await bend([path.join(TMP, "sum.bend")]);
+-  check("router, full guide, base and a program run through the executable",
++  check("router, packs, full guide, base and a program run through the executable",
+     guide.out.startsWith("# Bend agent router")
++    && program.out.startsWith("# PROGRAM pack")
++    && prove.out.startsWith("# PROVE pack")
+     && full.out.startsWith("# Bend")
+     && base.out.startsWith("type Map")
+     && sum5.code === 0 && sum5.out === "5n\n");
+diff --git a/guide/agent/PROGRAM.md b/guide/agent/PROGRAM.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/PROGRAM.md
+@@ -0,0 +1,33 @@
++# PROGRAM pack
++
++Purpose: implement, compile, run, test, and repair ordinary Bend programs with the smallest useful context.
++
++Read by default
++1. AGENTS.md
++2. guide/agent/ROUTER.md
++3. this file
++4. the target .bend file
++5. only its direct imports that are needed to answer the current question
++
++Query instead of loading
++- `bend base <name>` for one Base symbol and its subnames
++- `bend base --types` only when the type surface is the question
++- diagnostics by stable id when available
++
++Do not load by default
++- guide/GUIDE.md
++- paper/
++- bend2/bend.ts
++- unrelated demos
++- unrelated tests
++
++Working loop
++1. State the observable target.
++2. Read the target file and its direct dependency seam.
++3. Make the smallest source change that can satisfy the target.
++4. Run the narrowest relevant check or test.
++5. Preserve any residual failure as evidence. Do not broaden the read set until the current evidence requires it.
++6. Escalate to the full guide only when a material language question remains unresolved.
++
++Kernel boundary
++Do not edit bend2/bend.ts for implementation ergonomics. Prefer source code, tests, CLI seams, compiler metadata, documentation, indexes, and sidecars.
+diff --git a/guide/agent/PROVE.md b/guide/agent/PROVE.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/PROVE.md
+@@ -0,0 +1,36 @@
++# PROVE pack
++
++Purpose: discharge Bend laws without loading the entire language manual.
++
++Legal working set
++1. AGENTS.md
++2. guide/agent/ROUTER.md
++3. this file
++4. LAWS.bend
++5. PROOF.bend
++6. only definitions named by the target law or its current diagnostic
++7. one proof-move note at a time from guide/agent/proof/INDEX.md
++
++Proof contract
++- PROOF.bend beside LAWS.bend must import LAWS.bend.
++- A proof result is not trusted if its import graph contains @unsafe.
++- Preserve unresolved branches instead of replacing them with a plausible proof.
++- Prefer conversion and the smallest proof move before introducing helpers.
++
++Proof moves
++Load one at a time: conversion, case analysis, structural induction, rewrite, congruence, equality direction/chaining, witness construction, or contradiction. Recheck before stacking another move.
++
++Working loop
++1. Select one law.
++2. Inspect its type and the definitions it names.
++3. Check PROOF.bend.
++4. Classify the diagnostic.
++5. Choose one proof move.
++6. Recheck.
++7. Expand the dependency graph only when the diagnostic changes or the move exposes a new required name.
++8. Record unresolved residue rather than rereading the whole guide.
++
++Escalate to guide/GUIDE.md only when the target depends on a semantic rule not covered by the pack or a proof-move note.
++
++Kernel boundary
++Do not change bend2/bend.ts to make a proof easier.

@@ -1,11 +1,10 @@
 diff --git a/gates/ping.ts b/gates/ping.ts
 --- a/gates/ping.ts
 +++ b/gates/ping.ts
-@@
-   const prove = await bend(["guide", "prove"]);
-   check("bend guide prove prints the prove pack", prove.code === 0
-     && prove.out.includes("# PROVE pack"));
-+
+@@ -248,6 +248,15 @@
+     && base.out.startsWith("type Map")
+     && sum5.code === 0 && sum5.out === "5n\n");
+ 
 +  const contract = path.join(TMP, "proof-contract");
 +  fs.mkdirSync(contract, { recursive: true });
 +  fs.writeFileSync(path.join(contract, "LAWS.bend"),
@@ -14,3 +13,51 @@ diff --git a/gates/ping.ts b/gates/ping.ts
 +  const missed = await bend([path.join(contract, "PROOF.bend")]);
 +  check("PROOF beside LAWS must import it", missed.code !== 0
 +    && missed.err.includes("PROOF.bend must import ./LAWS.bend"));
++
+   const gfile = path.join(TMP, "graph.bend");
+   fs.writeFileSync(gfile, "import Base\n"
+     + "def leaf(x: Nat) -> Nat:\n  x\n"
+diff --git a/guide/agent/THEORY_BOUNDARY.md b/guide/agent/THEORY_BOUNDARY.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/THEORY_BOUNDARY.md
+@@ -0,0 +1,20 @@
++# Theory boundary
++
++Decision: no bend2/bend.ts theory edit is admitted by this ranked deepening.
++
++Deletion test
++Remove the proposed theory edit and ask whether any required capability disappears.
++
++1. Context routing lives in main.ts and guide/agent.
++2. PROGRAM and PROVE are documentation packs.
++3. Stable diagnostics and JSON are a CLI seam.
++4. Proof moves document existing language forms.
++5. Dependency graphing traverses the already exported lowered term representation.
++6. Law and diagnostic indexes are data.
++7. The PROOF to LAWS import guard already exists upstream.
++8. Eval sidecars are process residue.
++9. --why and --pack are CLI routing sugar.
++
++Result: no required capability depends on a theory change.
++
++Reopen only if a future required result cannot be expressed by existing checked terms, exported term structure, CLI policy, compiler metadata, tests, or documentation. A harder proof is not a reopen condition.
+diff --git a/guide/agent/UPSTREAM_DECISIONS.md b/guide/agent/UPSTREAM_DECISIONS.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/UPSTREAM_DECISIONS.md
+@@ -0,0 +1,14 @@
++# Upstream proof contract pin
++
++Pinned upstream: bendlang/bend e5a4c4c, Bend 2.0.9.
++
++Issue #776 was closed by the Bend maintainer after shipping the neighboring-file guard in 2.0.8. The current main.ts contains this invariant:
++
++- if the checked file is named PROOF.bend,
++- and LAWS.bend exists beside it,
++- then PROOF.bend must import that exact LAWS.bend file,
++- otherwise the CLI refuses the proof.
++
++This patch stack treats that guard as upstream authority and does not duplicate it.
++
++The issue also discussed @unsafe. Upstream did not make all @unsafe books fail. This layer therefore does not silently strengthen Bend's theory contract. BND102 remains a reserved diagnostic class for a future explicit policy decision.

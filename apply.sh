@@ -14,18 +14,19 @@ test -z "$(git -C "$TARGET" status --porcelain)" || {
   exit 1
 }
 
-mkdir -p "$TARGET/guide/agent/proof"
-cp "$SELF/overlay/AGENTS.md" "$TARGET/AGENTS.md"
-cp "$SELF/overlay/bend2/main.ts" "$TARGET/bend2/main.ts"
-cp "$SELF/overlay/gates/repo.ts" "$TARGET/gates/repo.ts"
-cp "$SELF/overlay/gates/ping.ts" "$TARGET/gates/ping.ts"
-cp "$SELF/CLAUDE.md" "$TARGET/CLAUDE.md"
-cp "$SELF"/guide/agent/*.md "$TARGET/guide/agent/"
-cp "$SELF"/guide/agent/*.json "$TARGET/guide/agent/"
-cp "$SELF"/guide/agent/proof/*.md "$TARGET/guide/agent/proof/"
-cp "$SELF/evals/README.md" "$TARGET/evals/README.md"
-cp "$SELF/evals/_template.sidecar.json" "$TARGET/evals/_template.sidecar.json"
-cp "$SELF/evals/_sidecar.schema.json" "$TARGET/evals/_sidecar.schema.json"
+# Validate the whole ordered stack in a temporary index before changing files.
+CHECK=$(mktemp -d)
+trap 'rm -rf "$CHECK"' EXIT
+trap 'exit 1' HUP INT TERM
+GIT_INDEX_FILE="$CHECK/index" git -C "$TARGET" read-tree HEAD
+for patch in "$SELF"/patches/[0-9][0-9]-*.patch; do
+  GIT_INDEX_FILE="$CHECK/index" git -C "$TARGET" apply --cached --whitespace=error "$patch"
+done
+
+for patch in "$SELF"/patches/[0-9][0-9]-*.patch; do
+  echo "apply: $(basename "$patch")"
+  git -C "$TARGET" apply --whitespace=error "$patch"
+done
 
 "$SELF/verify.sh" "$TARGET"
 echo "apply: ranked deepenings installed"

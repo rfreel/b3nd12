@@ -1,28 +1,62 @@
 diff --git a/bend2/main.ts b/bend2/main.ts
 --- a/bend2/main.ts
 +++ b/bend2/main.ts
-@@
+@@ -40,6 +40,7 @@
+   bend <file.bend> --checkup  check and run each import alone
+   bend <file.bend> --publish  publish the file and its imports to the hub
    bend <file.bend> --json     emit stable diagnostic events as JSON Lines
 +  bend <file.bend> --graph X  print the checked named dependency slice from X
-@@
+   bend <page.html> -o <dir>   bundle a page that imports .bend files
+   bend base [--types|<name>]  print Base, its types, or a name and its subnames
+   bend guide [program|prove]  print the router or one small task pack
+@@ -210,6 +211,7 @@
+   let checkup = false;
    let publish = false;
    let json = false;
 +  let graph: string[] | null = null;
-@@
+   for (let i = 0; i < args.length; i += 1) {
+     const a = args[i];
+     if (a === "--help" || a === "-h") {
+@@ -220,6 +222,10 @@
+       publish = true;
      } else if (a === "--json") {
        json = true;
 +    } else if (a === "--graph") {
 +      i += 1;
 +      graph = (args[i] ?? cli_fail("--graph needs a name"))
 +        .split(",").filter((x) => x !== "");
-@@
-     const book = await book_read(file, undefined, seen);
+     } else if (a === "-o") {
+       i += 1;
+       outs.push(args[i] ?? cli_fail("-o needs an output file"));
+@@ -253,6 +259,10 @@
+     cli_fail("--checkup takes no -o: a binary holds one main, so build each"
+       + " import alone");
+   }
++  if (graph !== null && (outs.length !== 0 || checkup || publish
++    || argv.length !== 0)) {
++    cli_fail("--graph takes a checked file and a name, with optional --json");
++  }
+   try {
+     if (publish) {
+       return await cli_publish(file);
+@@ -261,7 +271,11 @@
+       return await cli_checkup(file);
+     }
+     const seen = new Map<string, string | null>();
+-    const book = await book_read(file, undefined, seen);
++    const book = await book_read(file, undefined, seen, graph !== null);
 +    if (graph !== null) {
 +      cli_say(1, book_graph_show(book, graph, json));
 +      return;
 +    }
-@@
- }
+     if (outs.length !== 0 || book_main(book) !== null) {
+       cli_report(book, 2, json);
+     }
+@@ -282,6 +296,90 @@
+     cli_say(2, json ? diag_line(diag_of(e, file)) : book_err(e) + "\n");
+     process.exitCode = 1;
+   }
++}
 +
 +function term_refs(tm: Bend.LTerm, out: Set<string>): void {
 +  switch (tm.$) {
@@ -72,7 +106,7 @@ diff --git a/bend2/main.ts b/bend2/main.ts
 +}
 +
 +function book_graph(book: Bend.Book, roots: string[]):
-+  { schema: "bend.graph.v1"; roots: string[];
++  { schema: "bend.graph.v1"; roots: string[]; open: number;
 +    nodes: { name: string; refs: string[] }[] } {
 +  for (const root of roots) {
 +    if (book.tlds[root] === undefined) {
@@ -86,16 +120,64 @@ diff --git a/bend2/main.ts b/bend2/main.ts
 +    const name = todo.shift() as string;
 +    if (seen.has(name)) continue;
 +    seen.add(name);
-+    const refs = tld_refs(book.tlds[name]).filter((x) => book.tlds[x] !== undefined);
++    const refs = tld_refs(book.tlds[name])
++      .filter((x) => book.tlds[x] !== undefined);
 +    nodes.push({ name, refs });
-+    for (const ref of refs) if (!seen.has(ref)) todo.push(ref);
++    for (const ref of refs) {
++      const tld = book.tlds[ref];
++      if (!seen.has(ref) && !(tld.$ === "Def" && tld.b === true)) {
++        todo.push(ref);
++      }
++    }
 +  }
-+  return { schema: "bend.graph.v1", roots, nodes };
++  return { schema: "bend.graph.v1", roots,
++    open: book.hols + book.open, nodes };
 +}
 +
 +function book_graph_show(book: Bend.Book, roots: string[], json: boolean): string {
 +  const graph = book_graph(book, roots);
 +  if (json) return JSON.stringify(graph) + "\n";
 +  return graph.nodes.map((n) => n.name
-+    + (n.refs.length === 0 ? "" : " -> " + n.refs.join(", "))).join("\n") + "\n";
-+}
++    + (n.refs.length === 0 ? "" : " -> " + n.refs.join(", "))).join("\n")
++    + "\n";
+ }
+ 
+ // cli_checkup checks and runs each import of the file alone (Base read
+@@ -558,7 +656,7 @@
+ // ====
+ 
+ async function book_read(file: string, base?: Bend.Book,
+-  seen = new Map<string, string | null>()): Promise<Bend.Book> {
++  seen = new Map<string, string | null>(), allow_open = false): Promise<Bend.Book> {
+   const book = base === undefined ? Bend.book_nil() : book_seed(base);
+   if (base !== undefined) {
+     seen.set(BASE, "");
+@@ -571,7 +669,7 @@
+   }
+   Bend.book_valid(book, base?.order.length ?? 0);
+   const hols = book.hols + book.open;
+-  if (hols > 0) {
++  if (hols > 0 && !allow_open) {
+     throw cli_err("BND103", "Error: " + String(hols) + " TODO"
+       + (hols === 1 ? "" : "s")
+       + " found.\nThe code is incomplete, and not a valid proof yet.");
+diff --git a/gates/ping.ts b/gates/ping.ts
+--- a/gates/ping.ts
++++ b/gates/ping.ts
+@@ -247,6 +247,16 @@
+     && full.out.startsWith("# Bend")
+     && base.out.startsWith("type Map")
+     && sum5.code === 0 && sum5.out === "5n\n");
++
++  const gfile = path.join(TMP, "graph.bend");
++  fs.writeFileSync(gfile, "import Base\n"
++    + "def leaf(x: Nat) -> Nat:\n  x\n"
++    + "def root(x: Nat) -> Nat:\n  leaf(x)\n");
++  const graph = await bend([gfile, "--graph", "root", "--json"]);
++  check("bend --graph emits a named checked slice", graph.code === 0
++    && graph.out.includes('"schema":"bend.graph.v1"')
++    && graph.out.includes('"name":"root"')
++    && graph.out.includes('"leaf"'));
+   script = script.replace(sum, "0".repeat(64));
+   const fake = await install();
+   script = script.replace("0".repeat(64), sum);

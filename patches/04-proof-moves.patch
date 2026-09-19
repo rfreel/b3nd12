@@ -1,15 +1,217 @@
-diff --git a/guide/agent/PROVE.md b/guide/agent/PROVE.md
---- a/guide/agent/PROVE.md
-+++ b/guide/agent/PROVE.md
-@@
- 7. one proof-move note at a time when the proof-move library is present
-+
-+Proof moves live in guide/agent/proof/INDEX.md. Load one move at a time:
-+conversion, case analysis, structural induction, rewrite, congruence,
-+equality direction/chaining, witness construction, or contradiction.
 diff --git a/gates/repo.ts b/gates/repo.ts
 --- a/gates/repo.ts
 +++ b/gates/repo.ts
-@@
+@@ -59,6 +59,7 @@
+ allow(/^demos\/[a-z0-9_]+\/web\/(index\.html|main\.js|bunfig\.toml)$/, 4000);
+ allow("guide/GUIDE.md", 12000);
  allow(/^guide\/agent\/[A-Z_]+\.md$/, 4000);
 +allow(/^guide\/agent\/proof\/[0-9A-Z_-]+\.md$/, 4000);
+ allow(/^paper\/(BendRT|BendTT)\.pdf$/, 400000, true);
+ allow(/^media\/intro\.(gif|mp4)$/, 25000000, true);
+ allow(/^media\/(runtime|checker|parallel)\.gif$/, 6000000, true);
+diff --git a/guide/agent/proof/01-CONVERSION.md b/guide/agent/proof/01-CONVERSION.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/proof/01-CONVERSION.md
+@@ -0,0 +1,20 @@
++# 01 Conversion
++
++Use when both sides of the goal compute to the same term.
++
++Move
++```bend
++{==}
++```
++
++Signal
++The goal is an equality and no semantic bridge is needed after normalization.
++
++Example
++```bend
++def zero_case():
++  {==}
++```
++
++Stop
++If conversion does not close the goal, do not add noise. Inspect the residual and choose another move.
+diff --git a/guide/agent/proof/02-CASE.md b/guide/agent/proof/02-CASE.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/proof/02-CASE.md
+@@ -0,0 +1,20 @@
++# 02 Case analysis
++
++Use when the goal depends on which constructor a value has.
++
++Move
++```bend
++match x:
++  case Zero{}:
++    ...
++  case Succ{p}:
++    ...
++```
++
++For Nat syntax, constructor patterns may print as `0n` and `1n+p`.
++
++Signal
++A datatype value blocks reduction or different constructors require different evidence.
++
++Stop
++Keep branches separate when their residual goals differ.
+diff --git a/guide/agent/proof/03-INDUCTION.md b/guide/agent/proof/03-INDUCTION.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/proof/03-INDUCTION.md
+@@ -0,0 +1,20 @@
++# 03 Structural induction
++
++Use when a recursive datatype and recursive definition expose a strictly smaller subterm.
++
++Shape
++```bend
++def add_zero(x):
++  match x:
++    case 0n:
++      {==}
++    case 1n+p:
++      %add_zero(p) : {1n+Nat.add(p, 0n) == 1n+_ : Nat}
++      {==}
++```
++
++Signal
++The step case differs from the goal by the same proposition on the recursive field.
++
++Boundary
++The recursive proof call must follow Bend's termination rule. Do not use @unsafe to bypass it.
+diff --git a/guide/agent/proof/04-REWRITE.md b/guide/agent/proof/04-REWRITE.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/proof/04-REWRITE.md
+@@ -0,0 +1,21 @@
++# 04 Rewrite
++
++Use an equality as a local substitution.
++
++Move
++```bend
++%eq : {f(_) == target : T}
++rest
++```
++
++Named equation binder when needed
++```bend
++%eq@E : P
++rest
++```
++
++Meaning
++The underscore marks the endpoint being replaced in the motive.
++
++Signal
++You already have the equality needed to turn the current goal into a convertible one.
+diff --git a/guide/agent/proof/05-CONGRUENCE.md b/guide/agent/proof/05-CONGRUENCE.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/proof/05-CONGRUENCE.md
+@@ -0,0 +1,16 @@
++# 05 Congruence
++
++Use when an equality must be transported through a function.
++
++Move
++```bend
++Equal.cong(A, B, f, a, b, eq)
++```
++
++Shape
++Given `eq : {a == b : A}`, obtain `{f(a) == f(b) : B}`.
++
++Signal
++The mismatch is outside an already proved equality, such as a constructor, projection, arithmetic wrapper, or normalization function.
++
++Prefer this to manually rewriting several surrounding layers.
+diff --git a/guide/agent/proof/06-EQUALITY-CHAIN.md b/guide/agent/proof/06-EQUALITY-CHAIN.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/proof/06-EQUALITY-CHAIN.md
+@@ -0,0 +1,17 @@
++# 06 Equality direction and chain
++
++Reverse
++```bend
++Equal.sym(T, a, b, eq)
++```
++
++Chain
++```bend
++Equal.trans(T, a, b, c, ab, bc)
++```
++
++Signal
++The right fact exists but points the wrong way, or the target requires an intermediate term.
++
++Rule
++Choose the smallest intermediate term that makes both legs directly supported. Do not manufacture a long chain when one rewrite closes the goal.
+diff --git a/guide/agent/proof/07-WITNESS.md b/guide/agent/proof/07-WITNESS.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/proof/07-WITNESS.md
+@@ -0,0 +1,20 @@
++# 07 Witness construction
++
++Use when a law contains `exs`.
++
++Law shape
++```bend
++law example:
++  exs y: Nat
++  {P(y)}
++```
++
++Proof result
++```bend
++(y, proof)
++```
++
++Nested existentials return nested dependent pairs in declaration order.
++
++Signal
++The goal asks for data plus evidence. Construct the witness before proving its property when the witness is determined by the computation.
+diff --git a/guide/agent/proof/08-CONTRADICTION.md b/guide/agent/proof/08-CONTRADICTION.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/proof/08-CONTRADICTION.md
+@@ -0,0 +1,15 @@
++# 08 Contradiction and constructor clash
++
++Use an `Empty` inhabitant only when the context already makes the branch impossible.
++
++Direct
++A branch with `e : Empty` may eliminate it with the available Empty eliminator.
++
++Constructor clash
++For an equality such as `{1n == 0n : Nat}`, define or reuse a discriminator whose result differs by constructor, then rewrite the equality through that discriminator until the impossible branch has type Empty.
++
++Related form
++`{a != b : T}` is `{a == b : T} -> Empty`.
++
++Boundary
++Do not introduce @unsafe or a nonterminating inhabitant of Empty.
+diff --git a/guide/agent/proof/INDEX.md b/guide/agent/proof/INDEX.md
+new file mode 100644
+--- /dev/null
++++ b/guide/agent/proof/INDEX.md
+@@ -0,0 +1,12 @@
++# Proof moves
++
++1. 01-CONVERSION.md
++2. 02-CASE.md
++3. 03-INDUCTION.md
++4. 04-REWRITE.md
++5. 05-CONGRUENCE.md
++6. 06-EQUALITY-CHAIN.md
++7. 07-WITNESS.md
++8. 08-CONTRADICTION.md
++
++Select one move from the current residual. Recheck before stacking another.
