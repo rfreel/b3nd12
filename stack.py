@@ -2,6 +2,7 @@
 import json
 import os
 from pathlib import Path
+import stat
 import subprocess
 
 ROOT = Path(__file__).resolve().parent
@@ -89,11 +90,20 @@ def verify(target, index=None):
             if entry:
                 header, name = entry.split(b"\t", 1)
                 staged[os.fsdecode(name)] = header.split()[0]
-    for name in expected:
+    for name in sorted(modes.keys() | expected.keys()):
         mode = modes.get(name, b"100644")
-        actual = staged.get(name) if index else (b"100755" if (target / name).stat().st_mode & 0o111 else b"100644")
+        if index:
+            actual = staged.get(name)
+        else:
+            file_mode = (target / name).lstat().st_mode
+            if stat.S_ISREG(file_mode):
+                actual = b"100755" if file_mode & 0o111 else b"100644"
+            elif stat.S_ISLNK(file_mode):
+                actual = b"120000"
+            else:
+                actual = b"160000" if stat.S_ISDIR(file_mode) else None
         if actual != mode:
-            raise Failure("FILE_MODE", "Delivery mode differs: " + name,
+            raise Failure("FILE_MODE", "File mode differs: " + name,
                           "Preserve upstream modes and use regular additive files.")
     for name, reference in expected.items():
         file = target / name

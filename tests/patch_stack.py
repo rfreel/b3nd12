@@ -82,6 +82,29 @@ def main():
         print(f"PASS both installation paths match all {len(expected)} delivery files")
         print("PASS exact file scope, upstream modes, real index, and theory bytes")
 
+        run("git", "config", "core.filemode", "false", cwd=installed)
+        index_path = installed / ".git/index"
+        for name in ("bend2/bend.ts", "README.md", "bend2/main.ts"):
+            file = installed / name
+            original_mode = file.stat().st_mode
+            original_bytes = file.read_bytes()
+            changed_mode = original_mode & ~0o111 if original_mode & 0o111 else original_mode | 0o111
+            file.chmod(changed_mode)
+            status_before = run("git", "status", "--porcelain", cwd=installed).stdout
+            index_before = index_path.read_bytes()
+            result = run(sys.executable, str(ROOT / "stack.py"), str(installed), ok=False)
+            require(result.returncode != 0 and "mode" in result.stderr.lower(),
+                    f"Verifier accepted upstream executable-bit drift: {name}")
+            require(file.read_bytes() == original_bytes and file.stat().st_mode == changed_mode,
+                    "Verification changed the rejected file")
+            require(index_path.read_bytes() == index_before,
+                    "Verification changed the real index")
+            require(run("git", "status", "--porcelain", cwd=installed).stdout == status_before,
+                    "Verification changed target status")
+            file.chmod(original_mode)
+        run(sys.executable, str(ROOT / "stack.py"), str(installed))
+        print("PASS protected and untouched upstream modes checked with core.filemode=false")
+
         before = run("git", "status", "--porcelain", cwd=installed).stdout
         result = run(str(ROOT / "apply.sh"), str(installed), ok=False)
         require(result.returncode != 0 and "not clean" in result.stderr,
