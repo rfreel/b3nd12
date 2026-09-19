@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import stat
 import subprocess
+import bounded
 
 ROOT = Path(__file__).resolve().parent
 PIN = json.loads((ROOT / "upstream.json").read_text())["commit"]
@@ -18,22 +19,90 @@ class Failure(Exception):
 
 
 def git(target, *args, env=None):
-    result = subprocess.run(["git", "-C", str(target), *args],
-                            capture_output=True, env=env)
+    ambient_git_check()
+    try:
+        result = bounded.run(["git", "-C", str(target), *args], env=env)
+    except subprocess.TimeoutExpired as exc:
+        raise Failure("GIT_TIMEOUT", "Git exceeded its execution deadline.",
+                      "Check checkout access and retry.", 3, target=str(target)) from exc
+    except bounded.OutputLimitExceeded as exc:
+        raise Failure("GIT_OUTPUT_LIMIT", "Git exceeded the diagnostic output limit.",
+                      "Inspect the checkout size and configuration before retrying.", 3,
+                      target=str(target), limit_bytes=exc.limit_bytes,
+                      observed_bytes=exc.observed_bytes) from exc
     if result.returncode:
         raise Failure("GIT_FAILED", result.stderr.decode(errors="replace").strip(),
                       "Check Git and the checkout path.", 3, target=str(target))
     return result.stdout
 
 
+def ambient_git_check():
+    overrides = {"GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR",
+                 "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+                 "GIT_CONFIG", "GIT_CONFIG_PARAMETERS", "GIT_CONFIG_COUNT",
+                 "GIT_ATTR_SOURCE", "GIT_NAMESPACE", "GIT_CEILING_DIRECTORIES",
+                 "GIT_EXTERNAL_DIFF"}
+    forbidden = overrides.intersection(os.environ)
+    if forbidden:
+        raise Failure("GIT_ENVIRONMENT", "Unsupported Git environment: " + ", ".join(sorted(forbidden)),
+                      "Unset Git overrides before accessing the checkout.", 3)
+
+
+def install_guard(target, filesystem=True):
+    target = Path(target).resolve()
+    config = git(target, "config", "--null", "--list").decode(errors="replace").split("\0")
+    for item in config:
+        key, _, value = item.partition("\n")
+        if ((key in ("core.fsmonitor", "diff.external") and value.lower() not in ("", "false"))
+                or (key == "core.autocrlf" and value.lower() not in ("", "false"))):
+            raise Failure("GIT_CONFIGURATION", "Unsupported Git configuration: " + key,
+                          "Use a checkout without external hooks or newline conversion.", 3)
+    expected = expected_files()
+    tracked = set(os.fsdecode(git(target, "ls-tree", "-r", "--name-only", "-z", "HEAD")).rstrip("\0").split("\0"))
+    attrs = git(target, "check-attr", "-z", "filter", "working-tree-encoding", "--", *sorted(tracked | expected.keys())).split(b"\0")
+    for offset in range(0, len(attrs) - 2, 3):
+        name, attr, value = attrs[offset:offset + 3]
+        if value not in (b"unspecified", b"unset"):
+            raise Failure("GIT_ATTRIBUTES", "Unsupported Git attribute: " + os.fsdecode(name) + ": " + os.fsdecode(attr),
+                          "Use a checkout without active filters or encoding conversion.", 3)
+    if not filesystem:
+        return target
+    for name in expected:
+        file = target / name
+        for parent in file.parents:
+            if parent == target.parent:
+                break
+            if parent.is_symlink() or (parent.exists() and not parent.is_dir()):
+                raise Failure("FILESYSTEM_OBSTRUCTION", "Obstructed parent: " + str(parent),
+                              "Preserve the obstruction and use a clean checkout.", 3)
+            if parent.exists() and parent.stat().st_mode & 0o300 != 0o300:
+                raise Failure("FILESYSTEM_OBSTRUCTION", "Inaccessible parent: " + str(parent),
+                              "Use a writable, searchable checkout.", 3)
+        if file.is_symlink() or (name not in tracked and file.exists()):
+            raise Failure("FILESYSTEM_OBSTRUCTION", "Checkout is not clean; colliding delivery path: " + str(file),
+                          "Preserve caller content and use a clean checkout.", 3)
+        if file.exists() and (not file.is_file() or file.stat().st_mode & 0o600 != 0o600):
+            raise Failure("FILESYSTEM_OBSTRUCTION", "Inaccessible delivery path: " + str(file),
+                          "Use readable, writable regular delivery files.", 3)
+    return target
+
+
 def expected_files():
-    expected = {p: ROOT / "overlay" / p for p in
-                ("AGENTS.md", "bend2/main.ts", "gates/repo.ts", "gates/ping.ts")}
-    for pattern in ("CLAUDE.md", "guide/agent/*.md", "guide/agent/*.json",
-                    "guide/agent/proof/*.md", "evals/README.md",
-                    "evals/_template.sidecar.json", "evals/_sidecar.schema.json"):
-        for file in ROOT.glob(pattern):
-            expected[file.relative_to(ROOT).as_posix()] = file
+    manifest = json.loads((ROOT / "delivery-manifest.json").read_text())
+    expected = {}
+    if manifest.get("schema") != "b3nd12.delivery.v1" or len(manifest.get("files", [])) != 25:
+        raise Failure("DELIVERY_MANIFEST", "Invalid delivery manifest.", "Restore the reviewed 25-file manifest.")
+    for entry in manifest["files"]:
+        name, source = entry["path"], entry["source"]
+        role = entry["role"]
+        path = Path(name)
+        if (path.is_absolute() or ".." in path.parts or path.as_posix() != name
+                or name in expected or entry["mode"] not in ("100644", "100755")
+                or role not in ("overlay", "additive")
+                or source != ("overlay/" + name if role == "overlay" else name)):
+            raise Failure("DELIVERY_MANIFEST", "Invalid delivery entry: " + name,
+                          "Restore the reviewed paths, modes and roles.")
+        expected[name] = ROOT / source
     return expected
 
 
@@ -42,7 +111,7 @@ def target_check(target, clean=False):
     if not target.is_dir():
         raise Failure("NOT_FOUND", "Checkout directory does not exist.",
                       "Supply the path to the pinned Bend checkout.", 1, target=str(target))
-    top = Path(os.fsdecode(git(target, "rev-parse", "--show-toplevel")).strip()).resolve()
+    top = Path(os.fsdecode(git(target, "rev-parse", "--show-toplevel")).removesuffix("\n")).resolve()
     if top != target:
         raise Failure("INVALID_TARGET", "Use the checkout root, not a subdirectory.",
                       "Pass the Git worktree root.", 2, target=str(target))
@@ -51,23 +120,31 @@ def target_check(target, clean=False):
         raise Failure("WRONG_PIN", "Checkout is not at the declared Bend revision.",
                       "Use a separate clean checkout at the required commit.", 3,
                       expected=PIN, actual=head)
+    install_guard(target, filesystem=False)
     if clean and git(target, "status", "--porcelain"):
         raise Failure("DIRTY_TARGET", "Checkout has existing changes.",
                       "Use a separate clean checkout; preserve existing work.", 3)
     return target
 
 
-def patch_files():
-    patches = sorted((ROOT / "patches").glob("[0-9][0-9]-*.patch"))
+def patch_files(directory=None):
+    patches = sorted((Path(directory) if directory else ROOT / "patches").glob("[0-9][0-9]-*.patch"))
     if [int(p.name[:2]) for p in patches] != list(range(1, 10)):
         raise Failure("PATCH_SEQUENCE", "Expected exactly one patch at each rank 1 through 9.",
                       "Restore the declared patch stack.")
+    for patch in patches:
+        if any(line == b"GIT binary patch" or line.startswith(b"Binary files ")
+               for line in patch.read_bytes().splitlines()):
+            raise Failure("BINARY_PATCH", "Binary patches are outside the delivery: " + patch.name,
+                          "Use only the reviewed text patch stack.")
     return patches
 
 
 def verify(target, index=None):
     target = target_check(target)
     expected = expected_files()
+    manifest = json.loads((ROOT / "delivery-manifest.json").read_text())
+    declared = {entry["path"]: entry for entry in manifest["files"]}
     env = {**os.environ, "GIT_INDEX_FILE": str(index)} if index else None
     if index:
         changed = git(target, "diff", "--cached", "--name-only", "-z", "HEAD", env=env)
@@ -92,6 +169,12 @@ def verify(target, index=None):
                 staged[os.fsdecode(name)] = header.split()[0]
     for name in sorted(modes.keys() | expected.keys()):
         mode = modes.get(name, b"100644")
+        if name in declared:
+            entry = declared[name]
+            if (entry["mode"].encode() != mode
+                    or entry["role"] != ("overlay" if name in modes else "additive")):
+                raise Failure("DELIVERY_MANIFEST", "Delivery mode or role differs: " + name,
+                              "Restore the reviewed manifest matching the pin.")
         if index:
             actual = staged.get(name)
         else:
@@ -126,7 +209,11 @@ def verify(target, index=None):
 if __name__ == "__main__":
     import sys
     try:
-        if len(sys.argv) == 2:
+        if len(sys.argv) == 3 and sys.argv[1] == "--patches":
+            patch_files(sys.argv[2])
+        elif len(sys.argv) == 3 and sys.argv[1] == "--guard":
+            install_guard(sys.argv[2])
+        elif len(sys.argv) == 2:
             verify(sys.argv[1])
         elif len(sys.argv) == 3:
             verify(sys.argv[1], sys.argv[2])

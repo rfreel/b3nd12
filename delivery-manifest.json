@@ -1,0 +1,155 @@
+{
+  "schema": "b3nd12.delivery.v1",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "source": "overlay/AGENTS.md",
+      "mode": "100644",
+      "role": "overlay"
+    },
+    {
+      "path": "CLAUDE.md",
+      "source": "CLAUDE.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "bend2/main.ts",
+      "source": "overlay/bend2/main.ts",
+      "mode": "100755",
+      "role": "overlay"
+    },
+    {
+      "path": "evals/README.md",
+      "source": "evals/README.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "evals/_sidecar.schema.json",
+      "source": "evals/_sidecar.schema.json",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "evals/_template.sidecar.json",
+      "source": "evals/_template.sidecar.json",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "gates/ping.ts",
+      "source": "overlay/gates/ping.ts",
+      "mode": "100644",
+      "role": "overlay"
+    },
+    {
+      "path": "gates/repo.ts",
+      "source": "overlay/gates/repo.ts",
+      "mode": "100644",
+      "role": "overlay"
+    },
+    {
+      "path": "guide/agent/DIAGNOSTIC_IDS.md",
+      "source": "guide/agent/DIAGNOSTIC_IDS.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/PROGRAM.md",
+      "source": "guide/agent/PROGRAM.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/PROVE.md",
+      "source": "guide/agent/PROVE.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/ROUTER.md",
+      "source": "guide/agent/ROUTER.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/THEORY_BOUNDARY.md",
+      "source": "guide/agent/THEORY_BOUNDARY.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/UPSTREAM_DECISIONS.md",
+      "source": "guide/agent/UPSTREAM_DECISIONS.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/diagnostics.json",
+      "source": "guide/agent/diagnostics.json",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/laws-index.json",
+      "source": "guide/agent/laws-index.json",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/proof/01-CONVERSION.md",
+      "source": "guide/agent/proof/01-CONVERSION.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/proof/02-CASE.md",
+      "source": "guide/agent/proof/02-CASE.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/proof/03-INDUCTION.md",
+      "source": "guide/agent/proof/03-INDUCTION.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/proof/04-REWRITE.md",
+      "source": "guide/agent/proof/04-REWRITE.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/proof/05-CONGRUENCE.md",
+      "source": "guide/agent/proof/05-CONGRUENCE.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/proof/06-EQUALITY-CHAIN.md",
+      "source": "guide/agent/proof/06-EQUALITY-CHAIN.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/proof/07-WITNESS.md",
+      "source": "guide/agent/proof/07-WITNESS.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/proof/08-CONTRADICTION.md",
+      "source": "guide/agent/proof/08-CONTRADICTION.md",
+      "mode": "100644",
+      "role": "additive"
+    },
+    {
+      "path": "guide/agent/proof/INDEX.md",
+      "source": "guide/agent/proof/INDEX.md",
+      "mode": "100644",
+      "role": "additive"
+    }
+  ]
+}
