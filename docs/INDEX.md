@@ -4,6 +4,8 @@
 
 - [TODO_100.md](TODO_100.md): 100 proposed tasks with acceptance criteria and
   scope prerequisites, separate from the executable frozen contract.
+- [BACKLOG_PROGRESS.md](BACKLOG_PROGRESS.md): implemented tasks, source commits,
+  acceptance evidence and remaining limitations.
 - [PARALLEL_TEST.md](PARALLEL_TEST.md): six-worker evaluation, confirmed findings
   and limits of the evidence.
 

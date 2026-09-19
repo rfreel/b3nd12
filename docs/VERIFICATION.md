@@ -1,5 +1,9 @@
 # Verification ledger
 
+The latest integrated checks and backlog repairs are recorded in
+[BACKLOG_PROGRESS.md](BACKLOG_PROGRESS.md). Earlier measurements below retain
+their original scope and do not serve as new performance claims.
+
 Target repository: rfreel/b3nd12. Upstream pin:
 `e5a4c4cfe980c2e4e70571562efb5197fe27b2f4`, Bend 2.0.9.
 Environment: Linux x86-64, Python 3.12, Git, Bun 1.4.2.
