@@ -13,6 +13,11 @@ jobs:
       - name: Validate proposed backlog without activating it
         run: python3 tests/backlog.py
       - uses: oven-sh/setup-bun@v2
+      - name: Install test-only schema validator
+        run: |
+          python3 -m venv "$RUNNER_TEMP/b3nd12-tests"
+          "$RUNNER_TEMP/b3nd12-tests/bin/python" -m pip install -r requirements-test.txt
+          echo "$RUNNER_TEMP/b3nd12-tests/bin" >> "$GITHUB_PATH"
       - name: Acquire pinned Bend
         run: |
           git clone --quiet https://github.com/bendlang/bend.git upstream
@@ -28,6 +33,24 @@ jobs:
           python3 tests/bend_contracts.py upstream
           python3 tests/accretion.py upstream "$(command -v bun)"
           python3 tests/program.py upstream "$(command -v bun)"
+          python3 tests/process.py
+          python3 tests/cli_schema.py
+          python3 tests/cli_properties.py upstream
+          python3 tests/install_adversarial.py upstream
+          python3 tests/checker_failures.py upstream "$(command -v bun)"
+          python3 tests/evidence.py upstream "$(command -v bun)"
+          python3 tests/recheck.py upstream "$(command -v bun)"
+          python3 tests/archive.py upstream "$(command -v bun)"
+          python3 tests/storage.py upstream "$(command -v bun)"
+          python3 tests/output_bounds.py upstream "$(command -v bun)"
+          python3 tests/routing_domain.py upstream "$(command -v bun)"
+          python3 tests/law_conjuncts.py upstream "$(command -v bun)"
+          python3 tests/spec_twin.py upstream "$(command -v bun)"
+          python3 tests/translation.py upstream "$(command -v bun)"
+          python3 tests/smoke.py upstream "$(command -v bun)"
+          python3 tests/benchmark_contract.py upstream
+          python3 tests/install_receipt.py upstream
+          python3 tests/controller_model.py upstream "$(command -v bun)"
       - name: Apply and structurally verify
         run: ./apply.sh upstream
       - name: Exercise router and packs

@@ -37,3 +37,12 @@ accretion/TODO.json digest fixed, count rejected trials against its budget, and
 preserve unresolved receipts. Successor generation does not authorize activation.
 Run tests/program.py with the pinned checker and Bun. Keep generated evidence
 outside the repository; the replay does not install candidates.
+
+Read docs/EVIDENCE_PROTOCOL.md before changing evidence production or consumption.
+The terminal ledger record commits a complete run; summary.json is a derived
+projection. Independently verify packets against separately retained terminal
+and contract digests. Preserve checker malfunction as UNKNOWN, not law refusal.
+Install requirements-test.txt in an external virtual environment before running
+CLI schema tests. The workflow enumerates the acceptance suites.
+Read docs/INSTALLATION.md before changing installation. Keep delivery-manifest.json
+at the declared 25 paths and install only the patch bytes that passed preflight.

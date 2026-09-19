@@ -16,10 +16,16 @@ step = workflow.split(marker, 1)[1].split("      - name:", 1)[0]
 assert "        shell: bash\n" in step
 body = step.split("        run: |\n", 1)[1]
 script = "\n".join(line[10:] for line in body.splitlines() if line.strip()) + "\n"
-suites = ["patch_stack", "cli", "bend_contracts", "accretion", "program"]
-commands = [f"python3 tests/{name}.py upstream" +
-            (' "$(command -v bun)"' if name in {"accretion", "program"} else "")
-            for name in suites]
+suites = ["patch_stack", "cli", "bend_contracts", "accretion", "program",
+          "process", "cli_schema", "cli_properties", "install_adversarial",
+          "checker_failures", "evidence", "recheck", "archive", "storage", "output_bounds",
+          "routing_domain", "law_conjuncts", "spec_twin", "translation", "smoke",
+          "benchmark_contract", "install_receipt", "controller_model"]
+needs_bun = {"accretion", "program", "checker_failures", "evidence", "recheck", "archive",
+             "storage", "output_bounds", "routing_domain", "law_conjuncts", "spec_twin",
+             "translation", "smoke", "controller_model"}
+commands = [f"python3 tests/{name}.py" + ("" if name in {"process", "cli_schema"} else " upstream") +
+            (' "$(command -v bun)"' if name in needs_bun else "") for name in suites]
 assert script.splitlines() == ["set -euo pipefail", *commands]
 assert workflow.index(marker) < workflow.index("      - name: Apply and structurally verify\n")
 
@@ -43,4 +49,4 @@ with tempfile.TemporaryDirectory(prefix="b3nd12-ci-contract-") as temporary:
         count = len(suites) if failing is None else failing + 1
         assert log.read_text().splitlines() == [f"tests/{s}.py" for s in suites[:count]]
         assert result.returncode == (0 if failing is None else 17), result
-print("PASS workflow includes five suites before installation; each injected failure stops later suites")
+print(f"PASS workflow includes {len(suites)} suites before installation; each injected failure stops later suites")

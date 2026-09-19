@@ -70,6 +70,8 @@ stack is applied to a temporary index first and checked against all 25 delivery
 files. Only then are patches applied in numeric order. Verification checks bytes,
 file modes, and staged/working theory against the pin. `bend2/bend.ts` is unchanged.
 Post-write failures leave the target available for diagnosis; no reset is performed.
+The [installation contract](docs/INSTALLATION.md) documents the explicit manifest,
+sealed patch inputs, refusal boundaries and replayable installation receipts.
 
 Management code, acceptance experiments, and examples are not installed into Bend.
 The installed CLI retains its existing diagnostic JSON Lines and graph behavior.
@@ -77,6 +79,9 @@ The installed CLI retains its existing diagnostic JSON Lines and graph behavior.
 ## Verify changes
 
 ```sh
+python3 -m venv /path/outside/repository/test-venv
+/path/outside/repository/test-venv/bin/pip install -r requirements-test.txt
+. /path/outside/repository/test-venv/bin/activate
 python3 tests/patch_stack.py /path/to/pinned/bend
 python3 tests/cli.py /path/to/pinned/bend
 python3 tests/bend_contracts.py /path/to/pinned/bend
@@ -90,6 +95,17 @@ Put Bun on PATH for the installed Bend contracts. Tests cover exact installation
 refusals, terminal and pipe output, proof checking, graph output, interpretation,
 emitted JavaScript, and acceptance/rejection of routing changes. Native/GPU and
 upstream cluster checks remain unverified.
+
+The workflow lists the complete acceptance suite. Schema tests use the pinned
+test-only dependency; the management commands use Python's standard library.
+[Evidence protocol](docs/EVIDENCE_PROTOCOL.md) documents independent verification,
+proof reconstruction, bounded storage and archive round trips. A retained digest
+detects packet changes; it does not authenticate the measurements themselves.
+
+For repeatable management measurements, run
+`python3 benchmarks/management.py /path/to/pinned/bend --output /path/outside/repository/new-benchmark --runs 10 --warmup 1`.
+The report retains commands, raw observations, source identities, latency
+percentiles, throughput and process resource counters. It makes no speedup claim.
 
 ## Repository map
 

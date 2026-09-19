@@ -15,7 +15,13 @@
 - [ACCRETION.md](ACCRETION.md): what the environment experiment measures, proves,
   rejects, and leaves unresolved.
 - [CLI.md](CLI.md): management commands and machine-readable output.
+- [INSTALLATION.md](INSTALLATION.md): manifest, sealed patches, refusal boundaries
+  and installation receipt replay.
+- [EVIDENCE_PROTOCOL.md](EVIDENCE_PROTOCOL.md): independent packet verification,
+  durable commit point, reconstruction and archive limits.
 - [VERIFICATION.md](VERIFICATION.md): executed tests and coverage limitations.
+- [ACCEPTANCE_RUN.md](ACCEPTANCE_RUN.md): current integrated commands, coverage
+  and repaired review findings.
 - [Organization proposal](../PROPOSED_CODE_FILE_REORGANIZATION_PLAN.md): existing
   paths remain stable; no reorganization was performed.
 
