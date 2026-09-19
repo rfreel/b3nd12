@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "winner": "edit_first.bend",
+  "baseline_cases": 21,
+  "winner_cases": 15,
+  "protected_sha256": {
+    "/workspace/scratch/205e3b31b205/b3nd12/pilot/supermodularity/LAWS.bend": "2de7c73bbb138d596d4fe4a8ae4dcc7f6f21b84a61ce478076425998e63529e3",
+    "/workspace/scratch/205e3b31b205/b3nd12/pilot/supermodularity/model.bend": "76d6c4d97e251781631348dc01adc774f87f2e90cfa9617893c31117aa2655c0",
+    "/workspace/scratch/205e3b31b205/b3nd12/experiments/autoresearch/baseline.bend": "d7e8fcdfd3f3aad7fb1ad9af53f33c6066efccb0b1f293c558f2585f6c16287c",
+    "/workspace/scratch/205e3b31b205/b3nd12/experiments/autoresearch/run.py": "a54af27cd81b7235e4c944567e3131864df50b80b09c83f3ad88dd6906c49a80",
+    "/workspace/scratch/205e3b31b205/b3nd12/verify.sh": "a3684c00b864d5720cfadb5353005c6c1b57446b78e596a4d0de9454e2c1b009",
+    "/workspace/scratch/205e3b31b205/b3nd12/upstream.json": "4479b188f7317bebb91f58326323e8d518f5855a3d3abaed66b40e899136e1c9",
+    "/workspace/scratch/205e3b31b205/bend-upstream/bend2/bend.ts": "6f7b5246dc029d587d144e339b0e447b521a6b30daae63a7f7adc31780e96ea0",
+    "/workspace/scratch/205e3b31b205/bend-upstream/bend2/comp.ts": "99f24d78e7854830e0a20a6eebc8bf72288c4ec2dc9216fcd79fa61df9bd6cd2",
+    "/workspace/scratch/205e3b31b205/bend-upstream/bend2/docs/gen_anim.ts": "3e573ab8d44717a8b9ff8c94501f5f8916bd08db545ca5e5541fa240cd063426",
+    "/workspace/scratch/205e3b31b205/bend-upstream/bend2/docs/gen_charts.ts": "3e2076c0fb9dfb03b8b85b7bac5ddb10427669cf2e7ec9071d8a4f02b6aff4e1",
+    "/workspace/scratch/205e3b31b205/bend-upstream/bend2/docs/gen_gifs.ts": "a8e0c800b6370025cd0588f3243f14d3d2932960d58cdbb55ce00aa9513a7725",
+    "/workspace/scratch/205e3b31b205/bend-upstream/bend2/docs/gen_pins.ts": "0cb2a1bc2d1578f62e318492610e2ba085c1cb062c3db4f6138496ccb65728d7",
+    "/workspace/scratch/205e3b31b205/bend-upstream/bend2/main.ts": "ed428aef215786f0201acc7b7a18392a06599562bbe43948564fd5d074c46684",
+    "/workspace/scratch/205e3b31b205/bend-upstream/bend2/base.bend": "dc0a00754c03715821e67da6ae5273ae2f6df139ee090e0e97251130a8a3f385"
+  },
+  "runtime": {
+    "exit_code": 0,
+    "stdout": "1.2.22\n",
+    "stderr": "",
+    "seconds": 0.011711092998666572
+  },
+  "python": "3.12.14",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "upstream": "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4",
+  "scope": "Proof case count only; timing is descriptive, not an acceptance metric.",
+  "records": [
+    {
+      "candidate": "baseline",
+      "decision": "BASELINE",
+      "score": 21,
+      "raw": {
+        "exit_code": 0,
+        "stdout": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND000\",\"severity\":\"ok\",\"message\":\"All terms check.\",\"unsafe\":0}\n",
+        "stderr": "",
+        "seconds": 0.46165489299892215
+      }
+    },
+    {
+      "candidate": "missing_proof",
+      "decision": "GUARD",
+      "raw": {
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND103\",\"severity\":\"error\",\"message\":\"Error: 1 TODO found.\\nThe code is incomplete, and not a valid proof yet.\",\"file\":\"/tmp/tmp6b52lxy9/PROOF.bend\"}\n",
+        "seconds": 0.4652015730007406
+      }
+    },
+    {
+      "candidate": "false_proof",
+      "decision": "GUARD",
+      "raw": {
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND110\",\"severity\":\"error\",\"message\":\"Error:\\n- expected : {model.Pending{} == model.Pending{} : model.Decision}\\n- observed : Bool\\nLocation: LAWS.unresolved_preserved\\n68 | def Laws.unresolved_preserved():\\n69>|   True{}\\n70 | \",\"file\":\"/tmp/tmp6b52lxy9/PROOF.bend\"}\n",
+        "seconds": 0.5407143529992027
+      }
+    },
+    {
+      "candidate": "edit_first.bend",
+      "source_sha256": "18fe8d9ef59e4de056f3d109c0044526b69cff1b8ec29bf94059e1a8186cbce2",
+      "score": 15,
+      "hypothesis": "Combine deletion cases independent of program.",
+      "decision": "KEEP",
+      "raw": {
+        "exit_code": 0,
+        "stdout": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND000\",\"severity\":\"ok\",\"message\":\"All terms check.\",\"unsafe\":0}\n",
+        "stderr": "",
+        "seconds": 0.4772460399999545
+      },
+      "pairs": [
+        {
+          "incumbent": {
+            "exit_code": 0,
+            "stdout": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND000\",\"severity\":\"ok\",\"message\":\"All terms check.\",\"unsafe\":0}\n",
+            "stderr": "",
+            "seconds": 0.48143453700140526
+          },
+          "candidate": {
+            "exit_code": 0,
+            "stdout": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND000\",\"severity\":\"ok\",\"message\":\"All terms check.\",\"unsafe\":0}\n",
+            "stderr": "",
+            "seconds": 0.47662554000089585
+          }
+        },
+        {
+          "candidate": {
+            "exit_code": 0,
+            "stdout": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND000\",\"severity\":\"ok\",\"message\":\"All terms check.\",\"unsafe\":0}\n",
+            "stderr": "",
+            "seconds": 0.43052772599912714
+          },
+          "incumbent": {
+            "exit_code": 0,
+            "stdout": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND000\",\"severity\":\"ok\",\"message\":\"All terms check.\",\"unsafe\":0}\n",
+            "stderr": "",
+            "seconds": 0.40301842000008037
+          }
+        },
+        {
+          "incumbent": {
+            "exit_code": 0,
+            "stdout": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND000\",\"severity\":\"ok\",\"message\":\"All terms check.\",\"unsafe\":0}\n",
+            "stderr": "",
+            "seconds": 0.556394707000436
+          },
+          "candidate": {
+            "exit_code": 0,
+            "stdout": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND000\",\"severity\":\"ok\",\"message\":\"All terms check.\",\"unsafe\":0}\n",
+            "stderr": "",
+            "seconds": 0.4697187150013633
+          }
+        },
+        {
+          "candidate": {
+            "exit_code": 0,
+            "stdout": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND000\",\"severity\":\"ok\",\"message\":\"All terms check.\",\"unsafe\":0}\n",
+            "stderr": "",
+            "seconds": 0.4101026759999513
+          },
+          "incumbent": {
+            "exit_code": 0,
+            "stdout": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND000\",\"severity\":\"ok\",\"message\":\"All terms check.\",\"unsafe\":0}\n",
+            "stderr": "",
+            "seconds": 0.4285701930002688
+          }
+        },
+        {
+          "incumbent": {
+            "exit_code": 0,
+            "stdout": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND000\",\"severity\":\"ok\",\"message\":\"All terms check.\",\"unsafe\":0}\n",
+            "stderr": "",
+            "seconds": 0.4914700970002741
+          },
+          "candidate": {
+            "exit_code": 0,
+            "stdout": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND000\",\"severity\":\"ok\",\"message\":\"All terms check.\",\"unsafe\":0}\n",
+            "stderr": "",
+            "seconds": 0.47808236299897544
+          }
+        }
+      ],
+      "median_seconds": {
+        "incumbent": 0.48143453700140526,
+        "candidate": 0.4697187150013633
+      }
+    }
+  ]
+}

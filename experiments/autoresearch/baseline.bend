@@ -6,39 +6,51 @@ def Laws.evidence_retained(candidate):
   match candidate:
     case Model.Unresolved{}:
       {==}
-    case Model.Proposed{program, Model.Delete{}}:
-      {==}
     case Model.Proposed{Model.ConstantFalse{}, Model.Retain{}}:
+      {==}
+    case Model.Proposed{Model.ConstantFalse{}, Model.Delete{}}:
       {==}
     case Model.Proposed{Model.Identity{}, Model.Retain{}}:
       {==}
+    case Model.Proposed{Model.Identity{}, Model.Delete{}}:
+      {==}
     case Model.Proposed{Model.ConstantTrue{}, Model.Retain{}}:
+      {==}
+    case Model.Proposed{Model.ConstantTrue{}, Model.Delete{}}:
       {==}
 
 def Laws.accepted_repairs_target(candidate):
   match candidate:
     case Model.Unresolved{}:
       {==}
-    case Model.Proposed{program, Model.Delete{}}:
-      {==}
     case Model.Proposed{Model.ConstantFalse{}, Model.Retain{}}:
+      {==}
+    case Model.Proposed{Model.ConstantFalse{}, Model.Delete{}}:
       {==}
     case Model.Proposed{Model.Identity{}, Model.Retain{}}:
       {==}
+    case Model.Proposed{Model.Identity{}, Model.Delete{}}:
+      {==}
     case Model.Proposed{Model.ConstantTrue{}, Model.Retain{}}:
+      {==}
+    case Model.Proposed{Model.ConstantTrue{}, Model.Delete{}}:
       {==}
 
 def Laws.accepted_preserves_regression(candidate):
   match candidate:
     case Model.Unresolved{}:
       {==}
-    case Model.Proposed{program, Model.Delete{}}:
-      {==}
     case Model.Proposed{Model.ConstantFalse{}, Model.Retain{}}:
+      {==}
+    case Model.Proposed{Model.ConstantFalse{}, Model.Delete{}}:
       {==}
     case Model.Proposed{Model.Identity{}, Model.Retain{}}:
       {==}
+    case Model.Proposed{Model.Identity{}, Model.Delete{}}:
+      {==}
     case Model.Proposed{Model.ConstantTrue{}, Model.Retain{}}:
+      {==}
+    case Model.Proposed{Model.ConstantTrue{}, Model.Delete{}}:
       {==}
 
 def Laws.valid_repair_accepted():
