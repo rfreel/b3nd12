@@ -22,7 +22,8 @@ existing changes. It does not clone, reset, commit, or push the target. Run doct
 first; use --help for commands, errors, and compatibility details.
 """
 HELP = QUICK + """
-Commands: doctor; apply TARGET; verify TARGET; guide [router|program|prove]; help.
+Commands: doctor; apply TARGET; verify TARGET; guide [router|program|prove];
+          task implement|prove|diagnose; help.
 Global flags: --json, --human, --help, --version. Use -- before a literal path.
 Read-only aliases: check = verify; status = doctor; -h = help; -v = --version.
 Read-only command names ignore case and '-'/'_' separators. Apply is exact.
@@ -48,18 +49,20 @@ def parse(raw):
         return "quick", [], machine, [], False
     command = args[0]
     aliases = {"check": "verify", "verify": "verify", "doctor": "doctor", "status": "doctor",
-               "guide": "guide", "help": "help", "--help": "help", "-h": "help",
+               "guide": "guide", "task": "task", "help": "help", "--help": "help", "-h": "help",
                "--version": "version", "-v": "version", "version": "version"}
     normalized = command.lower().replace("_", "").replace("-", "")
     canonical = aliases.get(command, aliases.get(normalized, command))
     if command == "apply":
         canonical = "apply"
-    if canonical not in ("apply", "verify", "doctor", "guide", "help", "version"):
+    if canonical not in ("apply", "verify", "doctor", "guide", "task", "help", "version"):
         raise Failure("INVALID_COMMAND", "Unknown or noncanonical command: " + command,
                       "Use help; mutating commands require the exact spelling apply.", 2)
     values = args[1:] + tail
     if any(x.startswith("-") for x in args[1:]):
         raise Failure("INVALID_ARGUMENTS", "Unknown option.", "Use -- before a literal path beginning with a dash.", 2)
+    if canonical == "task" and len(values) != 1:
+        raise Failure("INVALID_ARGUMENTS", "task requires one task name.", "Use task implement, task prove, or task diagnose.", 2)
     if canonical in ("apply", "verify") and len(values) != 1:
         raise Failure("INVALID_ARGUMENTS", canonical + " requires one target.", "Use " + canonical + " /path/to/bend.", 2)
     if canonical in ("doctor", "help", "version") and values:
@@ -79,6 +82,12 @@ def execute(command, values):
         if name not in ("router", "program", "prove"):
             raise Failure("NOT_FOUND", "Unknown guide route: " + name, "Use router, program, or prove.", 1)
         return {"route": name, "text": (ROOT / "guide/agent" / (name.upper()+".md")).read_text()}
+    if command == "task":
+        from accretion.environment import resolve
+        try:
+            return resolve(values[0], ROOT / "accretion/routes.json")
+        except ValueError as exc:
+            raise Failure("INVALID_TASK", str(exc), "Use task implement, task prove, or task diagnose.", 2)
     if command == "doctor":
         tools = {name: shutil.which(name) for name in ("git", "sh", "bun")}
         patch_files()

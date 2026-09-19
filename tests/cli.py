@@ -44,10 +44,13 @@ def check(*args, status=0, code=None):
 def main():
     check()
     for args in [("doctor",), ("help",), ("--version",), ("guide",),
-                 ("guide", "program"), ("guide", "prove")]:
+                 ("guide", "program"), ("guide", "prove"), ("task", "implement"),
+                 ("task", "prove"), ("task", "diagnose")]:
         check(*args)
         check(*args, "--json")
         assert not run(*args, "--human").stdout.startswith('{"schema"')
+    check("task", "unknown", status=2, code="INVALID_TASK")
+    check("task", status=2, code="INVALID_ARGUMENTS")
     assert check("StAtUs")["command"] == ["doctor"]
     absent = run("doctor", "--json", status=3, env={**os.environ, "PATH": "/nonexistent"})
     assert json.loads(absent.stdout)["error"]["code"] == "MISSING_TOOL"

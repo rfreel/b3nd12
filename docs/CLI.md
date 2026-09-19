@@ -86,3 +86,11 @@ Installation does not modify the target's real Git index.
 The manager has no configuration file, authentication, pagination, or remote API.
 Bun smoke commands set `BEND_NO_TELEMETRY=1`. A missing Bun is reported by doctor;
 it does not turn source verification into a claim of runtime validation.
+
+## Accepted task routes
+
+`task implement`, `task prove`, and `task diagnose` select content through the
+accepted accretion/routes.json table. Results contain `task`, `text`, `reads`,
+and `files`; reads count actual table/router/document loads. Unknown tasks return
+INVALID_TASK with exit 2. The common JSON envelope and format flags are unchanged.
+The finite acceptance law and its limits are documented in ACCRETION.md.

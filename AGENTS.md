@@ -19,3 +19,15 @@ pin. Run tests/bend_contracts.py with Bun for executable behavior evidence.
 Management files are not added to the installed Bend tree. Keep the declared
 25-file delivery and protected theory boundary unless a separate scope change
 is authorized. Read docs/VERIFICATION.md before making coverage claims.
+
+## Environment improvement contract
+
+Start repository work with docs/ACCRETION.md. The executable law covers only the
+three-task routing workload. Use `python3 b3nd12.py task prove` for proof work;
+the other task names are implement and diagnose. Propose routing data, not
+executable evaluator changes.
+Do not weaken accretion/LAWS.bend, replace the oracle, or reset accepted routes
+to manufacture a gain. Changing the task set or cost model requires a separate
+contract review. Run tests/accretion.py with the pinned checker and Bun.
+A passing finite certificate is not evidence of general agent productivity.
+Keep historical investigation and current acceptance evidence labeled separately.

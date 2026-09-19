@@ -1,0 +1,5 @@
+{
+  "diagnose": "diagnostics.json",
+  "implement": "PROGRAM.md",
+  "prove": "PROVE.md"
+}

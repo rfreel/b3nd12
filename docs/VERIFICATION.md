@@ -126,3 +126,32 @@ is a possible later experiment; its score is impact 2 × confidence .6 / effort 
 a demonstrated interactive workload. Timing thresholds remain deferred until
 unchanged controls establish a stable host baseline. Exact-byte and refusal
 oracles provide deterministic regression protection now.
+
+## Environment acceptance rounds
+
+The current acceptance experiment is documented in ACCRETION.md. Executed:
+
+```sh
+python3 accretion/run.py --bend-root ../bend-pinned --bun ../tooling/node_modules/@oven/bun-linux-x64/bin/bun --promote
+python3 tests/accretion.py ../bend-pinned ../tooling/node_modules/@oven/bun-linux-x64/bin/bun
+```
+
+Three exact-content routing improvements checked successfully: total reads
+9 → 8 → 7 → 6. Each round printed `All terms check.` through the checker.
+Seven controls were refused: no gain, increased reads, wrong content, path escape,
+unknown task, duplicate task and oversized candidate. The integration test also
+checks the public task commands and refusal of modified compiler input. A no-gain
+control now runs before any promotion to detect a permissive law early.
+
+The three original acceptance scripts were rerun after adding task routing.
+Python syntax and whitespace checks passed. Installed overlays and the declared
+25-file scope remain unchanged. The earlier frozen spec-twin example is preserved
+without edits to its law, seq, pow2 or main.
+
+This is deterministic workload evidence, not a held-out fresh-agent study. The
+Bend proof establishes the frozen predicate over evaluator-produced observations;
+it does not authenticate those observations or enforce operating-system privileges.
+The controlled demonstration's promotion mode refuses to restart from accepted
+nonempty state. General external candidate evaluation is review-only. No claim of
+an autonomous production RSI controller, native execution, or GPU performance is
+made.
