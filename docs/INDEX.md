@@ -4,6 +4,15 @@ Start with [README.md](../README.md) for commands and prerequisites. For work on
 this repository, read [AGENTS.md](../AGENTS.md), then the contract for the area
 being changed.
 
+## Language guarantees
+
+- [Bend bug atlas](bend-bug-atlas.html): interactive comparison of ten bug
+  classes across Bend, Rust, Lean and Dafny, with examples and source links.
+  Download and open the HTML file in a browser. It includes its logos and styles.
+  The map distinguishes built-in restrictions, explicit proof obligations and
+  failures outside the checked model. Bend claims refer to the pinned 2.0.9
+  source and retain its checker and backend limitations.
+
 ## Current contracts and work
 
 - [TODO_100.md](TODO_100.md): 100 proposed tasks with acceptance criteria and
