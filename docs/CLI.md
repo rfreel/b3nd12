@@ -15,8 +15,13 @@ for `tests/bend_contracts.py`. There are no third-party Python dependencies.
 
 No arguments print a concise quick start. All commands accept `--json` and
 `--human`. Non-TTY stdout defaults to JSON; terminal stdout defaults to human
-text. Supplying both is an error. Options may precede or follow the command.
+text. Supplying both is an error. Format and help flags may precede or follow the command.
 Use `--` before a literal target that begins with a dash.
+
+`--help` or `-h` before the `--` delimiter displays help without executing a
+command, even when the command or operands are malformed. Conflicting format
+flags still fail. After `--`, those spellings are literal operands. `--version`
+is a command alias, not an option attached to another command.
 
 Examples:
 

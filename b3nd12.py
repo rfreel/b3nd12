@@ -24,7 +24,8 @@ first; use --help for commands, errors, and compatibility details.
 HELP = QUICK + """
 Commands: doctor; apply TARGET; verify TARGET; guide [router|program|prove];
           task implement|prove|diagnose; help.
-Global flags: --json, --human, --help, --version. Use -- before a literal path.
+Global flags: --json, --human, --help. Version command: --version.
+Use -- before a literal path.
 Read-only aliases: check = verify; status = doctor; -h = help; -v = --version.
 Read-only command names ignore case and '-'/'_' separators. Apply is exact.
 Exit codes: 0 success, 1 missing resource, 2 invalid/ambiguous arguments,
@@ -43,6 +44,8 @@ def parse(raw):
         raise Failure("AMBIGUOUS_FORMAT", "Choose one output format.", "Use --json or --human.", 2)
     machine = "--json" in fmt or ("--human" not in fmt and not sys.stdout.isatty())
     args = [x for x in own if x not in ("--json", "--human")]
+    if any(x in ("--help", "-h") for x in args):
+        return "help", [], machine, ["help"], True
     if not args:
         if tail:
             raise Failure("INVALID_ARGUMENTS", "A command is required before --.", "Use apply or verify before the target.", 2)

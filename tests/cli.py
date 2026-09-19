@@ -43,6 +43,20 @@ def check(*args, status=0, code=None):
 
 def main():
     check()
+    help_text = check("help")["result"]["text"]
+    for flag in ("--help", "-h"):
+        for command in ("doctor", "apply", "verify", "guide", "task", "help", "version"):
+            for args in ((flag, command), (command, flag)):
+                doc = check(*args, "--json")
+                assert doc["command"] == ["help"] and doc["result"]["text"] == help_text
+                assert run(*args, "--human").stdout == help_text
+        for args in (("apply", "--unknown", flag), ("Apply", flag),
+                     ("unknown", flag), (flag, "apply", "--", "--json")):
+            assert check(*args)["command"] == ["help"]
+        check(flag, "--json", "--human", status=2, code="AMBIGUOUS_FORMAT")
+        check("apply", "--", flag, status=1, code="NOT_FOUND")
+        check("verify", "--", flag, status=1, code="NOT_FOUND")
+        check("task", "--", flag, status=2, code="INVALID_TASK")
     for args in [("doctor",), ("help",), ("--version",), ("guide",),
                  ("guide", "program"), ("guide", "prove"), ("task", "implement"),
                  ("task", "prove"), ("task", "diagnose")]:
@@ -83,6 +97,15 @@ def main():
         target = Path(directory) / "checkout with spaces"
         subprocess.run(["git", "clone", "--shared", "--no-checkout", str(Path(sys.argv[1]).resolve()), str(target)], check=True, capture_output=True)
         subprocess.run(["git", "-C", str(target), "checkout", "--detach", PIN], check=True, capture_output=True)
+        control_files = [target / ".git" / name for name in ("HEAD", "index", "config")]
+        control_before = [path.read_bytes() for path in control_files]
+        for flag in ("--help", "-h"):
+            for args in ((flag, "apply", str(target)), ("apply", str(target), flag)):
+                assert check(*args)["command"] == ["help"]
+        assert [path.read_bytes() for path in control_files] == control_before
+        untouched = subprocess.run(["git", "-C", str(target), "status", "--porcelain", "--untracked-files=all"],
+                                   check=True, capture_output=True, text=True)
+        assert untouched.stdout == "", untouched.stdout
         check("verify", str(target), status=5, code="FILE_SCOPE")
         doc = check("apply", str(target))
         assert doc["result"]["files"] == 25 and doc["result"]["theory_unchanged"]
