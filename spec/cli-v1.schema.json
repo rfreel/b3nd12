@@ -349,7 +349,9 @@
         "theory_unchanged",
         "delivery",
         "checks",
-        "target"
+        "target",
+        "static_status",
+        "runtime_status"
       ],
       "properties": {
         "pin": {
@@ -373,6 +375,14 @@
         },
         "target": {
           "type": "string"
+        },
+        "static_status": {
+          "const": "pass"
+        },
+        "runtime_status": {
+          "enum": [
+            "not_run"
+          ]
         }
       }
     },
@@ -386,7 +396,9 @@
         "delivery",
         "checks",
         "target",
-        "log"
+        "log",
+        "static_status",
+        "runtime_status"
       ],
       "properties": {
         "pin": {
@@ -413,6 +425,15 @@
         },
         "log": {
           "type": "string"
+        },
+        "static_status": {
+          "const": "pass"
+        },
+        "runtime_status": {
+          "enum": [
+            "pass",
+            "unavailable"
+          ]
         }
       }
     }

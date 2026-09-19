@@ -36,6 +36,21 @@ Exit codes: 0 success, 1 missing resource, 2 invalid/ambiguous arguments,
 JSON schema: spec/cli-v1.schema.json. Bend's existing --json is unchanged.
 """
 
+RUNTIME_PASS = "verify: runtime smoke PASS"
+RUNTIME_UNAVAILABLE = "verify: runtime smoke UNAVAILABLE (bun not on PATH)"
+RUNTIME_FAILED = "verify: runtime smoke FAILED (including unavailable or timed-out execution)"
+
+
+def installation_status(stdout, stderr, succeeded):
+    """Decode the exact terminal records emitted by the trusted shell scripts."""
+    lines = stdout.splitlines()
+    if succeeded:
+        if len(lines) >= 2 and lines[-1] == "apply: ranked deepenings installed":
+            return {RUNTIME_PASS: "pass", RUNTIME_UNAVAILABLE: "unavailable"}.get(lines[-2], "unknown")
+        return "unknown"
+    errors = stderr.splitlines()
+    return "failed" if errors and errors[-1] == RUNTIME_FAILED else "unknown"
+
 
 def parse(raw):
     own, tail = raw, []
@@ -153,13 +168,29 @@ def execute(command, values):
                           "Preserve the target and inspect partial installation diagnostics before retrying.", 4,
                           stdout=exc.stdout or "", stderr=exc.stderr or "", target=str(target))
         if ran.returncode:
+            static_status = "unknown"
+            try:
+                verify(target)
+                static_status = "pass"
+            except (Failure, OSError, ValueError):
+                pass
             raise Failure("INSTALL_FAILED", "Patch installation or verification failed.",
                           "Inspect the diagnostics; preserve the target for investigation.", 5,
-                          stdout=ran.stdout, stderr=ran.stderr, target=str(target))
+                          stdout=ran.stdout, stderr=ran.stderr, target=str(target),
+                          static_status=static_status,
+                          runtime_status=installation_status(ran.stdout, ran.stderr, False))
         result = verify(target)
+        result["runtime_status"] = installation_status(ran.stdout, ran.stderr, True)
+        if result["runtime_status"] == "unknown":
+            raise Failure("INSTALL_FAILED", "Installation returned no recognized runtime status.",
+                          "Preserve the target and inspect the installer protocol.", 5,
+                          static_status="pass", runtime_status="unknown",
+                          stdout=ran.stdout, stderr=ran.stderr, target=str(target))
         result["log"] = ran.stdout
     else:
         result = verify(target)
+        result["runtime_status"] = "not_run"
+    result["static_status"] = "pass"
     result["target"] = str(target)
     return result
 

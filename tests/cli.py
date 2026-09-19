@@ -44,6 +44,28 @@ def check(*args, status=0, code=None):
 
 
 def main():
+    # Startup failures precede the normal envelope. They remain unsuccessful
+    # with empty stdout for both formats, including commands such as help.
+    with tempfile.TemporaryDirectory(prefix="b3nd12-bootstrap-") as directory:
+        isolated = Path(directory)
+        for name in ("b3nd12.py", "bounded.py", "stack.py", "upstream.json"):
+            shutil.copy2(ROOT / name, isolated / name)
+        cases = (("upstream.json", None), ("upstream.json", "{broken"),
+                 ("upstream.json", "{}"), ("bounded.py", "raise ImportError('bootstrap probe')\n"),
+                 ("stack.py", "this is invalid Python syntax!\n"))
+        for name, replacement in cases:
+            path = isolated / name
+            original = path.read_bytes()
+            if replacement is None:
+                path.unlink()
+            else:
+                path.write_text(replacement)
+            for flag in ("--json", "--human"):
+                failed = subprocess.run([sys.executable, str(isolated / "b3nd12.py"), "help", flag],
+                                        capture_output=True, text=True, timeout=5)
+                assert failed.returncode != 0 and failed.stdout == "", (name, failed)
+                assert "Traceback" in failed.stderr, (name, failed.stderr)
+            path.write_bytes(original)
     check()
     help_text = check("help")["result"]["text"]
     for flag in ("--help", "-h"):

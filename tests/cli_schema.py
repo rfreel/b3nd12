@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import sys
 import tempfile
+import subprocess
 from unittest.mock import patch
 
 from jsonschema import Draft202012Validator, ValidationError
@@ -36,6 +37,17 @@ def main():
     package.__path__ = [str(ROOT / "accretion")]
     sys.modules["accretion"] = package
     import b3nd12 as cli
+    with patch.object(cli, 'target_check', return_value=ROOT), patch.object(cli, 'patch_files'), \
+         patch.object(cli, 'verify', return_value={}), \
+         patch.object(cli, 'bounded_run', return_value=subprocess.CompletedProcess([], 0, 'unrecognized\n', cli.RUNTIME_FAILED + '\n')):
+        try:
+            cli.execute('apply', [str(ROOT)])
+        except Failure as exc:
+            assert exc.error['code'] == 'INSTALL_FAILED' and exc.status == 5
+            assert exc.error['context']['static_status'] == 'pass'
+            assert exc.error['context']['runtime_status'] == 'unknown'
+        else:
+            raise AssertionError('missing shell terminal record accepted')
     for command, values in [('help', []), ('quick', []), ('version', []), ('guide', []),
                             ('task', ['implement']), ('doctor', [])]:
         doc = dict(schema='b3nd12.cli.v1', ok=True,

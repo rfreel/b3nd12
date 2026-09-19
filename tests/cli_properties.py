@@ -129,7 +129,7 @@ def classification():
             'MISSING_TOOL', 'BROKEN_TOOL', 'CONFIGURATION'],
         4: ['INSTALL_TIMEOUT', 'INSTALL_OUTPUT_LIMIT'],
         5: ['BINARY_PATCH', 'DELIVERY_MANIFEST', 'PATCH_SEQUENCE', 'FILE_SCOPE', 'FILE_MODE', 'CONTENT_MISMATCH',
-            'THEORY_CHANGED', 'INSTALL_FAILED', 'INTERNAL'],
+            'THEORY_CHANGED', 'STAGED_INDEX', 'INSTALL_FAILED', 'INTERNAL'],
     }
     declared = {code for codes in classifications.values() for code in codes}
     observed = set()

@@ -48,7 +48,7 @@ empty; subprocess diagnostics appear in error context. The published Draft
 result fields and types and rejects undeclared result fields.
 
 ```json
-{"schema":"b3nd12.cli.v1","ok":true,"command":["verify","/path/to/bend"],"corrected":false,"result":{"pin":"e5a4c4cfe980c2e4e70571562efb5197fe27b2f4","files":25,"theory_unchanged":true,"delivery":"byte-identical","checks":["pin","scope","bytes","theory","whitespace"],"target":"/path/to/bend"},"error":null,"exit_code":0}
+{"schema":"b3nd12.cli.v1","ok":true,"command":["verify","/path/to/bend"],"corrected":false,"result":{"pin":"e5a4c4cfe980c2e4e70571562efb5197fe27b2f4","files":25,"theory_unchanged":true,"delivery":"byte-identical","checks":["pin","scope","bytes","theory","index","whitespace"],"static_status":"pass","runtime_status":"not_run","target":"/path/to/bend"},"error":null,"exit_code":0}
 ```
 
 `command` contains the normalized command followed by literal operands, or null
@@ -81,8 +81,18 @@ to stdout; errors and correction notices go to stderr.
 | Task | `task`, `text`, `reads`, `files` |
 | Version | `version`, `bend_version`, `pin` |
 | Doctor | `pin`, `tools`, `patches`, `runtime_checks`, `probes` |
-| Verify | `pin`, `files`, `theory_unchanged`, `delivery`, `checks`, `target` |
+| Verify | `pin`, `files`, `theory_unchanged`, `delivery`, `checks`, `target`, `static_status`, `runtime_status` |
 | Apply | Verify fields plus `log` |
+
+`verify` performs static checks only: success reports `static_status: "pass"`
+and `runtime_status: "not_run"`. Successful `apply` reports static `pass` and
+runtime `pass` or `unavailable`, according to the installer's smoke result.
+An `INSTALL_FAILED` context preserves independently established static status
+and a recognized runtime failure; unestablished statuses remain `unknown`.
+
+These status fields were added under `b3nd12.cli.v1`. Consumers pinned to an
+older schema that rejects additional fields must update their schema. Command
+semantics remain unchanged, but the result's exact object shape has expanded.
 
 | Exit | Meaning | Representative codes |
 |---:|---|---|
@@ -91,7 +101,7 @@ to stdout; errors and correction notices go to stderr.
 | 2 | Invalid or ambiguous intent | INVALID_COMMAND, INVALID_ARGUMENTS, INVALID_TARGET, INVALID_TASK, AMBIGUOUS_FORMAT |
 | 3 | Configuration or prerequisite failure | WRONG_PIN, DIRTY_TARGET, MISSING_TOOL, BROKEN_TOOL, ROUTING_CONFIGURATION, GIT_FAILED, GIT_TIMEOUT, GIT_OUTPUT_LIMIT, CONFIGURATION |
 | 4 | External operation limit | INSTALL_TIMEOUT, INSTALL_OUTPUT_LIMIT |
-| 5 | Internal or delivery invariant failure | PATCH_SEQUENCE, FILE_SCOPE, CONTENT_MISMATCH, THEORY_CHANGED, FILE_MODE, INSTALL_FAILED, INTERNAL |
+| 5 | Internal or delivery invariant failure | PATCH_SEQUENCE, FILE_SCOPE, CONTENT_MISMATCH, THEORY_CHANGED, STAGED_INDEX, FILE_MODE, INSTALL_FAILED, INTERNAL |
 
 ## Prerequisite probes and limits
 
@@ -117,6 +127,13 @@ back partial installation. Preserve the target for diagnosis before retrying.
 
 ## Compatibility and operational limits
 
+The envelope begins after Python has imported the management modules and loaded
+their required configuration. An import, syntax or configuration failure before
+that point exits nonzero with empty stdout and a Python diagnostic on stderr,
+including with `--json` or help. Such initialization failures do not have a stable
+management error code or exit classification. Restore the checkout before
+retrying; do not parse a traceback as a JSON response.
+
 `apply.sh TARGET` and `verify.sh TARGET` remain human-readable compatibility
 entry points with their shell exit convention. The robot contract is provided
 by `b3nd12.py`; Bend's installed diagnostic JSON Lines and graph schema remain
@@ -128,6 +145,8 @@ before writes. Disk failure, concurrent mutation, or a failing post-write runtim
 check can still leave the target modified. The command does not reset or delete
 caller files. No transaction across filesystem writes or concurrent-install
 guarantee is claimed. Installation preserves the target's real Git index.
+Verification requires that index to match the pin. Staging even correct delivery
+content is refused with `STAGED_INDEX`, exit 5, without modifying the index.
 
 Verification refuses extra tracked or untracked delivery changes. Ignored build
 artifacts are outside the path-set check. It verifies source bytes, modes and
