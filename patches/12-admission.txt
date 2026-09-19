@@ -1,0 +1,8 @@
+Review-only repository extension; no upstream overlay or checker changes.
+
+pilot/admission: three-domain finite decision laws and proofs.
+tools/admission_gate.py: authenticated manifest admission and local Git transaction.
+tests/test_admission_gate.py: finite oracle and concrete boundary regressions.
+experiments/admission_stress.py: bounded isolated mutation campaign.
+scripts/verify-admission.sh: proof, negative fixtures, and campaign entry point.
+docs/admission.md: trust boundary, commands, and unresolved deployment obligations.

@@ -4,17 +4,21 @@ on:
   push:
     branches: [ranked-deepenings]
   pull_request:
+  merge_group:
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - uses: ./.github/actions/toolchain
       - name: Acquire pinned Bend
         run: |
-          git clone --quiet https://github.com/bendlang/bend.git upstream
-          git -C upstream checkout --quiet e5a4c4cfe980c2e4e70571562efb5197fe27b2f4
+          pin=$(python3 -c 'import json; print(json.load(open("upstream.json"))["commit"])')
+          git init upstream
+          git -C upstream remote add origin https://github.com/bendlang/bend.git
+          git -C upstream fetch --depth=1 origin "$pin"
+          git -C upstream checkout --detach FETCH_HEAD
       - name: Apply and structurally verify
         run: ./apply.sh upstream
       - name: Exercise router and packs

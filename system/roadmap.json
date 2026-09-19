@@ -1,0 +1,814 @@
+{
+  "schema_version": 1,
+  "tasks": [
+    {
+      "id": "A01",
+      "title": "Validate task contracts and dependency graphs",
+      "depends": [],
+      "priority": 1,
+      "effort_minutes": 20,
+      "files": [
+        "tools/agent_system/contracts.py",
+        "tools/agent_system/__init__.py",
+        "tests/test_agent_contracts.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_contracts.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Reject invalid schemas, cycles, duplicate IDs, path escapes, and invalid budgets.",
+      "reopen": "Contract or parser changes",
+      "phase": "foundation"
+    },
+    {
+      "id": "A02",
+      "title": "Bind bounded verification to source evidence",
+      "depends": [
+        "A01"
+      ],
+      "priority": 1,
+      "effort_minutes": 20,
+      "files": [
+        "tools/agent_system/contracts.py",
+        "tools/agent_system/__init__.py",
+        "tests/test_agent_contracts.py",
+        "tools/agent_system/evidence.py",
+        "tests/test_agent_evidence.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_evidence.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Retain passing and failing commands; reject stale artifacts, empty suites, and timeouts.",
+      "reopen": "Runner, source scope, or evidence format changes",
+      "phase": "foundation"
+    },
+    {
+      "id": "A03",
+      "title": "Enforce replayable task transitions",
+      "depends": [
+        "A02"
+      ],
+      "priority": 1,
+      "effort_minutes": 20,
+      "files": [
+        "tools/agent_system/contracts.py",
+        "tools/agent_system/__init__.py",
+        "tests/test_agent_contracts.py",
+        "tools/agent_system/evidence.py",
+        "tools/agent_system/state.py",
+        "tests/test_agent_state.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_state.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Prove retry idempotency, one concurrent winner, stale propagation, and corruption rejection.",
+      "reopen": "Event schema, projection, or concurrency mechanism changes",
+      "phase": "foundation"
+    },
+    {
+      "id": "A04",
+      "title": "Expose one bounded agent command surface",
+      "depends": [
+        "A03"
+      ],
+      "priority": 1,
+      "effort_minutes": 20,
+      "files": [
+        "tools/agent_system/contracts.py",
+        "tools/agent_system/__init__.py",
+        "tests/test_agent_contracts.py",
+        "control.py",
+        "tools/agent_system/cli.py",
+        "tools/agent_system/state.py",
+        "tools/agent_system/evidence.py",
+        "tests/test_agent_cli.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_cli.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Read commands stay read-only and public commands return stable JSON success or error envelopes.",
+      "reopen": "CLI contract or routing changes",
+      "phase": "foundation"
+    },
+    {
+      "id": "A05",
+      "title": "Measure control cost and integrity",
+      "depends": [
+        "A04"
+      ],
+      "priority": 1,
+      "effort_minutes": 20,
+      "files": [
+        "tools/agent_system/contracts.py",
+        "tools/agent_system/__init__.py",
+        "tests/test_agent_contracts.py",
+        "tools/agent_system/benchmarks.py",
+        "system/metrics.json",
+        "tests/test_agent_benchmarks.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_benchmarks.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Run reproducible workloads; distinguish collected values from unmeasured targets.",
+      "reopen": "Benchmark workload, registry, or collection method changes",
+      "phase": "foundation"
+    },
+    {
+      "id": "A06",
+      "title": "Integrate guidance, lessons, roadmap, and CI",
+      "depends": [
+        "A05"
+      ],
+      "priority": 1,
+      "effort_minutes": 20,
+      "files": [
+        "AGENTS.md",
+        "START_HERE.md",
+        "README.md",
+        "docs/agent-system-design.md",
+        "docs/agent-system-plan.md",
+        "docs/agent-roadmap.md",
+        "docs/benchmarks.md",
+        "system/lessons.json",
+        ".github/workflows/agent-system.yml",
+        "tests/test_agent_integration.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_integration.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Verify foundation file references, lesson evidence, and integrated operating instructions.",
+      "reopen": "Instructions, roadmap interpretation, CI contract, or lesson provenance changes",
+      "phase": "foundation"
+    },
+    {
+      "id": "B01",
+      "title": "Migrate contracts and recover interrupted journals",
+      "depends": [
+        "A06"
+      ],
+      "priority": 10,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/migration.py",
+        "tests/test_agent_migration.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_migration.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Preserve every old event, require an explicit source head, reject changed completed-task semantics, and recover only from an independently retained intact prefix.",
+      "reopen": "First contract revision or interrupted write",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B02",
+      "title": "Unify campaign and task evidence",
+      "depends": [
+        "A06"
+      ],
+      "priority": 11,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/campaign_adapter.py",
+        "tests/test_agent_campaign_adapter.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_campaign_adapter.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Convert real proof-campaign reports to the evidence contract; reject missing raw records and mismatched source or evaluator hashes.",
+      "reopen": "A second research campaign is admitted",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B03",
+      "title": "Retrieve scoped lessons and counterexamples",
+      "depends": [
+        "A06"
+      ],
+      "priority": 12,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/lessons.py",
+        "tests/test_agent_lessons.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_lessons.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Given a task scope, retrieve only evidence-backed applicable lessons; reject a lesson on an explicit out-of-scope case.",
+      "reopen": "At least five distinct retained lessons",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B04",
+      "title": "Fingerprint and compare execution environments",
+      "depends": [
+        "B02"
+      ],
+      "priority": 13,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/environment.py",
+        "tests/test_agent_environment.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_environment.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Equivalent declared environments compare; incompatible compiler, runtime, backend, or hardware blocks performance comparison.",
+      "reopen": "First cross-machine comparison",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B05",
+      "title": "Evaluate performance with paired uncertainty",
+      "depends": [
+        "B04"
+      ],
+      "priority": 14,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/performance.py",
+        "tests/test_agent_performance.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_performance.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Use alternating pairs, declared minimum effect and confidence interval; label noise and trade-offs without a combined correctness score.",
+      "reopen": "A candidate claims runtime or memory improvement",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B06",
+      "title": "Build held-out repair and proof task suites",
+      "depends": [
+        "B02"
+      ],
+      "priority": 15,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/holdout.py",
+        "tests/test_agent_holdout.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_holdout.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Version 100 tasks across at least ten families; keep development and final holdout partitions disjoint and freeze scoring before trials.",
+      "reopen": "Instrumented agent evaluation is ready",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B07",
+      "title": "Run budgeted agent usability trials",
+      "depends": [
+        "B06"
+      ],
+      "priority": 16,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/agent_trials.py",
+        "tests/test_agent_agent_trials.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_agent_trials.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Record 30 tasks, three independent repeats, model identity, prompt tokens, tool calls, dollars, success, and interventions; compare against the old workflow.",
+      "reopen": "A model provider and explicit total spend ceiling are available",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B08",
+      "title": "Reuse verified results by complete context key",
+      "depends": [
+        "B04"
+      ],
+      "priority": 17,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/cache.py",
+        "tests/test_agent_cache.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_cache.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Hit only with matching source, evaluator, environment, objective, and law hashes; mutation probes force cache misses.",
+      "reopen": "Repeated verification consumes more than 20 percent of campaign cost",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B09",
+      "title": "Isolate candidate workers from evaluator authority",
+      "depends": [
+        "B02"
+      ],
+      "priority": 18,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/isolation.py",
+        "tests/test_agent_isolation.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_isolation.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "A real unprivileged worker cannot write controller files, read signing material, or supply its own trusted verdict; resource exhaustion is contained.",
+      "reopen": "Unattended candidate generation is introduced",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B10",
+      "title": "Coordinate work across clones with expiring leases",
+      "depends": [
+        "B09"
+      ],
+      "priority": 19,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/leases.py",
+        "tests/test_agent_leases.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_leases.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Two workers contend for one lease; exactly one acts, fencing rejects expired ownership, and restart preserves accepted results.",
+      "reopen": "More than one independent clone executes tasks",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B11",
+      "title": "Attest execution with independent signing",
+      "depends": [
+        "B09",
+        "B04"
+      ],
+      "priority": 20,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/attestation.py",
+        "tests/test_agent_attestation.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_attestation.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Verifier-held keys sign source and result identities; forgery, replay under another task, and artifact mutation fail.",
+      "reopen": "Evidence crosses a trust boundary",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B12",
+      "title": "Enforce repository merge gates on the host",
+      "depends": [
+        "B11"
+      ],
+      "priority": 21,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/host_gates.py",
+        "tests/test_agent_host_gates.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_host_gates.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Demonstrate rejected merge with failed required checks and separate review for law changes using actual host policy evidence.",
+      "reopen": "Repository policy and authorized reviewer identities are selected",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B13",
+      "title": "Generalize finite repair laws to variable suites",
+      "depends": [
+        "B06"
+      ],
+      "priority": 22,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/generalized_laws.py",
+        "tests/test_agent_generalized_laws.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_generalized_laws.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Prove preservation for variable case lists, retain a valid witness, and reject deletion and regression counterexamples.",
+      "reopen": "A real variable regression suite needs proof",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B14",
+      "title": "Learn task priorities from observed value and cost",
+      "depends": [
+        "B07"
+      ],
+      "priority": 23,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/scheduling.py",
+        "tests/test_agent_scheduling.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_scheduling.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Compare declared static ordering with a learned policy on held-out tasks at equal budgets; retain confidence and exploration cost.",
+      "reopen": "Thirty comparable completed trials exist",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B15",
+      "title": "Test whether lessons transfer without regressions",
+      "depends": [
+        "B03",
+        "B07"
+      ],
+      "priority": 24,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/transfer.py",
+        "tests/test_agent_transfer.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_transfer.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Use paired with-lesson and without-lesson trials on disjoint task families; measure both positive and negative transfer.",
+      "reopen": "Ten independently reproduced lessons exist",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B16",
+      "title": "Validate Linux and macOS recovery behavior",
+      "depends": [
+        "B01"
+      ],
+      "priority": 25,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/portability.py",
+        "tests/test_agent_portability.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_portability.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Run lock, timeout, child cleanup, and replay tests on both operating systems; report unsupported native Windows explicitly.",
+      "reopen": "A second operating system is available in CI",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B17",
+      "title": "Compact history with verified replay equivalence",
+      "depends": [
+        "B01"
+      ],
+      "priority": 26,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/compaction.py",
+        "tests/test_agent_compaction.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_compaction.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Snapshot 10000 events, replay the suffix, compare full state byte-for-byte, and reject a corrupted anchor.",
+      "reopen": "Measured replay p95 exceeds 500 ms",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B18",
+      "title": "Evaluate a supervisor without evaluator self-modification",
+      "depends": [
+        "B07",
+        "B09"
+      ],
+      "priority": 27,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/supervision.py",
+        "tests/test_agent_supervision.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_supervision.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Supervisor changes only next-campaign search policy; worker cannot alter objectives or proofs; ablate supervision at equal budget.",
+      "reopen": "Baseline agent trials and isolation both pass",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B19",
+      "title": "Report rolling research trajectories",
+      "depends": [
+        "B07",
+        "B15"
+      ],
+      "priority": 28,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/trajectory.py",
+        "tests/test_agent_trajectory.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_trajectory.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Report 30-day and 90-day comparable cohorts, confidence, cost per replicated gain, regressions, and missing observations.",
+      "reopen": "At least two comparable trial cohorts exist",
+      "phase": "trajectory"
+    },
+    {
+      "id": "B20",
+      "title": "Stop campaigns by measured continuation value",
+      "depends": [
+        "B05",
+        "B14"
+      ],
+      "priority": 29,
+      "effort_minutes": 60,
+      "files": [
+        "tools/agent_system/stopping.py",
+        "tests/test_agent_stopping.py"
+      ],
+      "checks": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_agent_stopping.py",
+          "-v"
+        ]
+      ],
+      "timeout_seconds": 60,
+      "acceptance": "Replay retained campaigns to compare fixed budgets against stopping policies; count missed improvements and saved cost.",
+      "reopen": "Enough completed campaigns exist to validate stopping without reuse of holdout",
+      "phase": "trajectory"
+    }
+  ]
+}

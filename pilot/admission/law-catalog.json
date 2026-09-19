@@ -1,0 +1,97 @@
+{
+  "schema": "admission.law-catalog.v1",
+  "scope": "Finite decision kernel and Boolean state update only. Authentication, host enforcement, real effects, and evidence acquisition remain outside these proofs.",
+  "verification": "Run the Bend checker on PROOF.bend with zero unsafe and verify the complete inventory; this catalog does not itself establish proof results.",
+  "laws": [
+    {
+      "law": "accepted_behavior",
+      "positive_scope": "Accepted implies behavior Pass",
+      "forbidden_case": "Accepted with behavior Fail or Pending",
+      "law_file": "pilot/admission/LAWS.bend",
+      "proof_file": "pilot/admission/PROOF.bend",
+      "coverage": "54 Request inhabitants",
+      "negative_fixture": null,
+      "negative_fixture_status": "not separately compiled; forbidden case stated above"
+    },
+    {
+      "law": "accepted_preservation",
+      "positive_scope": "Accepted implies preservation Pass",
+      "forbidden_case": "Accepted with preservation Fail or Pending",
+      "law_file": "pilot/admission/LAWS.bend",
+      "proof_file": "pilot/admission/PROOF.bend",
+      "coverage": "54 Request inhabitants",
+      "negative_fixture": null,
+      "negative_fixture_status": "not separately compiled; forbidden case stated above"
+    },
+    {
+      "law": "accepted_integrity",
+      "positive_scope": "Accepted implies integrity Pass",
+      "forbidden_case": "Accepted with integrity Fail or Pending",
+      "law_file": "pilot/admission/LAWS.bend",
+      "proof_file": "pilot/admission/PROOF.bend",
+      "coverage": "54 Request inhabitants",
+      "negative_fixture": null,
+      "negative_fixture_status": "not separately compiled; forbidden case stated above"
+    },
+    {
+      "law": "invalid_context_rejected",
+      "positive_scope": "False context always rejects",
+      "forbidden_case": "False context accepted",
+      "law_file": "pilot/admission/LAWS.bend",
+      "proof_file": "pilot/admission/PROOF.bend",
+      "coverage": "27 status combinations",
+      "negative_fixture": "pilot/admission/negative/invalid_context_accepted.bend",
+      "negative_fixture_status": "present"
+    },
+    {
+      "law": "eligible_accepted",
+      "positive_scope": "True context and three Pass statuses accepts",
+      "forbidden_case": "Eligible request rejected",
+      "law_file": "pilot/admission/LAWS.bend",
+      "proof_file": "pilot/admission/PROOF.bend",
+      "coverage": "concrete witness",
+      "negative_fixture": null,
+      "negative_fixture_status": "not separately compiled; forbidden case stated above"
+    },
+    {
+      "law": "missing_evidence_waits",
+      "positive_scope": "True context, Pass, Pass, Pending waits",
+      "forbidden_case": "Missing evidence accepted",
+      "law_file": "pilot/admission/LAWS.bend",
+      "proof_file": "pilot/admission/PROOF.bend",
+      "coverage": "concrete witness",
+      "negative_fixture": "pilot/admission/negative/pending_accepted.bend",
+      "negative_fixture_status": "present"
+    },
+    {
+      "law": "rejected_preserves_state",
+      "positive_scope": "Rejected leaves before unchanged",
+      "forbidden_case": "Rejected changes state",
+      "law_file": "pilot/admission/LAWS.bend",
+      "proof_file": "pilot/admission/PROOF.bend",
+      "coverage": "4 Boolean state pairs",
+      "negative_fixture": null,
+      "negative_fixture_status": "not separately compiled; forbidden case stated above"
+    },
+    {
+      "law": "pending_preserves_state",
+      "positive_scope": "Waiting leaves before unchanged",
+      "forbidden_case": "Waiting changes state",
+      "law_file": "pilot/admission/LAWS.bend",
+      "proof_file": "pilot/admission/PROOF.bend",
+      "coverage": "4 Boolean state pairs",
+      "negative_fixture": null,
+      "negative_fixture_status": "not separately compiled; forbidden case stated above"
+    },
+    {
+      "law": "accepted_updates_state",
+      "positive_scope": "Accepted returns proposed after",
+      "forbidden_case": "Accepted ignores changed after",
+      "law_file": "pilot/admission/LAWS.bend",
+      "proof_file": "pilot/admission/PROOF.bend",
+      "coverage": "4 Boolean state pairs",
+      "negative_fixture": null,
+      "negative_fixture_status": "not separately compiled; forbidden case stated above"
+    }
+  ]
+}

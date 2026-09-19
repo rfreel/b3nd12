@@ -1,0 +1,239 @@
+{
+  "schema_version": 1,
+  "metrics": [
+    {
+      "id": "tamper_rejection_rate",
+      "unit": "fraction",
+      "direction": "higher",
+      "scope": "Ten altered records in a 1000-event history",
+      "collection": "Local mutation workload",
+      "target_30d": 1,
+      "target_90d": 1
+    },
+    {
+      "id": "projection_reproducible",
+      "unit": "boolean",
+      "direction": "higher",
+      "scope": "Same events and source evidence",
+      "collection": "Repeat local replay",
+      "target_30d": 1,
+      "target_90d": 1
+    },
+    {
+      "id": "status_bytes",
+      "unit": "UTF-8 bytes",
+      "direction": "lower",
+      "scope": "Compact current-state packet",
+      "collection": "Serialize public status packet",
+      "target_30d": 6000,
+      "target_90d": 4000
+    },
+    {
+      "id": "cold_status_p95_ms",
+      "unit": "milliseconds",
+      "direction": "lower",
+      "scope": "Seven fresh Python invocations on recorded host",
+      "collection": "Measure process start through JSON status",
+      "target_30d": 150,
+      "target_90d": 100
+    },
+    {
+      "id": "status_p95_ms",
+      "unit": "milliseconds",
+      "direction": "lower",
+      "scope": "Seven in-process projections of current journal",
+      "collection": "Measure projection plus evidence freshness",
+      "target_30d": 30,
+      "target_90d": 15
+    },
+    {
+      "id": "replay_1000_p95_ms",
+      "unit": "milliseconds",
+      "direction": "lower",
+      "scope": "1000 synthetic events and current plan shape",
+      "collection": "Measure decode and integrity verification",
+      "target_30d": 500,
+      "target_90d": 200
+    },
+    {
+      "id": "external_runtime_dependencies",
+      "unit": "packages",
+      "direction": "lower",
+      "scope": "Control layer excluding Python standard library",
+      "collection": "Inspect runtime imports",
+      "target_30d": 0,
+      "target_90d": 0
+    },
+    {
+      "id": "false_admission_rate",
+      "unit": "fraction",
+      "direction": "lower",
+      "scope": "Versioned adversarial corpus",
+      "collection": "Execute all invalid candidates; count accepted invalid results",
+      "target_30d": 0,
+      "target_90d": 0
+    },
+    {
+      "id": "worker_boundary_escape_rate",
+      "unit": "fraction",
+      "direction": "lower",
+      "scope": "Real process and filesystem isolation probes",
+      "collection": "Run B09 escape suite on actual worker host",
+      "target_30d": 0,
+      "target_90d": 0
+    },
+    {
+      "id": "fresh_evidence_coverage",
+      "unit": "fraction",
+      "direction": "higher",
+      "scope": "All accepted transitions in sampled campaigns",
+      "collection": "Audit source and environment-bound retained artifacts",
+      "target_30d": 1,
+      "target_90d": 1
+    },
+    {
+      "id": "crash_recovery_success",
+      "unit": "fraction",
+      "direction": "higher",
+      "scope": "Injected interruption at each persistence boundary",
+      "collection": "Run B01 fault matrix; count exact recoveries",
+      "target_30d": 0.99,
+      "target_90d": 1
+    },
+    {
+      "id": "independent_reproduction_rate",
+      "unit": "fraction",
+      "direction": "higher",
+      "scope": "Accepted results rerun on a clean compatible environment",
+      "collection": "Run B04 independent reproduction trial",
+      "target_30d": 0.95,
+      "target_90d": 0.99
+    },
+    {
+      "id": "agent_task_success",
+      "unit": "fraction",
+      "direction": "higher",
+      "scope": "Frozen held-out tasks within equal budgets",
+      "collection": "Run B07 agent trials; use at least 30 tasks and confidence intervals",
+      "target_30d": 0.85,
+      "target_90d": 0.95
+    },
+    {
+      "id": "first_action_accuracy",
+      "unit": "fraction",
+      "direction": "higher",
+      "scope": "Cold-start agents choosing among consequential actions",
+      "collection": "Score blind B07 selections against predeclared admissible actions",
+      "target_30d": 0.9,
+      "target_90d": 0.98
+    },
+    {
+      "id": "median_context_tokens",
+      "unit": "tokens",
+      "direction": "lower",
+      "scope": "Tokens read before first useful operation",
+      "collection": "Collect provider tokenizer counts in B07",
+      "target_30d": 6000,
+      "target_90d": 3000
+    },
+    {
+      "id": "tool_calls_per_solved_task",
+      "unit": "calls",
+      "direction": "lower",
+      "scope": "Successful held-out task with complete run accounting",
+      "collection": "Count B07 calls including failed retries",
+      "target_30d": 20,
+      "target_90d": 10
+    },
+    {
+      "id": "human_interventions_per_30_tasks",
+      "unit": "interventions",
+      "direction": "lower",
+      "scope": "Material handoffs during benchmark tasks",
+      "collection": "Record B07 interventions and reasons",
+      "target_30d": 3,
+      "target_90d": 1
+    },
+    {
+      "id": "dollars_per_replicated_gain",
+      "unit": "USD",
+      "direction": "lower",
+      "scope": "Total campaign spend divided by independently reproduced gains",
+      "collection": "Collect actual provider billing and independent reruns",
+      "target_30d": 10,
+      "target_90d": 3
+    },
+    {
+      "id": "verified_cache_hit_rate",
+      "unit": "fraction",
+      "direction": "higher",
+      "scope": "Eligible repeated checks under exact matching context",
+      "collection": "Run B08 cache with mutation probes and retained hit records",
+      "target_30d": 0.4,
+      "target_90d": 0.7
+    },
+    {
+      "id": "budget_overrun_rate",
+      "unit": "fraction",
+      "direction": "lower",
+      "scope": "All bounded real agent campaigns",
+      "collection": "Compare spend, calls, CPU time and wall time against admitted limits",
+      "target_30d": 0,
+      "target_90d": 0
+    },
+    {
+      "id": "cross_family_transfer_gain",
+      "unit": "percentage points",
+      "direction": "higher",
+      "scope": "With-lesson minus without-lesson held-out task success",
+      "collection": "Run B15 paired ablation with confidence interval",
+      "target_30d": 5,
+      "target_90d": 15
+    },
+    {
+      "id": "negative_transfer_rate",
+      "unit": "fraction",
+      "direction": "lower",
+      "scope": "Tasks harmed by an applied lesson",
+      "collection": "Run B15 negative-transfer cases",
+      "target_30d": 0.05,
+      "target_90d": 0.01
+    },
+    {
+      "id": "replicated_gains_per_100_attempts",
+      "unit": "gains",
+      "direction": "higher",
+      "scope": "Distinct accepted gains independently reproduced",
+      "collection": "Run B19 cohort analysis with all failures in denominator",
+      "target_30d": 10,
+      "target_90d": 20
+    },
+    {
+      "id": "rollback_rate",
+      "unit": "fraction",
+      "direction": "lower",
+      "scope": "Accepted changes reopened for demonstrated regression",
+      "collection": "Run B19 rolling cohort audit",
+      "target_30d": 0.05,
+      "target_90d": 0.01
+    },
+    {
+      "id": "task_family_coverage",
+      "unit": "families",
+      "direction": "higher",
+      "scope": "Distinct frozen held-out families with retained evidence",
+      "collection": "Publish B06 manifest and evaluate every family",
+      "target_30d": 10,
+      "target_90d": 20
+    },
+    {
+      "id": "policy_improvement_per_equal_budget",
+      "unit": "percentage points",
+      "direction": "higher",
+      "scope": "Supervisor success minus static-policy success",
+      "collection": "Run B18 ablation under equal total compute and model spend",
+      "target_30d": 5,
+      "target_90d": 15
+    }
+  ]
+}

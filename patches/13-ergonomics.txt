@@ -1,0 +1,11 @@
+Repository ergonomics integration over admission and the existing task controller.
+
+repo and tools/repo_cli.py provide setup, status, routing, verification, retained
+evidence, counterexample capture, publication preparation, and remote comparison.
+admission/ is the immutable public facade and bounded local producer adapter.
+system/ergonomics.json is the 66-item capability inventory. Task authority stays
+in the existing roadmap and append-only journal.
+Proof generation and runtime correspondence are reproducible scripts.
+CI shares toolchain.json and runs the integrated entry point.
+
+No bend2/bend.ts edit. No automatic host permission change or merge activation.

@@ -1,0 +1,728 @@
+{
+  "schema_version": 1,
+  "authority": "Capability inventory only. Task state remains in system/roadmap.json and state/events.jsonl; live verification is source-bound.",
+  "items": [
+    {
+      "id": "E01",
+      "title": "Entry point",
+      "acceptance": "One command reports environment, changes, tasks, and evidence.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E02",
+      "title": "Task routing",
+      "acceptance": "Five routes name small working sets.",
+      "files": [
+        "guide/agent/ROUTER.md",
+        "guide/agent/GATE.md",
+        "guide/agent/VERIFY.md",
+        "guide/agent/RELEASE.md"
+      ],
+      "evidence": "./repo catalog --check"
+    },
+    {
+      "id": "E03",
+      "title": "Repository map",
+      "acceptance": "Documentation distinguishes overlays, pilots, task authority, and local artifacts.",
+      "files": [
+        "docs/repo-operations.md",
+        "docs/admission.md"
+      ],
+      "evidence": "./repo catalog --check"
+    },
+    {
+      "id": "E04",
+      "title": "Supported commands",
+      "acceptance": "Setup, verify, stress, status, and explain have public parsers.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E05",
+      "title": "Dependency setup",
+      "acceptance": "Setup locates or installs the pinned Bun runtime.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E06",
+      "title": "Upstream acquisition",
+      "acceptance": "Setup fetches and checks the exact upstream pin.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E07",
+      "title": "Workspace discovery",
+      "acceptance": "Local configuration retains the target path.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E08",
+      "title": "Environment diagnostics",
+      "acceptance": "Doctor exposes missing prerequisites before verification.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E09",
+      "title": "Runtime consistency",
+      "acceptance": "CI and setup read the same toolchain manifest.",
+      "files": [
+        "toolchain.json",
+        ".github/workflows/supermodularity.yml",
+        ".github/actions/toolchain/action.yml"
+      ],
+      "evidence": "./repo verify"
+    },
+    {
+      "id": "E10",
+      "title": "Cleanliness checks",
+      "acceptance": "Status reports staged, tracked, and untracked changes.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E11",
+      "title": "Safe resumability",
+      "acceptance": "Setup preserves unknown edits and accepts its prior overlay outputs.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E12",
+      "title": "Guarantee map",
+      "acceptance": "Law catalog connects each formal claim to its model and witnesses.",
+      "files": [
+        "pilot/admission/law-catalog.json",
+        "scripts/generate-admission-proof.py",
+        "scripts/check-admission-correspondence.py",
+        "tests/test_proof_tools.py"
+      ],
+      "evidence": "./repo verify --scope proof"
+    },
+    {
+      "id": "E13",
+      "title": "Evidence classification",
+      "acceptance": "Receipts retain their required evidence kind and scope.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E14",
+      "title": "Trust boundary",
+      "acceptance": "Controller, producers, runtime, Git, and host assumptions are explicit.",
+      "files": [
+        "docs/repo-operations.md",
+        "docs/admission.md"
+      ],
+      "evidence": "./repo catalog --check"
+    },
+    {
+      "id": "E15",
+      "title": "Deployment status",
+      "acceptance": "Local verification and external enforcement remain distinct.",
+      "files": [
+        "docs/repo-operations.md",
+        "docs/admission.md"
+      ],
+      "evidence": "./repo catalog --check"
+    },
+    {
+      "id": "E16",
+      "title": "Law definitions",
+      "acceptance": "Every law has premises, positive case, and forbidden case.",
+      "files": [
+        "pilot/admission/law-catalog.json",
+        "scripts/generate-admission-proof.py",
+        "scripts/check-admission-correspondence.py",
+        "tests/test_proof_tools.py"
+      ],
+      "evidence": "./repo verify --scope proof"
+    },
+    {
+      "id": "E17",
+      "title": "Non-vacuity",
+      "acceptance": "Useful acceptance and concrete positive cases remain executable.",
+      "files": [
+        "pilot/admission/law-catalog.json",
+        "scripts/generate-admission-proof.py",
+        "scripts/check-admission-correspondence.py",
+        "tests/test_proof_tools.py"
+      ],
+      "evidence": "./repo verify --scope proof"
+    },
+    {
+      "id": "E18",
+      "title": "Negative coverage",
+      "acceptance": "Compiled false claims are distinguished from documented forbidden cases.",
+      "files": [
+        "pilot/admission/law-catalog.json",
+        "scripts/generate-admission-proof.py",
+        "scripts/check-admission-correspondence.py",
+        "tests/test_proof_tools.py"
+      ],
+      "evidence": "./repo verify --scope proof"
+    },
+    {
+      "id": "E19",
+      "title": "Model correspondence",
+      "acceptance": "All 54 finite decisions execute in Bend and match Python.",
+      "files": [
+        "pilot/admission/law-catalog.json",
+        "scripts/generate-admission-proof.py",
+        "scripts/check-admission-correspondence.py",
+        "tests/test_proof_tools.py"
+      ],
+      "evidence": "./repo verify --scope proof"
+    },
+    {
+      "id": "E20",
+      "title": "Scope boundaries",
+      "acceptance": "Unsupported formats, external effects, and crash assumptions are stated.",
+      "files": [
+        "docs/repo-operations.md",
+        "docs/admission.md"
+      ],
+      "evidence": "./repo catalog --check"
+    },
+    {
+      "id": "E21",
+      "title": "Amendments",
+      "acceptance": "Policy change procedure uses prior authority and cannot exempt its own patch.",
+      "files": [
+        "docs/repo-operations.md",
+        "docs/admission.md"
+      ],
+      "evidence": "./repo catalog --check"
+    },
+    {
+      "id": "E22",
+      "title": "Public API",
+      "acceptance": "Admission exports stable named constructors and operations.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E23",
+      "title": "Data structures",
+      "acceptance": "Validated canonical immutable documents prevent nested mutation.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E24",
+      "title": "Construction",
+      "acceptance": "Builders construct policies, manifests, and bundles.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E25",
+      "title": "Serialization",
+      "acceptance": "Strict parsing and canonical serialization are shared.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E26",
+      "title": "Error reporting",
+      "acceptance": "Stable decision codes accompany descriptive reasons.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E27",
+      "title": "Decision explanation",
+      "acceptance": "Each evidence domain has a separate outcome.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E28",
+      "title": "Inspection",
+      "acceptance": "Manifest inspection and field-level comparison are available.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E29",
+      "title": "Dry runs",
+      "acceptance": "Plans disclose intended refs without mutating them.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E30",
+      "title": "Timeout recovery",
+      "acceptance": "Reconciliation preserves uncertainty and never grants blind retries.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E31",
+      "title": "Repository identity",
+      "acceptance": "Controller-owned mapping is explicit and checked before mutation.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E32",
+      "title": "Policy loading",
+      "acceptance": "Immutable policy construction validates the controller-supplied content.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E33",
+      "title": "Producer integration",
+      "acceptance": "A bounded command producer retains bytes and signs its bounded-test result.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E34",
+      "title": "Key handling",
+      "acceptance": "Signing is confined to explicit producer calls; verification trust is documented.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E35",
+      "title": "Examples",
+      "acceptance": "Disposable demo exercises producer, gate, commit, replay, and reconciliation.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E36",
+      "title": "Proof repetition",
+      "acceptance": "Exact generated cases replace manual maintenance of repeated branches.",
+      "files": [
+        "pilot/admission/law-catalog.json",
+        "scripts/generate-admission-proof.py",
+        "scripts/check-admission-correspondence.py",
+        "tests/test_proof_tools.py"
+      ],
+      "evidence": "./repo verify --scope proof"
+    },
+    {
+      "id": "E37",
+      "title": "Generated proofs",
+      "acceptance": "Generator --check rejects drift.",
+      "files": [
+        "pilot/admission/law-catalog.json",
+        "scripts/generate-admission-proof.py",
+        "scripts/check-admission-correspondence.py",
+        "tests/test_proof_tools.py"
+      ],
+      "evidence": "./repo verify --scope proof"
+    },
+    {
+      "id": "E38",
+      "title": "Proof inventory",
+      "acceptance": "An exact nine-law inventory rejects omissions and duplicates.",
+      "files": [
+        "pilot/admission/law-catalog.json",
+        "scripts/generate-admission-proof.py",
+        "scripts/check-admission-correspondence.py",
+        "tests/test_proof_tools.py"
+      ],
+      "evidence": "./repo verify --scope proof"
+    },
+    {
+      "id": "E39",
+      "title": "Focused verification",
+      "acceptance": "Named scopes expose component-level checks.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E40",
+      "title": "Full verification",
+      "acceptance": "One bounded command aggregates required checks.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E41",
+      "title": "Skipped tests",
+      "acceptance": "Unexpected skipped or empty suites fail the gate.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E42",
+      "title": "Stress coverage",
+      "acceptance": "Campaign declares finite dimensions, mutations, and deadlines.",
+      "files": [
+        "experiments/admission_stress.py",
+        "tests/test_admission_gate.py"
+      ],
+      "evidence": "./repo stress"
+    },
+    {
+      "id": "E43",
+      "title": "Mutation maintenance",
+      "acceptance": "Every named mutation validates its unique source anchor.",
+      "files": [
+        "experiments/admission_stress.py",
+        "tests/test_admission_gate.py"
+      ],
+      "evidence": "./repo stress"
+    },
+    {
+      "id": "E44",
+      "title": "Mutation diagnostics",
+      "acceptance": "Expected test failure identifies detection of each fault.",
+      "files": [
+        "experiments/admission_stress.py",
+        "tests/test_admission_gate.py"
+      ],
+      "evidence": "./repo stress"
+    },
+    {
+      "id": "E45",
+      "title": "Counterexample retention",
+      "acceptance": "Minimal reproducers and law references have a supported capture command.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E46",
+      "title": "Concurrency coverage",
+      "acceptance": "Bounded repeated races verify a single winning Git transaction.",
+      "files": [
+        "experiments/admission_stress.py",
+        "tests/test_admission_gate.py"
+      ],
+      "evidence": "./repo stress"
+    },
+    {
+      "id": "E47",
+      "title": "Crash coverage",
+      "acceptance": "Lost acknowledgements are tested and distinguished from power-loss durability.",
+      "files": [
+        "admission/api.py",
+        "admission/__init__.py",
+        "tests/test_admission_api.py"
+      ],
+      "evidence": "./repo verify --scope schema"
+    },
+    {
+      "id": "E48",
+      "title": "Evidence freshness",
+      "acceptance": "Source, tests, configuration, runtime, upstream, and logs bind run results.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E49",
+      "title": "Result summaries",
+      "acceptance": "Small summaries point to full per-step logs.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E50",
+      "title": "Evidence retention",
+      "acceptance": "New bulky runs remain local or in CI artifacts; committed records preserve useful history.",
+      "files": [
+        "docs/repo-operations.md",
+        "docs/admission.md"
+      ],
+      "evidence": "./repo catalog --check"
+    },
+    {
+      "id": "E51",
+      "title": "CI topology",
+      "acceptance": "Jobs and their claims are documented; required enforcement is separately inspected.",
+      "files": [
+        "toolchain.json",
+        ".github/workflows/supermodularity.yml",
+        ".github/actions/toolchain/action.yml"
+      ],
+      "evidence": "./repo verify"
+    },
+    {
+      "id": "E52",
+      "title": "Check enforcement",
+      "acceptance": "Read-only host inspection distinguishes workflow existence from host rules.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E53",
+      "title": "Merge candidate identity",
+      "acceptance": "CI records evaluated source and upstream identity on merge-group events.",
+      "files": [
+        "toolchain.json",
+        ".github/workflows/supermodularity.yml",
+        ".github/actions/toolchain/action.yml"
+      ],
+      "evidence": "./repo verify"
+    },
+    {
+      "id": "E54",
+      "title": "Workflow protection",
+      "acceptance": "Policy procedure identifies the complete checker dependency boundary.",
+      "files": [
+        "docs/repo-operations.md",
+        "docs/admission.md"
+      ],
+      "evidence": "./repo catalog --check"
+    },
+    {
+      "id": "E55",
+      "title": "Remote publishing",
+      "acceptance": "Prepared packets support CLI and connected-GitHub transport.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E56",
+      "title": "Publication verification",
+      "acceptance": "Exact remote commit tree is compared with local content.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E57",
+      "title": "PR descriptions",
+      "acceptance": "Publication prepares the body from current verification metadata.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E58",
+      "title": "CI waiting",
+      "acceptance": "Bounded watch distinguishes pending from completed checks.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E59",
+      "title": "Completion state",
+      "acceptance": "Task authority, local evidence, remote CI, merge, and deployment are separate.",
+      "files": [
+        "docs/repo-operations.md",
+        "docs/admission.md"
+      ],
+      "evidence": "./repo catalog --check"
+    },
+    {
+      "id": "E60",
+      "title": "Status duplication",
+      "acceptance": "Capability views render from one catalog and task views reuse the existing journal.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E61",
+      "title": "Residual obligations",
+      "acceptance": "Each open boundary names consequence, probe, and reopen trigger.",
+      "files": [
+        "docs/repo-operations.md",
+        "docs/admission.md"
+      ],
+      "evidence": "./repo catalog --check"
+    },
+    {
+      "id": "E62",
+      "title": "Historical claims",
+      "acceptance": "Source-bound records distinguish historical success from freshness.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E63",
+      "title": "Change impact",
+      "acceptance": "Changed paths map to declared checks with a full-suite fallback.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E64",
+      "title": "Task completion",
+      "acceptance": "Existing journal requires retained fresh evidence to close tasks.",
+      "files": [
+        "tools/agent_system/state.py",
+        "system/roadmap.json",
+        "state/events.jsonl"
+      ],
+      "evidence": "./repo tasks check"
+    },
+    {
+      "id": "E65",
+      "title": "Resource limits",
+      "acceptance": "Total and per-step budgets stop bounded runs; no remote workers start.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    },
+    {
+      "id": "E66",
+      "title": "Recovery instructions",
+      "acceptance": "Interrupted runs retain completed steps and a safe reverify command.",
+      "files": [
+        "repo",
+        "tools/repo_cli.py",
+        "tests/test_repo_cli.py"
+      ],
+      "evidence": "python3 -m unittest discover -s tests -p test_repo_cli.py"
+    }
+  ]
+}

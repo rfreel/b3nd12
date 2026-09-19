@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+"""Repository entry point; Python's standard library is the bootstrap dependency."""
+from tools.repo_cli import main
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "lessons": [
+    {
+      "id": "L001",
+      "failure": "Bend diagnostic errors can be emitted on stderr while successful checks use stdout.",
+      "scope": "Bend CLI structured diagnostic collection",
+      "reproducer": "Run a PROOF.bend with a missing required proof and capture both streams.",
+      "guard": "tests/test_autoresearch.py::AutoresearchTests.test_stderr_error_overrides_stdout_success",
+      "reopen": "The compiler changes its diagnostic transport contract.",
+      "evidence": {
+        "path": "experiments/autoresearch/results/first/ledger.jsonl",
+        "sha256": "7f160e133faa9cef0001967a464c65449df5a3cabc9f3d2f77d05e6661356570"
+      },
+      "consequence": "Parse both streams and reject errors even if stdout contains a success event.",
+      "transfer_status": "LOCAL_ONLY"
+    },
+    {
+      "id": "L002",
+      "failure": "Syntactically valid JSON can still have the wrong object shape.",
+      "scope": "Versioned JSON command boundaries",
+      "reproducer": "Supply [] as the evidence object or metric registry.",
+      "guard": "tests/test_agent_cli.py::CliTests.test_json_array_is_not_an_evidence_object",
+      "reopen": "A new external document shape or schema version is accepted.",
+      "evidence": {
+        "path": "evidence/agent-system/review.md",
+        "sha256": "668531b68a7a1f3a95064f31ea4cd0a31750d903dfe41af0fabfef089ec619f6"
+      },
+      "consequence": "Validate schema shape before field access and preserve the structured error envelope.",
+      "transfer_status": "LOCAL_ONLY"
+    },
+    {
+      "id": "L003",
+      "failure": "A measurement subprocess can silently observe a different state than the parent.",
+      "scope": "Benchmarks invoking another control process",
+      "reproducer": "Select an alternate journal while the default journal is corrupt.",
+      "guard": "tests/test_agent_benchmarks.py::BenchmarkTests.test_cold_benchmark_uses_selected_journal",
+      "reopen": "A new subprocess, state selector, or remote measurement adapter is introduced.",
+      "evidence": {
+        "path": "evidence/agent-system/review.md",
+        "sha256": "668531b68a7a1f3a95064f31ea4cd0a31750d903dfe41af0fabfef089ec619f6"
+      },
+      "consequence": "Forward the selected state and verify its returned head before attributing measurements.",
+      "transfer_status": "LOCAL_ONLY"
+    },
+    {
+      "id": "L004",
+      "failure": "A verifier exposed its final evidence path before execution completed.",
+      "scope": "Local evidence publication",
+      "reproducer": "During verification, require the final evidence path to remain absent.",
+      "guard": "tests/test_agent_evidence.py::EvidenceTests.test_unfinished_evidence_is_not_published",
+      "reopen": "Evidence publication moves to a different filesystem or remote object store.",
+      "evidence": {
+        "path": "evidence/agent-system/evidence-incident.md",
+        "sha256": "ba40eb1d9da7f128a17d422a539f6fee80488980fb36a4fb51047c25740fac9f"
+      },
+      "consequence": "Publish only complete fsynced evidence through a no-overwrite atomic operation; preserve interrupted pending records.",
+      "transfer_status": "LOCAL_ONLY"
+    }
+  ]
+}

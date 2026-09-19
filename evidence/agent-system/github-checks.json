@@ -1,0 +1,36 @@
+{
+  "commit": "f83376b5ffe51def63dba2033d879301c79b6367",
+  "scope": "First published implementation; all three pull-request workflows passed.",
+  "workflow_runs": [
+    {
+      "id": 35465811320,
+      "name": "verify-ranked-deepenings",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 10,
+      "jobs_url": "https://api.github.com/repos/rfreel/b3nd12/actions/runs/35465811320/jobs",
+      "logs_url": "https://api.github.com/repos/rfreel/b3nd12/actions/runs/35465811320/logs",
+      "workflow_id": 361631711
+    },
+    {
+      "id": 35465811360,
+      "name": "verify-supermodularity",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 7,
+      "jobs_url": "https://api.github.com/repos/rfreel/b3nd12/actions/runs/35465811360/jobs",
+      "logs_url": "https://api.github.com/repos/rfreel/b3nd12/actions/runs/35465811360/logs",
+      "workflow_id": 362221787
+    },
+    {
+      "id": 35465811314,
+      "name": "agent-system",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 2,
+      "jobs_url": "https://api.github.com/repos/rfreel/b3nd12/actions/runs/35465811314/jobs",
+      "logs_url": "https://api.github.com/repos/rfreel/b3nd12/actions/runs/35465811314/logs",
+      "workflow_id": 362266563
+    }
+  ]
+}
