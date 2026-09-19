@@ -29,6 +29,11 @@ python3 accretion/program.py \
   --output /path/outside/repository/new-evidence-directory
 ```
 
+The resolved output destination must be outside the repository, including when
+reached through a relative path or a symlink alias. Repository-contained outputs
+are refused before directories are created. This checks physical containment;
+it does not isolate concurrent filesystem changes by another process.
+
 An existing output directory is refused. Output is JSON; exit 0 means all
 outcomes and the successor task completed. Exit 1 means refusal, unresolved
 evidence, an exhausted trial budget, or an incomplete candidate queue. An

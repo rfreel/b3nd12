@@ -13,6 +13,12 @@ from program import encode, replay, sha
 bend, bun = (Path(p).resolve() for p in sys.argv[1:3])
 seal = sha((ROOT / "accretion/TODO.json").read_bytes())
 routes = (ROOT / "accretion/routes.json").read_bytes()
+try:
+    replay(ROOT, seal, bun, bend)
+except ValueError as exc:
+    assert "outside the repository" in str(exc)
+else:
+    raise AssertionError("repository root accepted through replay API")
 with tempfile.TemporaryDirectory() as tmp:
     root = Path(tmp)
     result = replay(root / "positive", seal, bun, bend)
@@ -47,6 +53,23 @@ with tempfile.TemporaryDirectory() as tmp:
     assert not (root / "bad-seal").exists()
     # Exercise seal and oracle tampering through the CLI in its saved source copy.
     snapshot = root / "positive/inputs"
+    # The boundary follows the executing module's repository, even in a copy.
+    alias = root / "repository-alias"
+    alias.symlink_to(snapshot, target_is_directory=True)
+    for supplied, absent in [
+        (snapshot / "forbidden-absolute", snapshot / "forbidden-absolute"),
+        (Path("forbidden-relative"), snapshot / "forbidden-relative"),
+        (snapshot / "forbidden-parent/nested/run", snapshot / "forbidden-parent"),
+        (alias / "forbidden-alias/nested", snapshot / "forbidden-alias"),
+    ]:
+        boundary = subprocess.run(
+            [sys.executable, str(snapshot / "accretion/program.py"),
+             "--contract-sha256", seal, "--bend-root", str(bend), "--bun", str(bun),
+             "--output", str(supplied)],
+            cwd=snapshot, capture_output=True, text=True)
+        assert boundary.returncode == 1, boundary.stdout
+        assert not absent.exists(), "refused output created repository paths: " + str(absent)
+        assert "outside the repository" in json.loads(boundary.stdout)["error"], boundary.stdout
     frozen_todo = snapshot / "accretion/TODO.json"
     original = frozen_todo.read_bytes()
     altered = json.loads(original)
@@ -84,4 +107,4 @@ with tempfile.TemporaryDirectory() as tmp:
     unknown = replay(root / "unknown", seal, Path('/usr/bin/true'), bend, [one])
     assert unknown["stop"] == "unresolved" and not unknown["completed"]
 assert (ROOT / "accretion/routes.json").read_bytes() == routes
-print("PASS frozen seal, 3 productive trials with 9 proofs, bounded refusals, duplicate credit, regression, unresolved checker, successor gate, unchanged installed routes")
+print("PASS external evidence boundary, frozen seal, 3 productive trials with 9 proofs, bounded refusals, duplicate credit, regression, unresolved checker, successor gate, unchanged installed routes")

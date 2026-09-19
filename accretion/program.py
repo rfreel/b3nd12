@@ -50,6 +50,9 @@ def journal(directory, records, event):
 
 
 def replay(output, expected, bun, bend, candidates=None):
+    output = output.resolve()
+    if output.is_relative_to(ROOT.resolve()):
+        raise ValueError("evidence output must be outside the repository")
     contract, raw = load_contract(expected)
     validate_compiler(bend)
     frozen = {p: p.read_bytes() for p in [HERE / "TODO.json", HERE / "program.py",
