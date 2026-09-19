@@ -12,6 +12,7 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from stack import PIN
+from cli_schema import validate
 
 
 def run(*args, status=0, env=None):
@@ -25,6 +26,7 @@ def check(*args, status=0, code=None):
     got = run(*args, status=status)
     assert got.stderr == "", got.stderr
     doc = json.loads(got.stdout)
+    validate(doc)
     assert set(doc) == {"schema", "ok", "command", "corrected", "result", "error", "exit_code"}
     schema = json.loads((ROOT / "spec/cli-v1.schema.json").read_text())
     assert set(doc) == set(schema["required"])
@@ -67,6 +69,7 @@ def main():
     check("task", status=2, code="INVALID_ARGUMENTS")
     assert check("StAtUs")["command"] == ["doctor"]
     absent = run("doctor", "--json", status=3, env={**os.environ, "PATH": "/nonexistent"})
+    validate(json.loads(absent.stdout))
     assert json.loads(absent.stdout)["error"]["code"] == "MISSING_TOOL"
     assert check("ver_ify", "/no-such-bend", status=1, code="NOT_FOUND")["corrected"]
     for args in [("Apply", "/x"), ("apply",), ("check",), ("doctor", "extra"),

@@ -3,8 +3,11 @@
 import json
 import os
 import shutil
+import re
 import subprocess
 import sys
+
+from bounded import OutputLimitExceeded, run as bounded_run
 
 from stack import ROOT, PIN, Failure, patch_files, target_check, verify
 
@@ -75,6 +78,30 @@ def parse(raw):
     return canonical, values, machine, [canonical, *values], canonical != command
 
 
+def probe_tool(name, path):
+    """Operational probes are readiness evidence, not executable authentication."""
+    if path is None:
+        return {"status": "missing", "detail": "Executable was not found on PATH."}
+    args = {"git": ["--version"], "sh": ["-c", "printf b3nd12-shell-ready"],
+            "bun": ["-e", 'console.log("b3nd12-bun-ready:" + Bun.version)']}[name]
+    try:
+        ran = bounded_run([path, *args], capture_output=True, text=True, timeout=2, max_output_bytes=65536)
+    except OutputLimitExceeded as exc:
+        return {"status": "broken", "detail": "Probe exceeded output limit of " + str(exc.limit_bytes) + " bytes."}
+    except subprocess.TimeoutExpired:
+        return {"status": "timeout", "detail": "Probe exceeded two seconds."}
+    except OSError as exc:
+        return {"status": "broken", "detail": str(exc)}
+    if ran.returncode:
+        return {"status": "broken", "detail": "Probe exited with status " + str(ran.returncode)}
+    output = ran.stdout.strip()
+    valid = {"git": bool(re.fullmatch(r"git version [0-9]+\.[0-9]+(?:\.[^\s]+)?(?: .*)?", output)),
+             "sh": output == "b3nd12-shell-ready",
+             "bun": bool(re.fullmatch(r"b3nd12-bun-ready:1\.[0-9]+\.[0-9]+(?:[-+].*)?", output))}[name]
+    return {"status": "usable" if valid and not ran.stderr else "incompatible",
+            "detail": output[:200] or "Probe produced no output."}
+
+
 def execute(command, values):
     if command in ("quick", "help"):
         return {"text": QUICK if command == "quick" else HELP}
@@ -86,22 +113,45 @@ def execute(command, values):
             raise Failure("NOT_FOUND", "Unknown guide route: " + name, "Use router, program, or prove.", 1)
         return {"route": name, "text": (ROOT / "guide/agent" / (name.upper()+".md")).read_text()}
     if command == "task":
-        from accretion.environment import resolve
+        from accretion.environment import resolve, TASKS
+        if values[0] not in TASKS:
+            raise Failure("INVALID_TASK", "Unknown task: " + values[0],
+                          "Use task implement, task prove, or task diagnose.", 2)
         try:
-            return resolve(values[0], ROOT / "accretion/routes.json")
-        except ValueError as exc:
-            raise Failure("INVALID_TASK", str(exc), "Use task implement, task prove, or task diagnose.", 2)
+            result = resolve(values[0], ROOT / "accretion/routes.json")
+            expected = (ROOT / "guide/agent" / TASKS[values[0]]).read_text()
+            if result["text"] != expected:
+                raise ValueError("accepted route returns the wrong task content")
+            return result
+        except (ValueError, OSError) as exc:
+            raise Failure("ROUTING_CONFIGURATION", str(exc),
+                          "Restore accretion/routes.json and its declared guide files from the accepted revision.", 3)
     if command == "doctor":
         tools = {name: shutil.which(name) for name in ("git", "sh", "bun")}
         patch_files()
-        if not tools["git"] or not tools["sh"]:
-            raise Failure("MISSING_TOOL", "Git and a POSIX shell are required.", "Install the missing prerequisites.", 3, tools=tools)
-        return {"pin": PIN, "tools": tools, "patches": 9,
-                "runtime_checks": "available" if tools["bun"] else "unavailable"}
+        probes = {name: probe_tool(name, path) for name, path in tools.items()}
+        if any(probes[name]["status"] != "usable" for name in ("git", "sh")):
+            missing = any(tools[name] is None for name in ("git", "sh"))
+            raise Failure("MISSING_TOOL" if missing else "BROKEN_TOOL",
+                          "Git and a working POSIX shell are required.",
+                          "Install or repair the prerequisites shown in probes.", 3,
+                          tools=tools, probes=probes)
+        return {"pin": PIN, "tools": tools, "patches": 9, "probes": probes,
+                "runtime_checks": "available" if probes["bun"]["status"] == "usable" else "unavailable"}
     target = target_check(values[0], clean=command == "apply")
     patch_files()
     if command == "apply":
-        ran = subprocess.run([str(ROOT / "apply.sh"), str(target)], capture_output=True, text=True)
+        try:
+            ran = bounded_run([str(ROOT / "apply.sh"), str(target)], capture_output=True, text=True, timeout=90)
+        except OutputLimitExceeded as exc:
+            raise Failure("INSTALL_OUTPUT_LIMIT", "Installation exceeded its output limit.",
+                          "Preserve the target and inspect truncated diagnostics before retrying.", 4,
+                          stdout=exc.stdout or "", stderr=exc.stderr or "", target=str(target),
+                          limit_bytes=exc.limit_bytes, observed_bytes=exc.observed_bytes)
+        except subprocess.TimeoutExpired as exc:
+            raise Failure("INSTALL_TIMEOUT", "Installation exceeded 90 seconds.",
+                          "Preserve the target and inspect partial installation diagnostics before retrying.", 4,
+                          stdout=exc.stdout or "", stderr=exc.stderr or "", target=str(target))
         if ran.returncode:
             raise Failure("INSTALL_FAILED", "Patch installation or verification failed.",
                           "Inspect the diagnostics; preserve the target for investigation.", 5,

@@ -3,29 +3,562 @@
   "title": "B3ND12 management CLI result",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "ok", "command", "corrected", "result", "error", "exit_code"],
+  "required": [
+    "schema",
+    "ok",
+    "command",
+    "corrected",
+    "result",
+    "error",
+    "exit_code"
+  ],
   "properties": {
-    "schema": {"const": "b3nd12.cli.v1"},
-    "ok": {"type": "boolean"},
-    "command": {"type": ["array", "null"], "items": {"type": "string"}},
-    "corrected": {"type": "boolean"},
-    "result": {"type": ["object", "null"]},
-    "exit_code": {"enum": [0, 1, 2, 3, 4, 5]},
+    "schema": {
+      "const": "b3nd12.cli.v1"
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "command": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string"
+      },
+      "description": "Normalized semantic command and literal operands, or null when parsing failed. This is not a shell command or replay-ready argv. To replay, insert -- between the command and its operands; choose the output format separately."
+    },
+    "corrected": {
+      "type": "boolean"
+    },
+    "result": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "exit_code": {
+      "enum": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
     "error": {
       "oneOf": [
-        {"type": "null"},
-        {"type": "object", "additionalProperties": false,
-         "required": ["code", "message", "context", "correction", "examples"],
-         "properties": {
-           "code": {"type": "string"}, "message": {"type": "string"},
-           "context": {"type": "object"}, "correction": {"type": "string"},
-           "examples": {"type": "array", "maxItems": 2, "items": {"type": "string"}}
-         }}
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "context",
+            "correction",
+            "examples"
+          ],
+          "properties": {
+            "code": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "context": {
+              "type": "object"
+            },
+            "correction": {
+              "type": "string"
+            },
+            "examples": {
+              "type": "array",
+              "maxItems": 2,
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
       ]
     }
   },
   "oneOf": [
-    {"properties": {"ok": {"const": true}, "error": {"type": "null"}, "exit_code": {"const": 0}, "result": {"type": "object"}}},
-    {"properties": {"ok": {"const": false}, "error": {"type": "object"}, "exit_code": {"minimum": 1}, "result": {"type": "null"}}}
+    {
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "error": {
+          "type": "null"
+        },
+        "exit_code": {
+          "const": 0
+        },
+        "result": {
+          "type": "object"
+        }
+      }
+    },
+    {
+      "properties": {
+        "ok": {
+          "const": false
+        },
+        "error": {
+          "type": "object"
+        },
+        "exit_code": {
+          "minimum": 1
+        },
+        "result": {
+          "type": "null"
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "text": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text"
+      ],
+      "properties": {
+        "text": {
+          "type": "string"
+        }
+      }
+    },
+    "version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "bend_version",
+        "pin"
+      ],
+      "properties": {
+        "version": {
+          "const": "1"
+        },
+        "bend_version": {
+          "const": "2.0.9"
+        },
+        "pin": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    "guide": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "route",
+        "text"
+      ],
+      "properties": {
+        "route": {
+          "enum": [
+            "router",
+            "program",
+            "prove"
+          ]
+        },
+        "text": {
+          "type": "string"
+        }
+      }
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task",
+        "text",
+        "reads",
+        "files"
+      ],
+      "properties": {
+        "task": {
+          "enum": [
+            "implement",
+            "prove",
+            "diagnose"
+          ]
+        },
+        "text": {
+          "type": "string"
+        },
+        "reads": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "doctor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pin",
+        "tools",
+        "patches",
+        "runtime_checks",
+        "probes"
+      ],
+      "properties": {
+        "pin": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "tools": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "git",
+            "sh",
+            "bun"
+          ],
+          "properties": {
+            "git": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sh": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "bun": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "patches": {
+          "const": 9
+        },
+        "runtime_checks": {
+          "enum": [
+            "available",
+            "unavailable"
+          ]
+        },
+        "probes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "git",
+            "sh",
+            "bun"
+          ],
+          "properties": {
+            "git": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "detail"
+              ],
+              "properties": {
+                "status": {
+                  "enum": [
+                    "missing",
+                    "timeout",
+                    "broken",
+                    "incompatible",
+                    "usable"
+                  ]
+                },
+                "detail": {
+                  "type": "string"
+                }
+              }
+            },
+            "sh": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "detail"
+              ],
+              "properties": {
+                "status": {
+                  "enum": [
+                    "missing",
+                    "timeout",
+                    "broken",
+                    "incompatible",
+                    "usable"
+                  ]
+                },
+                "detail": {
+                  "type": "string"
+                }
+              }
+            },
+            "bun": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "detail"
+              ],
+              "properties": {
+                "status": {
+                  "enum": [
+                    "missing",
+                    "timeout",
+                    "broken",
+                    "incompatible",
+                    "usable"
+                  ]
+                },
+                "detail": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "verify": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pin",
+        "files",
+        "theory_unchanged",
+        "delivery",
+        "checks",
+        "target"
+      ],
+      "properties": {
+        "pin": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "files": {
+          "const": 25
+        },
+        "theory_unchanged": {
+          "const": true
+        },
+        "delivery": {
+          "const": "byte-identical"
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "target": {
+          "type": "string"
+        }
+      }
+    },
+    "apply": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pin",
+        "files",
+        "theory_unchanged",
+        "delivery",
+        "checks",
+        "target",
+        "log"
+      ],
+      "properties": {
+        "pin": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "files": {
+          "const": 25
+        },
+        "theory_unchanged": {
+          "const": true
+        },
+        "delivery": {
+          "const": "byte-identical"
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "target": {
+          "type": "string"
+        },
+        "log": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "ok": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "oneOf": [
+          {
+            "properties": {
+              "command": {
+                "type": "array",
+                "minItems": 1,
+                "prefixItems": [
+                  {
+                    "const": "help"
+                  }
+                ],
+                "maxItems": 1
+              },
+              "result": {
+                "$ref": "#/$defs/text"
+              }
+            }
+          },
+          {
+            "properties": {
+              "command": {
+                "type": "array",
+                "minItems": 1,
+                "prefixItems": [
+                  {
+                    "const": "version"
+                  }
+                ],
+                "maxItems": 1
+              },
+              "result": {
+                "$ref": "#/$defs/version"
+              }
+            }
+          },
+          {
+            "properties": {
+              "command": {
+                "type": "array",
+                "minItems": 1,
+                "prefixItems": [
+                  {
+                    "const": "guide"
+                  }
+                ],
+                "maxItems": 2
+              },
+              "result": {
+                "$ref": "#/$defs/guide"
+              }
+            }
+          },
+          {
+            "properties": {
+              "command": {
+                "type": "array",
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "const": "task"
+                  }
+                ],
+                "maxItems": 2
+              },
+              "result": {
+                "$ref": "#/$defs/task"
+              }
+            }
+          },
+          {
+            "properties": {
+              "command": {
+                "type": "array",
+                "minItems": 1,
+                "prefixItems": [
+                  {
+                    "const": "doctor"
+                  }
+                ],
+                "maxItems": 1
+              },
+              "result": {
+                "$ref": "#/$defs/doctor"
+              }
+            }
+          },
+          {
+            "properties": {
+              "command": {
+                "type": "array",
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "const": "verify"
+                  }
+                ],
+                "maxItems": 2
+              },
+              "result": {
+                "$ref": "#/$defs/verify"
+              }
+            }
+          },
+          {
+            "properties": {
+              "command": {
+                "type": "array",
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "const": "apply"
+                  }
+                ],
+                "maxItems": 2
+              },
+              "result": {
+                "$ref": "#/$defs/apply"
+              }
+            }
+          },
+          {
+            "properties": {
+              "command": {
+                "const": []
+              },
+              "result": {
+                "$ref": "#/$defs/text"
+              }
+            }
+          }
+        ]
+      }
+    }
   ]
 }
