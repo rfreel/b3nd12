@@ -103,11 +103,11 @@ Files: `system/metrics.json`, `tools/agent_system/benchmarks.py`,
 Files: `.github/workflows/agent-system.yml`, `system/lessons.json`,
 `docs/agent-roadmap.md`, `README.md`, `state/events.jsonl`.
 
-- [ ] Run all control tests and the existing Bend pilot after integration.
-- [ ] Verify each delivered task and record its completion through the public CLI.
-- [ ] Generate the current TODO view from the journal.
-- [ ] Publish the branch and pull request with the unimplemented gates named.
-- [ ] Inspect GitHub checks and resolve failures caused by this change.
+- [x] Run all control tests and the existing Bend pilot after integration.
+- [x] Verify each delivered task and record its completion through the public CLI.
+- [x] Generate the current TODO view from the journal.
+- [x] Publish the branch and pull request with the unimplemented gates named.
+- [x] Inspect GitHub checks and resolve failures caused by this change.
 
 ## Atomic future work
 

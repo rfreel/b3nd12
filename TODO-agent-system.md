@@ -9,7 +9,7 @@ Generated from system/roadmap.json and state/events.jsonl.
 | A03 | SOLVED | Enforce replayable task transitions | A02 |
 | A04 | SOLVED | Expose one bounded agent command surface | A03 |
 | A05 | SOLVED | Measure control cost and integrity | A04 |
-| A06 | RUNNING | Integrate guidance, lessons, roadmap, and CI | A05 |
+| A06 | SOLVED | Integrate guidance, lessons, roadmap, and CI | A05 |
 | B01 | OPEN | Migrate contracts and recover interrupted journals | A06 |
 | B02 | OPEN | Unify campaign and task evidence | A06 |
 | B03 | OPEN | Retrieve scoped lessons and counterexamples | A06 |
@@ -31,4 +31,4 @@ Generated from system/roadmap.json and state/events.jsonl.
 | B19 | OPEN | Report rolling research trajectories | B07, B15 |
 | B20 | OPEN | Stop campaigns by measured continuation value | B05, B14 |
 
-Journal head: `162cad0933751498c71e4dfd32286d21794c3d6d299c5e64077c5bd0b99b194a`
+Journal head: `2cd25f4f6f1c6b8370e1b7d9b28b212cb1c6ee5112e1a3646fde2dbbfd48736c`

@@ -17,6 +17,7 @@ roadmap, and 26 metrics with separate measured values and future targets.
 - [System design](docs/agent-system-design.md)
 - [Implementation checklist](docs/agent-system-plan.md)
 - [Long-term roadmap](docs/agent-roadmap.md)
+- [Current TODO](TODO-agent-system.md)
 - [Benchmark contract](docs/benchmarks.md)
 
 The controller is local and supervised. Remote workers, signed evidence,
