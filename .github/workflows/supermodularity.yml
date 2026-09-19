@@ -42,3 +42,12 @@ jobs:
           name: supermodularity-results
           path: ${{ runner.temp }}/supermodularity-results
           if-no-files-found: ignore
+      - name: Run bounded proof research
+        run: python3 experiments/autoresearch/run.py --target upstream --output "${{ runner.temp }}/autoresearch-results"
+      - name: Preserve proof research evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autoresearch-results
+          path: ${{ runner.temp }}/autoresearch-results
+          if-no-files-found: ignore

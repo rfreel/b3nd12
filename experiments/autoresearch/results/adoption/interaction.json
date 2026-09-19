@@ -1,0 +1,263 @@
+{
+  "records": [
+    {
+      "arm": "baseline",
+      "budget": {
+        "max_cli_calls_per_case": 2,
+        "timeout_seconds_per_call": 20
+      },
+      "bytes": 41,
+      "calls": 1,
+      "cases": [
+        "empty PROOF.bend beside empty LAWS.bend"
+      ],
+      "evaluation": "missing-laws-import-resolver-v1",
+      "evidence": [
+        {
+          "args": [
+            "PROOF.bend"
+          ],
+          "bytes": 41,
+          "exit_code": 1,
+          "stderr": "bend: PROOF.bend must import ./LAWS.bend\n",
+          "stdout": ""
+        }
+      ],
+      "features": [],
+      "metric": {
+        "direction": "higher_is_better",
+        "name": "correct import repair hint present",
+        "unit": "cases"
+      },
+      "score": 1,
+      "status": "observed",
+      "system": {
+        "files_sha256": {
+          "bend2/base.bend": "dc0a00754c03715821e67da6ae5273ae2f6df139ee090e0e97251130a8a3f385",
+          "bend2/bend.ts": "6f7b5246dc029d587d144e339b0e447b521a6b30daae63a7f7adc31780e96ea0",
+          "bend2/comp.ts": "99f24d78e7854830e0a20a6eebc8bf72288c4ec2dc9216fcd79fa61df9bd6cd2",
+          "bend2/main.ts": "ed428aef215786f0201acc7b7a18392a06599562bbe43948564fd5d074c46684",
+          "experiments/diagnostic_interaction.py": "e64158d365964e0a35c4086960e873a2eeb804976c6ee6156f27e0f41c2b1448",
+          "fixtures/LAWS.bend": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "fixtures/PROOF.bend": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "guide/agent/diagnostics.json": "124dcf191328242d73f7c1e61e3ec6b1f6d9ebc2bab4ee9c953c05895e76ef05",
+          "tools/interaction.py": "a3f11c22bd7b1c6cd7dce9a603a5149bd2afcef490807a43935f353772db734b"
+        },
+        "revision": "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4",
+        "runtime": "bun 1.2.22"
+      }
+    },
+    {
+      "arm": "a",
+      "budget": {
+        "max_cli_calls_per_case": 2,
+        "timeout_seconds_per_call": 20
+      },
+      "bytes": 126,
+      "calls": 1,
+      "cases": [
+        "empty PROOF.bend beside empty LAWS.bend"
+      ],
+      "evaluation": "missing-laws-import-resolver-v1",
+      "evidence": [
+        {
+          "args": [
+            "PROOF.bend",
+            "--json"
+          ],
+          "bytes": 126,
+          "exit_code": 1,
+          "stderr": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND101\",\"severity\":\"error\",\"message\":\"PROOF.bend must import ./LAWS.bend\",\"file\":\"PROOF.bend\"}\n",
+          "stdout": ""
+        }
+      ],
+      "features": [
+        "a"
+      ],
+      "metric": {
+        "direction": "higher_is_better",
+        "name": "correct import repair hint present",
+        "unit": "cases"
+      },
+      "score": 1,
+      "status": "observed",
+      "system": {
+        "files_sha256": {
+          "bend2/base.bend": "dc0a00754c03715821e67da6ae5273ae2f6df139ee090e0e97251130a8a3f385",
+          "bend2/bend.ts": "6f7b5246dc029d587d144e339b0e447b521a6b30daae63a7f7adc31780e96ea0",
+          "bend2/comp.ts": "99f24d78e7854830e0a20a6eebc8bf72288c4ec2dc9216fcd79fa61df9bd6cd2",
+          "bend2/main.ts": "ed428aef215786f0201acc7b7a18392a06599562bbe43948564fd5d074c46684",
+          "experiments/diagnostic_interaction.py": "e64158d365964e0a35c4086960e873a2eeb804976c6ee6156f27e0f41c2b1448",
+          "fixtures/LAWS.bend": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "fixtures/PROOF.bend": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "guide/agent/diagnostics.json": "124dcf191328242d73f7c1e61e3ec6b1f6d9ebc2bab4ee9c953c05895e76ef05",
+          "tools/interaction.py": "a3f11c22bd7b1c6cd7dce9a603a5149bd2afcef490807a43935f353772db734b"
+        },
+        "revision": "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4",
+        "runtime": "bun 1.2.22"
+      }
+    },
+    {
+      "arm": "b",
+      "budget": {
+        "max_cli_calls_per_case": 2,
+        "timeout_seconds_per_call": 20
+      },
+      "bytes": 182,
+      "calls": 2,
+      "cases": [
+        "empty PROOF.bend beside empty LAWS.bend"
+      ],
+      "evaluation": "missing-laws-import-resolver-v1",
+      "evidence": [
+        {
+          "args": [
+            "PROOF.bend"
+          ],
+          "bytes": 41,
+          "exit_code": 1,
+          "stderr": "bend: PROOF.bend must import ./LAWS.bend\n",
+          "stdout": ""
+        },
+        {
+          "args": [
+            "--why",
+            "BND101"
+          ],
+          "bytes": 141,
+          "exit_code": 0,
+          "stderr": "",
+          "stdout": "BND101 proof.laws_import_missing\nPROOF.bend sits beside LAWS.bend but did not import it.\nnext: Import ./LAWS.bend as a module, then recheck.\n"
+        }
+      ],
+      "features": [
+        "b"
+      ],
+      "metric": {
+        "direction": "higher_is_better",
+        "name": "correct import repair hint present",
+        "unit": "cases"
+      },
+      "score": 1,
+      "status": "observed",
+      "system": {
+        "files_sha256": {
+          "bend2/base.bend": "dc0a00754c03715821e67da6ae5273ae2f6df139ee090e0e97251130a8a3f385",
+          "bend2/bend.ts": "6f7b5246dc029d587d144e339b0e447b521a6b30daae63a7f7adc31780e96ea0",
+          "bend2/comp.ts": "99f24d78e7854830e0a20a6eebc8bf72288c4ec2dc9216fcd79fa61df9bd6cd2",
+          "bend2/main.ts": "ed428aef215786f0201acc7b7a18392a06599562bbe43948564fd5d074c46684",
+          "experiments/diagnostic_interaction.py": "e64158d365964e0a35c4086960e873a2eeb804976c6ee6156f27e0f41c2b1448",
+          "fixtures/LAWS.bend": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "fixtures/PROOF.bend": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "guide/agent/diagnostics.json": "124dcf191328242d73f7c1e61e3ec6b1f6d9ebc2bab4ee9c953c05895e76ef05",
+          "tools/interaction.py": "a3f11c22bd7b1c6cd7dce9a603a5149bd2afcef490807a43935f353772db734b"
+        },
+        "revision": "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4",
+        "runtime": "bun 1.2.22"
+      }
+    },
+    {
+      "arm": "ab",
+      "budget": {
+        "max_cli_calls_per_case": 2,
+        "timeout_seconds_per_call": 20
+      },
+      "bytes": 267,
+      "calls": 2,
+      "cases": [
+        "empty PROOF.bend beside empty LAWS.bend"
+      ],
+      "evaluation": "missing-laws-import-resolver-v1",
+      "evidence": [
+        {
+          "args": [
+            "PROOF.bend",
+            "--json"
+          ],
+          "bytes": 126,
+          "exit_code": 1,
+          "stderr": "{\"schema\":\"bend.diag.v1\",\"id\":\"BND101\",\"severity\":\"error\",\"message\":\"PROOF.bend must import ./LAWS.bend\",\"file\":\"PROOF.bend\"}\n",
+          "stdout": ""
+        },
+        {
+          "args": [
+            "--why",
+            "BND101"
+          ],
+          "bytes": 141,
+          "exit_code": 0,
+          "stderr": "",
+          "stdout": "BND101 proof.laws_import_missing\nPROOF.bend sits beside LAWS.bend but did not import it.\nnext: Import ./LAWS.bend as a module, then recheck.\n"
+        }
+      ],
+      "features": [
+        "a",
+        "b"
+      ],
+      "metric": {
+        "direction": "higher_is_better",
+        "name": "correct import repair hint present",
+        "unit": "cases"
+      },
+      "score": 1,
+      "status": "observed",
+      "system": {
+        "files_sha256": {
+          "bend2/base.bend": "dc0a00754c03715821e67da6ae5273ae2f6df139ee090e0e97251130a8a3f385",
+          "bend2/bend.ts": "6f7b5246dc029d587d144e339b0e447b521a6b30daae63a7f7adc31780e96ea0",
+          "bend2/comp.ts": "99f24d78e7854830e0a20a6eebc8bf72288c4ec2dc9216fcd79fa61df9bd6cd2",
+          "bend2/main.ts": "ed428aef215786f0201acc7b7a18392a06599562bbe43948564fd5d074c46684",
+          "experiments/diagnostic_interaction.py": "e64158d365964e0a35c4086960e873a2eeb804976c6ee6156f27e0f41c2b1448",
+          "fixtures/LAWS.bend": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "fixtures/PROOF.bend": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "guide/agent/diagnostics.json": "124dcf191328242d73f7c1e61e3ec6b1f6d9ebc2bab4ee9c953c05895e76ef05",
+          "tools/interaction.py": "a3f11c22bd7b1c6cd7dce9a603a5149bd2afcef490807a43935f353772db734b"
+        },
+        "revision": "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4",
+        "runtime": "bun 1.2.22"
+      }
+    }
+  ],
+  "result": {
+    "classification": "additive",
+    "context": {
+      "budget": {
+        "max_cli_calls_per_case": 2,
+        "timeout_seconds_per_call": 20
+      },
+      "cases": [
+        "empty PROOF.bend beside empty LAWS.bend"
+      ],
+      "evaluation": "missing-laws-import-resolver-v1",
+      "metric": {
+        "direction": "higher_is_better",
+        "name": "correct import repair hint present",
+        "unit": "cases"
+      },
+      "system": {
+        "files_sha256": {
+          "bend2/base.bend": "dc0a00754c03715821e67da6ae5273ae2f6df139ee090e0e97251130a8a3f385",
+          "bend2/bend.ts": "6f7b5246dc029d587d144e339b0e447b521a6b30daae63a7f7adc31780e96ea0",
+          "bend2/comp.ts": "99f24d78e7854830e0a20a6eebc8bf72288c4ec2dc9216fcd79fa61df9bd6cd2",
+          "bend2/main.ts": "ed428aef215786f0201acc7b7a18392a06599562bbe43948564fd5d074c46684",
+          "experiments/diagnostic_interaction.py": "e64158d365964e0a35c4086960e873a2eeb804976c6ee6156f27e0f41c2b1448",
+          "fixtures/LAWS.bend": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "fixtures/PROOF.bend": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "guide/agent/diagnostics.json": "124dcf191328242d73f7c1e61e3ec6b1f6d9ebc2bab4ee9c953c05895e76ef05",
+          "tools/interaction.py": "a3f11c22bd7b1c6cd7dce9a603a5149bd2afcef490807a43935f353772db734b"
+        },
+        "revision": "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4",
+        "runtime": "bun 1.2.22"
+      }
+    },
+    "interaction": "0",
+    "schema": "bend.interaction.v1",
+    "scope": "Recorded evaluation only; no global supermodularity claim.",
+    "scores": {
+      "a": "1",
+      "ab": "1",
+      "b": "1",
+      "baseline": "1"
+    }
+  }
+}

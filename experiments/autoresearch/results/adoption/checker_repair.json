@@ -1,0 +1,127 @@
+{
+  "after_verifier_sha256": "a3684c00b864d5720cfadb5353005c6c1b57446b78e596a4d0de9454e2c1b009",
+  "baseline_commit": "de1ea9ce6c2f02537c79988e9a061775f1e43141",
+  "before_verifier_sha256": "0bf9a18000e757995e840430739fb6bbae92a7f7a6acb05610b4010aea7a735f",
+  "config": {
+    "expected_exit": {
+      "clean": 0,
+      "staged": 1,
+      "unstaged": 1
+    },
+    "timeout_seconds": 60,
+    "upstream": "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4"
+  },
+  "decision": {
+    "after_sha256": "f94d2e71b041b006c37e5f3a6ffa71ff7bebc2dea7662d8713eff1be0c05093c",
+    "before_sha256": "3e20f8ad74c57ef4a7a66c779935bcd5410d885a1c94519cf2004f6a9510e69c",
+    "input_sha256": "6db4257ec81cf651075c3eb5a343ace06088a56b3a8e1c7b53cd383b1fda9484",
+    "reasons": [],
+    "schema_version": 1,
+    "scope": "Supplied evidence consistency only; execution and digest authenticity are not attested.",
+    "verdict": "ACCEPTED"
+  },
+  "environment": {
+    "bun": "1.2.22",
+    "git": "git version 2.51.1",
+    "platform": "linux",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]"
+  },
+  "expected_pattern_observed": true,
+  "experiment": "staged checker modification bypass",
+  "raw_evidence": {
+    "after": {
+      "clean": {
+        "exit_code": 0,
+        "expected_exit_code": 0,
+        "stderr": "",
+        "stdout": "verify: structure PASS; bend2/bend.ts unchanged\n"
+      },
+      "staged": {
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "stderr": "verify: forbidden bend2/bend.ts change\n",
+        "stdout": ""
+      },
+      "unstaged": {
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "stderr": "verify: forbidden bend2/bend.ts change\n",
+        "stdout": ""
+      }
+    },
+    "before": {
+      "clean": {
+        "exit_code": 0,
+        "expected_exit_code": 0,
+        "stderr": "",
+        "stdout": "verify: structure PASS; bend2/bend.ts unchanged\n"
+      },
+      "staged": {
+        "exit_code": 0,
+        "expected_exit_code": 1,
+        "stderr": "",
+        "stdout": "verify: structure PASS; bend2/bend.ts unchanged\n"
+      },
+      "unstaged": {
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "stderr": "verify: forbidden bend2/bend.ts change\n",
+        "stdout": ""
+      }
+    }
+  },
+  "report": {
+    "after": {
+      "cases": [
+        {
+          "evidence_sha256": "bf4bd3a4507f73ce8eba79e11e8dfbe52209f0d7a3dccd3803e7b0de067b81be",
+          "id": "clean",
+          "status": "PASS"
+        },
+        {
+          "evidence_sha256": "e4cd2d6adf13f2da96271bbd081a0afeec71fb8144035528fb173060376593b5",
+          "id": "unstaged",
+          "status": "PASS"
+        },
+        {
+          "evidence_sha256": "e4cd2d6adf13f2da96271bbd081a0afeec71fb8144035528fb173060376593b5",
+          "id": "staged",
+          "status": "PASS"
+        }
+      ],
+      "context": {
+        "config_sha256": "c16c9ea3e519b849f61e3720c2af309fa4bba3198b9d7a9e8d71aa387a175eda",
+        "environment_sha256": "908f06890073a6ff8cd893b21b891c7e26cea339ab59a32751f3ca275e9b1641",
+        "suite_sha256": "d09e90753ba5c1285fcde6ef2bc4f4d2b2afc2b44562848108de9eef74f62786"
+      }
+    },
+    "before": {
+      "cases": [
+        {
+          "evidence_sha256": "bf4bd3a4507f73ce8eba79e11e8dfbe52209f0d7a3dccd3803e7b0de067b81be",
+          "id": "clean",
+          "status": "PASS"
+        },
+        {
+          "evidence_sha256": "e4cd2d6adf13f2da96271bbd081a0afeec71fb8144035528fb173060376593b5",
+          "id": "unstaged",
+          "status": "PASS"
+        },
+        {
+          "evidence_sha256": "479a20072c09fe88dbfc1ea9992885bd5e25c543d28daa82049e9db11f0e98ae",
+          "id": "staged",
+          "status": "FAIL"
+        }
+      ],
+      "context": {
+        "config_sha256": "c16c9ea3e519b849f61e3720c2af309fa4bba3198b9d7a9e8d71aa387a175eda",
+        "environment_sha256": "908f06890073a6ff8cd893b21b891c7e26cea339ab59a32751f3ca275e9b1641",
+        "suite_sha256": "d09e90753ba5c1285fcde6ef2bc4f4d2b2afc2b44562848108de9eef74f62786"
+      }
+    },
+    "schema_version": 1,
+    "target_case": "staged"
+  },
+  "schema_version": 1,
+  "scope": "Three real local verifier probes. Temporary clone only; no edits to the supplied target."
+}
