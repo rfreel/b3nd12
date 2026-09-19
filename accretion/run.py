@@ -11,6 +11,8 @@ import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from environment import ROOT, TASKS, decode, resolve
+sys.path.insert(0, str(ROOT))
+import bounded
 
 HERE = Path(__file__).resolve().parent
 PIN = json.loads((ROOT / "upstream.json").read_text())["commit"]
@@ -28,6 +30,55 @@ def measure(raw, workspace):
     preserved = all(row["text"].encode() == (ROOT / "guide/agent" / TASKS[task]).read_bytes()
                     for task, row in outcomes.items())
     return {"preserved": preserved, "reads": {task: row["reads"] for task, row in outcomes.items()}}
+
+
+# Exact diagnostic from the pinned checker for this frozen false equality.
+REFUSAL = ("Error:\n- expected : False{}\n- observed : True{}\n"
+           "Location: LAWS.improves_next_agent\n"
+           "4 | def Laws.improves_next_agent():\n5>|   {==}\n6 | \n")
+
+
+# Three observations can expand each raw byte to six JSON bytes. A 256 KiB
+# checker cap leaves space for all three streams and metadata below 8 MiB.
+CHECKER_OUTPUT_BYTES = 256 * 1024
+
+
+def check_book(cmd):
+    """Retain process evidence without turning transport failure into law refusal."""
+    evidence = {"command": cmd, "stage": "checker", "exit": None,
+                "stdout": "", "stderr": ""}
+    def stream(value):
+        return value.decode("utf-8", errors="replace") if isinstance(value, bytes) else value or ""
+    try:
+        process = bounded.run(cmd, env={**os.environ, "BEND_NO_TELEMETRY": "1"},
+                                 capture_output=True, text=True, timeout=15,
+                                 max_output_bytes=CHECKER_OUTPUT_BYTES)
+    except bounded.OutputLimitExceeded as exc:
+        evidence.update(status="output_limit", stdout=stream(exc.stdout), stderr=stream(exc.stderr),
+                        limit_bytes=exc.limit_bytes, observed_bytes=exc.observed_bytes, error=str(exc))
+    except subprocess.TimeoutExpired as exc:
+        evidence.update(status="timeout", stdout=stream(exc.stdout), stderr=stream(exc.stderr),
+                        timeout_seconds=exc.timeout, error=str(exc))
+    except OSError as exc:
+        evidence.update(status="spawn_error", error=str(exc))
+    except UnicodeError as exc:
+        evidence.update(status="malformed_certificate", error=str(exc))
+    else:
+        evidence.update(exit=process.returncode, stdout=process.stdout, stderr=process.stderr)
+        if process.returncode == 0 and process.stdout == "All terms check.\n" and process.stderr == "":
+            status = "accepted"
+        elif process.returncode == 1 and process.stdout == "" and process.stderr == REFUSAL:
+            status = "refused"
+        elif process.returncode < 0:
+            status = "crash"
+        elif process.returncode != 0:
+            status = "process_error"
+        elif process.stdout == "" and process.stderr == "":
+            status = "missing_certificate"
+        else:
+            status = "malformed_certificate"
+        evidence["status"] = status
+    return evidence
 
 
 def admit(before, after, bun, bend, workspace):
@@ -49,21 +100,22 @@ def admit(before, after, bun, bend, workspace):
         lines.append(f"def {key}() -> {typ}:\n  {term}\n")
     (book / "Evidence.bend").write_text("\n".join(lines))
     cmd = [str(bun), str(bend / "bend2/main.ts"), str(book / "PROOF.bend")]
-    run = subprocess.run(cmd, env={**os.environ, "BEND_NO_TELEMETRY": "1"},
-                         capture_output=True, text=True, timeout=15)
-    accepted = run.returncode == 0 and run.stdout == "All terms check.\n" and run.stderr == ""
+    checker = check_book(cmd)
+    accepted = checker["status"] == "accepted"
     return {"accepted": accepted, "baseline_sha256": before_sha, "candidate_sha256": after_sha,
             "law_sha256": sha((HERE / "LAWS.bend").read_bytes()), "metrics": evidence,
             "before_reads": old["reads"], "after_reads": new["reads"],
-            "checker": {"command": cmd, "exit": run.returncode, "stdout": run.stdout, "stderr": run.stderr}}
+            "book_sha256": {name: sha((book / name).read_bytes())
+                            for name in ("Evidence.bend", "LAWS.bend", "PROOF.bend")},
+            "checker": checker}
 
 
 def validate_compiler(bend):
-    head = subprocess.check_output(["git", "-C", str(bend), "rev-parse", "HEAD"], text=True).strip()
+    head = bounded.check_output(["git", "-C", str(bend), "rev-parse", "HEAD"], text=True).strip()
     if head != PIN:
         raise ValueError("compiler must be at the B3ND12 pin")
     for name in ("bend2/bend.ts", "bend2/base.bend", "bend2/main.ts", "bend2/comp.ts"):
-        original = subprocess.check_output(["git", "-C", str(bend), "show", PIN+":"+name])
+        original = bounded.check_output(["git", "-C", str(bend), "show", PIN+":"+name])
         if (bend / name).read_bytes() != original:
             raise ValueError("checker inputs differ from pinned source: " + name)
 
@@ -71,7 +123,7 @@ def validate_compiler(bend):
 def rounds(bun, bend, promote=False):
     validate_compiler(bend)
     protected = {p: p.read_bytes() for p in [HERE / "LAWS.bend", HERE / "PROOF.bend", HERE / "environment.py",
-                  HERE / "run.py", ROOT / "upstream.json", ROOT / "guide/agent/ROUTER.md", *[ROOT / "guide/agent" / n for n in TASKS.values()]]}
+                  HERE / "run.py", ROOT / "bounded.py", ROOT / "upstream.json", ROOT / "guide/agent/ROUTER.md", *[ROOT / "guide/agent" / n for n in TASKS.values()]]}
     seal = {str(p.relative_to(ROOT)): sha(raw) for p, raw in protected.items()}
     before = b"{}\n"
     destination = HERE / "routes.json"
@@ -82,8 +134,9 @@ def rounds(bun, bend, promote=False):
         workspace = Path(tmp)
         # Check a refusal before any promotion, so a trivially permissive law
         # cannot mutate accepted state during this demonstration.
-        if admit(before, before, bun, bend, workspace)["accepted"]:
-            raise ValueError("acceptance law failed its no-gain control")
+        control = admit(before, before, bun, bend, workspace)
+        if control["checker"]["status"] != "refused":
+            raise ValueError("no-gain control did not establish law refusal: " + json.dumps(control))
         mapping = {}
         for task, filename in TASKS.items():
             mapping[task] = filename
@@ -112,8 +165,8 @@ def rounds(bun, bend, promote=False):
         for label, raw in {"no_gain": before, "regression": b"{}\n",
                            "wrong_content": b'{"implement":"PROVE.md","prove":"PROVE.md","diagnose":"diagnostics.json"}'}.items():
             result = admit(before, raw, bun, bend, workspace)
-            if result["accepted"]:
-                raise AssertionError("invalid candidate accepted: " + label)
+            if result["checker"]["status"] != "refused":
+                raise AssertionError("negative control did not establish law refusal: " + label + json.dumps(result))
             negative[label] = result
         for label, raw in {"path_escape": b'{"implement":"../../secret"}',
                            "unknown_task": b'{"invented":"PROGRAM.md"}',

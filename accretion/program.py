@@ -2,7 +2,6 @@
 """Replay a sealed, finite routing experiment; never install or activate a successor."""
 import argparse
 import json
-import os
 from pathlib import Path
 import platform
 import subprocess
@@ -10,6 +9,8 @@ import tempfile
 
 from environment import ROOT, TASKS, decode
 from run import HERE, PIN, admit, measure, sha, validate_compiler
+import bounded
+import storage
 
 
 def encode(value):
@@ -42,10 +43,11 @@ def journal(directory, records, event):
     row = {"sequence": len(records), "previous": records[-1]["sha256"] if records else None,
            "event": event}
     row["sha256"] = sha(encode(row))
-    with (directory / "ledger.jsonl").open("ab") as stream:
-        stream.write(json.dumps(row, sort_keys=True).encode() + b"\n")
-        stream.flush()
-        os.fsync(stream.fileno())
+    # Rewrite the bounded logical append-only log atomically. A killed writer
+    # leaves the prior full prefix or the new full prefix, never a torn event.
+    data = b"".join(json.dumps(item, sort_keys=True).encode() + b"\n"
+                    for item in [*records, row])
+    storage.write(directory / "ledger.jsonl", data)
     records.append(row)
 
 
@@ -56,7 +58,7 @@ def replay(output, expected, bun, bend, candidates=None):
     contract, raw = load_contract(expected)
     validate_compiler(bend)
     frozen = {p: p.read_bytes() for p in [HERE / "TODO.json", HERE / "program.py",
-              HERE / "run.py", HERE / "environment.py", HERE / "PROOF.bend",
+              HERE / "run.py", HERE / "storage.py", ROOT / "bounded.py", HERE / "environment.py", HERE / "PROOF.bend",
               HERE / "routes.json", *[ROOT / n for n in contract["protected"]]]}
 
     def unchanged():
@@ -64,30 +66,32 @@ def replay(output, expected, bun, bend, candidates=None):
             raise ValueError("sealed input changed during experiment")
 
     # A new directory owns one run. Existing evidence is never overwritten or resumed.
-    output.mkdir(parents=True, exist_ok=False)
-    (output / "TODO.json").write_bytes(raw)
+    storage.mkdir(output, parents=True, exist_ok=False)
+    storage.write(output / "TODO.json", raw)
     for path, value in frozen.items():
         snapshot = output / "inputs" / path.relative_to(ROOT)
-        snapshot.parent.mkdir(parents=True, exist_ok=True)
-        snapshot.write_bytes(value)
+        storage.mkdir(snapshot.parent, parents=True, exist_ok=True)
+        storage.write(snapshot, value)
     manifest = {str(p.relative_to(ROOT)): sha(value) for p, value in frozen.items()}
     metadata = {"schema": "b3nd12.experiment.v1", "contract_sha256": expected,
                 "inputs": manifest, "pin": PIN, "python": platform.python_version(),
                 "platform": platform.platform(), "bun_sha256": sha(bun.read_bytes()),
-                "bun_version": subprocess.check_output([str(bun), "--version"], text=True).strip(),
-                "source": subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip(),
-                "working_tree": subprocess.check_output(["git", "-C", str(ROOT), "status", "--porcelain"], text=True),
+                "bun_version": bounded.check_output([str(bun), "--version"], text=True).strip(),
+                "source": bounded.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip(),
+                "working_tree": bounded.check_output(["git", "-C", str(ROOT), "status", "--porcelain"], text=True),
                 "scope": "constructed deterministic routing workload; no agent latency claim"}
-    (output / "manifest.json").write_bytes(encode(metadata))
+    manifest_raw = encode(metadata)
+    storage.write(output / "manifest.json", manifest_raw)
     records, completed = [], []
     before = b"{}\n"
     with tempfile.TemporaryDirectory(prefix="b3nd12-program-") as temporary:
         workspace = Path(temporary)
         control = admit(before, before, bun, bend, workspace)
-        if control["accepted"]:
-            raise ValueError("no-gain control accepted")
         journal(output, records, {"kind": "baseline", "control": control,
-                                 "profile": measure(before, workspace)})
+                                 "profile": measure(before, workspace),
+                                 "manifest_sha256": sha(manifest_raw)})
+        if control["checker"]["status"] != "refused":
+            raise ValueError("no-gain control did not establish law refusal: " + json.dumps(control))
         queue = iter(candidates) if candidates is not None else None
         stop = "budget_exhausted"
         for attempt in range(1, contract["max_attempts"] + 1):
@@ -108,10 +112,12 @@ def replay(output, expected, bun, bend, candidates=None):
                 except StopIteration:
                     stop = "candidates_exhausted"
                     break
+            if not isinstance(after, bytes) or len(after) > 4097:
+                raise ValueError("candidate buffer must be bytes of at most 4097 bytes")
             packet = output / f"pass-{attempt:03d}"
-            packet.mkdir()
-            (packet / "before.json").write_bytes(before)
-            (packet / "candidate.json").write_bytes(after)
+            storage.mkdir(packet)
+            storage.write(packet / "before.json", before)
+            storage.write(packet / "candidate.json", after)
             journal(output, records, {"kind": "attempt", "attempt": attempt,
                                      "baseline_sha256": sha(before), "candidate_sha256": sha(after)})
             samples = []
@@ -124,7 +130,9 @@ def replay(output, expected, bun, bend, candidates=None):
                 for _ in range(contract["repetitions"]):
                     samples.append(admit(before, after, bun, bend, workspace))
                 metrics = [s["metrics"] for s in samples]
-                if any(m != metrics[0] for m in metrics):
+                if any(s["checker"]["status"] not in ("accepted", "refused") for s in samples):
+                    verdict, reason = "UNKNOWN", "checker process did not establish a verdict"
+                elif any(m != metrics[0] for m in metrics):
                     verdict, reason = "UNKNOWN", "inconsistent deterministic observations"
                 elif all(s["accepted"] for s in samples):
                     verdict, reason = "PRODUCTIVE", "strict read reduction with exact content preserved"
@@ -145,7 +153,7 @@ def replay(output, expected, bun, bend, candidates=None):
                        "mechanism": "one direct route avoids one fallback router read",
                        "equivalence": "all three returned documents equal the frozen expected bytes",
                        "end_to_end": "not measured; no fresh-agent productivity conclusion"}
-            (packet / "receipt.json").write_bytes(encode(receipt))
+            storage.write(packet / "receipt.json", encode(receipt))
             journal(output, records, {"kind": "verdict", "attempt": attempt,
                                      "receipt_sha256": sha(encode(receipt)), "verdict": verdict})
             if verdict == "PRODUCTIVE":
@@ -170,7 +178,7 @@ def replay(output, expected, bun, bend, candidates=None):
                          "evidence": final,
                          "reason": "each task reads the table and its document; no missing route remains",
                          "reopen_when": "a separately reviewed workload or representation supplies a measurable opportunity"}
-            (output / "successor.json").write_bytes(encode(successor))
+            storage.write(output / "successor.json", encode(successor))
             completed.append("propose-successor")
             journal(output, records, {"kind": "completed", "task": "propose-successor",
                                      "proposal_sha256": sha(encode(successor))})
@@ -178,9 +186,11 @@ def replay(output, expected, bun, bend, candidates=None):
         summary = {"schema": "b3nd12.experiment.v1", "stop": stop, "completed": completed,
                    "final": final, "final_sha256": sha(before), "successor": successor,
                    "installed": False, "contract_sha256": expected}
-        (output / "final.json").write_bytes(before)
+        storage.write(output / "final.json", before)
+        # The terminal ledger event commits the complete evidence bundle after
+        # all referenced artifacts are durable. Summary is a derived projection.
         journal(output, records, {"kind": "stop", **summary})
-        (output / "summary.json").write_bytes(encode(summary))
+        storage.write(output / "summary.json", encode(summary))
     return summary
 
 

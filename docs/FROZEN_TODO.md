@@ -37,7 +37,10 @@ it does not isolate concurrent filesystem changes by another process.
 An existing output directory is refused. Output is JSON; exit 0 means all
 outcomes and the successor task completed. Exit 1 means refusal, unresolved
 evidence, an exhausted trial budget, or an incomplete candidate queue. An
-interrupted run has no successful summary and is not resumable.
+interrupted run is not resumable. The durable terminal ledger record is the
+completion point; an interruption after that record may leave a complete packet
+without its optional summary projection. The independent verifier distinguishes
+complete, incomplete and invalid packets.
 
 By default the controller measures current reads and chooses a missing route
 with the highest read count, breaking ties by task name. Each route has the same
@@ -77,10 +80,13 @@ satisfy its frozen strict-gain law. No verdict authorizes installation.
 
 Each run saves the contract, evaluator input snapshots, source and runtime
 identifiers, initial control, per-pass before/candidate bytes, repeated raw
-observations, receipts, final state and summary. The append-only JSON Lines
-ledger links records by hashes and binds verdicts to receipt hashes. Failed
+observations, receipts, final state and summary. The logically append-only JSON Lines
+ledger links records by hashes and binds the manifest and verdicts to their
+artifact hashes. Each bounded prefix is replaced atomically. Failed
 attempts remain visible. Hash links detect edits relative to a retained digest;
 they do not authenticate an author or prevent replacement of the entire log.
+See [the evidence protocol](EVIDENCE_PROTOCOL.md) for independent verification,
+reconstruction, durable write boundaries, diagnostic limits and archive commands.
 
 The final task writes `successor.json` only after all three outcomes complete.
 For this representation its result is `exhausted`, with no proposed candidates:
