@@ -155,3 +155,45 @@ The controlled demonstration's promotion mode refuses to restart from accepted
 nonempty state. General external candidate evaluation is review-only. No claim of
 an autonomous production RSI controller, native execution, or GPU performance is
 made.
+
+## Frozen TODO controller
+
+The repository-only controller uses the original routing law and evaluator.
+Its contract freezes the empty experimental baseline, outcomes of 8, 7 and 6
+reads, six candidate attempts, three observations per valid candidate and the
+final successor-proposal task. It does not reset or install accepted routes.
+
+Executed from the repository root:
+
+```sh
+python3 tests/program.py ../bend-pinned ../tooling/node_modules/@oven/bun-linux-x64/bin/bun
+python3 accretion/program.py --contract-sha256 8e0074c4bddb7a8de684d11d7a2db93021c013bd290d2fe8378dff941fb1c40b --bend-root ../bend-pinned --bun ../tooling/node_modules/@oven/bun-linux-x64/bin/bun --output ../evidence-bend/frozen-todo-final
+python3 -m py_compile accretion/program.py tests/program.py
+git diff --check
+```
+
+The existing patch-stack, management CLI and Bend contract commands listed above
+also passed after this change. The original accretion suite passed before the
+controller addition; its source and evaluator were unchanged. CI runs both
+accretion suites before applying patches to the pristine checker checkout.
+
+| Requirement | Observed evidence | Limit |
+|---|---|---|
+| Frozen contract and expected content | Modified outcomes, wrong seal and modified oracle refused before trial output creation | Operator retains the trusted digest independently |
+| Ordered completion | Three trials produce 9 → 8 → 7 → 6; nine real checker certificates | Constructed routing workload |
+| No duplicate credit | Repeated successful data is neutral; prior outcome recorded once | Finite three-outcome contract |
+| Bounded failed search | Six unsuccessful trials consume all six slots; seventh candidate is not evaluated | Trial-count budget, not a wall-time quota |
+| Evidence preservation | Before/candidate buffers, receipts, snapshots and linked ledger retained; reused output directory refused | Hash chain is not a signature or external immutable store |
+| Unresolved evidence | Process returning success without a certificate stops with no completion | Controlled failure injection, not a real compiler defect |
+| Successor dependency | Partial runs produce no proposal; complete run produces an exhausted proposal without activation | New workload selection remains a separate review |
+| Delivery preservation | Installer matches all 25 files; theory bytes unchanged; task commands pass | Native/GPU checks remain unavailable |
+
+An initial failure-injection fixture used a process that also refused the runtime
+version query, stopping before its intended boundary. The corrected fixture
+returns exit zero without a certificate and exercises unresolved evidence during
+a trial. Productive trials use the actual pinned checker.
+
+The final replay reports no remaining route candidate. It supplies no new timing,
+allocation, GPU or fresh-agent performance claim. Budget and TODO accounting are
+controller logic; the unchanged Bend law certifies only the original finite
+improvement predicate.

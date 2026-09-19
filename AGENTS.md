@@ -31,3 +31,9 @@ to manufacture a gain. Changing the task set or cost model requires a separate
 contract review. Run tests/accretion.py with the pinned checker and Bun.
 A passing finite certificate is not evidence of general agent productivity.
 Keep historical investigation and current acceptance evidence labeled separately.
+
+For bounded outcome replay, read docs/FROZEN_TODO.md. Keep the operator's
+accretion/TODO.json digest fixed, count rejected trials against its budget, and
+preserve unresolved receipts. Successor generation does not authorize activation.
+Run tests/program.py with the pinned checker and Bun. Keep generated evidence
+outside the repository; the replay does not install candidates.

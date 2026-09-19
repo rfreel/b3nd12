@@ -2,7 +2,7 @@ name: verify-ranked-deepenings
 
 on:
   push:
-    branches: [ranked-deepenings]
+    branches: [ranked-deepenings, improve/verified-stack-and-cli]
   pull_request:
 
 jobs:
@@ -15,6 +15,10 @@ jobs:
         run: |
           git clone --quiet https://github.com/bendlang/bend.git upstream
           git -C upstream checkout --quiet e5a4c4cfe980c2e4e70571562efb5197fe27b2f4
+      - name: Verify frozen outcome experiments against pristine pin
+        run: |
+          python3 tests/accretion.py upstream "$(command -v bun)"
+          python3 tests/program.py upstream "$(command -v bun)"
       - name: Apply and structurally verify
         run: ./apply.sh upstream
       - name: Exercise router and packs

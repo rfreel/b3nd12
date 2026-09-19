@@ -1,0 +1,22 @@
+{
+  "baseline": {},
+  "final_task": "propose-successor",
+  "max_attempts": 6,
+  "pin": "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4",
+  "protected": {
+    "accretion/LAWS.bend": "fa8693a4f81e9fa9916acc9d5fe810034447d36935ddd210fb99d0bb76681a3b",
+    "accretion/PROOF.bend": "c2c0a7ac4e2980d405249bc9c25c8c5e7f966f86508822cacaa6b13c90179470",
+    "guide/agent/PROGRAM.md": "8743fbd78ebb1268c78c82cca34ee83649d13528ced82a8587111e61c1b840cc",
+    "guide/agent/PROVE.md": "d16d131c8cd83a601ca7dc3a4753dbd5ee8e041d43058ebf08df64e58e56c507",
+    "guide/agent/ROUTER.md": "d02cf42a66441a70071ed4a90d5eff918592e796d3b5ec8446b454e0befbcf3c",
+    "guide/agent/diagnostics.json": "124dcf191328242d73f7c1e61e3ec6b1f6d9ebc2bab4ee9c953c05895e76ef05",
+    "upstream.json": "4479b188f7317bebb91f58326323e8d518f5855a3d3abaed66b40e899136e1c9"
+  },
+  "repetitions": 3,
+  "schema": "b3nd12.todo.v1",
+  "targets": [
+    8,
+    7,
+    6
+  ]
+}

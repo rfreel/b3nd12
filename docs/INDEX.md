@@ -2,6 +2,9 @@
 
 ## Current operating contract
 
+- [FROZEN_TODO.md](FROZEN_TODO.md): sealed outcomes, bounded trial accounting,
+  evidence receipts and successor-proposal limits.
+
 - [ACCRETION.md](ACCRETION.md): what the environment experiment measures, proves,
   rejects, and leaves unresolved.
 - [CLI.md](CLI.md): management commands and machine-readable output.

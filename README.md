@@ -46,6 +46,11 @@ The accepted table already attains two reads per task in this representation.
 An unchanged candidate fails the strict-gain condition. Improving another metric
 or changing the workload requires a new reviewed contract, not a weaker proof.
 
+[Frozen TODO replay](docs/FROZEN_TODO.md) adds an ordered outcome contract,
+bounded experiments, repeated observations and evidence receipts. Its final task
+produces a successor proposal without authorizing another workload. The replay
+leaves accepted routes unchanged.
+
 ## Install the pinned delivery
 
 ```sh
@@ -70,6 +75,7 @@ python3 tests/patch_stack.py /path/to/pinned/bend
 python3 tests/cli.py /path/to/pinned/bend
 python3 tests/bend_contracts.py /path/to/pinned/bend
 python3 tests/accretion.py /path/to/pinned/bend /path/to/bun
+python3 tests/program.py /path/to/pinned/bend /path/to/bun
 ```
 
 Put Bun on PATH for the installed Bend contracts. Tests cover exact installation,
