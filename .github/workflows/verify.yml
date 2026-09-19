@@ -17,8 +17,15 @@ jobs:
         run: |
           git clone --quiet https://github.com/bendlang/bend.git upstream
           git -C upstream checkout --quiet e5a4c4cfe980c2e4e70571562efb5197fe27b2f4
-      - name: Verify frozen outcome experiments against pristine pin
+      - name: Verify acceptance suite orchestration
+        run: python3 tests/ci_contract.py
+      - name: Run all acceptance suites against pristine pin
+        shell: bash
         run: |
+          set -euo pipefail
+          python3 tests/patch_stack.py upstream
+          python3 tests/cli.py upstream
+          python3 tests/bend_contracts.py upstream
           python3 tests/accretion.py upstream "$(command -v bun)"
           python3 tests/program.py upstream "$(command -v bun)"
       - name: Apply and structurally verify
