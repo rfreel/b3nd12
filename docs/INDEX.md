@@ -2,6 +2,11 @@
 
 ## Current operating contract
 
+- [TODO_100.md](TODO_100.md): 100 proposed tasks with acceptance criteria and
+  scope prerequisites, separate from the executable frozen contract.
+- [PARALLEL_TEST.md](PARALLEL_TEST.md): six-worker evaluation, confirmed findings
+  and limits of the evidence.
+
 - [FROZEN_TODO.md](FROZEN_TODO.md): sealed outcomes, bounded trial accounting,
   evidence receipts and successor-proposal limits.
 

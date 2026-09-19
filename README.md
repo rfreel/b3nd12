@@ -51,6 +51,11 @@ bounded experiments, repeated observations and evidence receipts. Its final task
 produces a successor proposal without authorizing another workload. The replay
 leaves accepted routes unchanged.
 
+The [100-task backlog](docs/TODO_100.md) lists proposed engineering work and
+measurable acceptance criteria. The [six-worker evaluation](docs/PARALLEL_TEST.md)
+records baseline tests and open findings. The backlog does not replace the
+executable frozen contract.
+
 ## Install the pinned delivery
 
 ```sh
@@ -76,6 +81,7 @@ python3 tests/cli.py /path/to/pinned/bend
 python3 tests/bend_contracts.py /path/to/pinned/bend
 python3 tests/accretion.py /path/to/pinned/bend /path/to/bun
 python3 tests/program.py /path/to/pinned/bend /path/to/bun
+python3 tests/backlog.py
 ```
 
 Put Bun on PATH for the installed Bend contracts. Tests cover exact installation,
