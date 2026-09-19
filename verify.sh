@@ -1,6 +1,12 @@
 #!/bin/sh
 set -eu
 TARGET=${1:?usage: ./verify.sh /path/to/bend-checkout}
+PIN=e5a4c4cfe980c2e4e70571562efb5197fe27b2f4
+
+test "$(git -C "$TARGET" rev-parse HEAD)" = "$PIN" || {
+  echo "verify: target must be pinned to $PIN" >&2
+  exit 1
+}
 
 need() { test -e "$TARGET/$1" || { echo "verify: missing $1" >&2; exit 1; }; }
 need CLAUDE.md
@@ -23,7 +29,7 @@ grep -q -- '--pack' "$TARGET/bend2/main.ts"
 grep -q 'PROOF.bend must import ./LAWS.bend' "$TARGET/bend2/main.ts"
 
 git -C "$TARGET" diff --check
-git -C "$TARGET" diff --quiet -- bend2/bend.ts || {
+git -C "$TARGET" diff --quiet "$PIN" -- bend2/bend.ts || {
   echo "verify: forbidden bend2/bend.ts change" >&2
   exit 1
 }

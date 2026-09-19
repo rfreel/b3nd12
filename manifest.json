@@ -1,7 +1,7 @@
 {
   "schema": "b3nd12.ranked-deepenings.v1",
   "upstream": "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4",
-  "completed": 10,
+  "completed": 11,
   "theoryEdited": false,
   "ranks": [
     {
@@ -82,6 +82,18 @@
       "evidence": [
         "guide/agent/THEORY_BOUNDARY.md",
         "patches/10-no-theory-edit.txt"
+      ]
+    },
+    {
+      "rank": 11,
+      "status": "COMPLETE",
+      "evidence": [
+        "patches/11-supermodularity.txt",
+        "pilot/supermodularity/PROOF.bend",
+        "scripts/verify-supermodularity.sh",
+        "experiments/checker_repair.results.json",
+        "experiments/diagnostic_interaction.results.json",
+        "docs/supermodularity.md"
       ]
     }
   ]
