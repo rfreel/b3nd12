@@ -14,6 +14,8 @@ test -z "$(git -C "$TARGET" status --porcelain)" || {
   exit 1
 }
 
+python3 "$SELF/stack.py"
+
 # Validate the whole ordered stack in a temporary index before changing files.
 CHECK=$(mktemp -d)
 trap 'rm -rf "$CHECK"' EXIT
@@ -22,6 +24,8 @@ GIT_INDEX_FILE="$CHECK/index" git -C "$TARGET" read-tree HEAD
 for patch in "$SELF"/patches/[0-9][0-9]-*.patch; do
   GIT_INDEX_FILE="$CHECK/index" git -C "$TARGET" apply --cached --whitespace=error "$patch"
 done
+
+python3 "$SELF/stack.py" "$TARGET" "$CHECK/index"
 
 for patch in "$SELF"/patches/[0-9][0-9]-*.patch; do
   echo "apply: $(basename "$patch")"

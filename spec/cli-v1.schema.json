@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "B3ND12 management CLI result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "ok", "command", "corrected", "result", "error", "exit_code"],
+  "properties": {
+    "schema": {"const": "b3nd12.cli.v1"},
+    "ok": {"type": "boolean"},
+    "command": {"type": ["array", "null"], "items": {"type": "string"}},
+    "corrected": {"type": "boolean"},
+    "result": {"type": ["object", "null"]},
+    "exit_code": {"enum": [0, 1, 2, 3, 4, 5]},
+    "error": {
+      "oneOf": [
+        {"type": "null"},
+        {"type": "object", "additionalProperties": false,
+         "required": ["code", "message", "context", "correction", "examples"],
+         "properties": {
+           "code": {"type": "string"}, "message": {"type": "string"},
+           "context": {"type": "object"}, "correction": {"type": "string"},
+           "examples": {"type": "array", "maxItems": 2, "items": {"type": "string"}}
+         }}
+      ]
+    }
+  },
+  "oneOf": [
+    {"properties": {"ok": {"const": true}, "error": {"type": "null"}, "exit_code": {"const": 0}, "result": {"type": "object"}}},
+    {"properties": {"ok": {"const": false}, "error": {"type": "object"}, "exit_code": {"minimum": 1}, "result": {"type": "null"}}}
+  ]
+}

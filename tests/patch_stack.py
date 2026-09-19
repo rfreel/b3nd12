@@ -94,6 +94,8 @@ def main():
         broken = tmp / "broken-installer"
         broken.mkdir()
         shutil.copy2(ROOT / "apply.sh", broken / "apply.sh")
+        shutil.copy2(ROOT / "stack.py", broken / "stack.py")
+        shutil.copy2(ROOT / "upstream.json", broken / "upstream.json")
         shutil.copytree(ROOT / "patches", broken / "patches")
         last = broken / "patches" / patches[-1].name
         last.write_text("diff --git a/AGENTS.md b/AGENTS.md\n"
@@ -104,6 +106,35 @@ def main():
         require(run("git", "status", "--porcelain", cwd=clean).stdout == "",
                 "Failed preflight modified the target")
         print("PASS malformed rank 9 rejected before any target changes")
+
+        intact = tmp / "intact-installer"
+        shutil.copytree(ROOT, intact, ignore=shutil.ignore_patterns(".git", "__pycache__"))
+        missing = next((intact / "patches").glob("01-*.patch"))
+        saved = missing.read_bytes()
+        missing.unlink()
+        result = run(str(intact / "apply.sh"), str(clean), ok=False)
+        require(result.returncode != 0 and "rank 1 through 9" in result.stderr,
+                "Missing rank was not rejected")
+        require(run("git", "status", "--porcelain", cwd=clean).stdout == "",
+                "Missing rank changed target")
+        missing.write_bytes(saved)
+        reference = intact / "overlay/bend2/main.ts"
+        reference.write_bytes(reference.read_bytes() + b"\n// delivery drift\n")
+        result = run(str(intact / "apply.sh"), str(clean), ok=False)
+        require(result.returncode != 0 and "Delivery bytes differ" in result.stderr,
+                "Preflight did not detect delivery drift")
+        require(run("git", "status", "--porcelain", cwd=clean).stdout == "",
+                "Delivery mismatch changed target")
+        reference.write_bytes((ROOT / "overlay/bend2/main.ts").read_bytes())
+        marker = b"diff --git a/AGENTS.md b/AGENTS.md\n"
+        require(marker in saved, "Rank 1 has no AGENTS entry")
+        missing.write_bytes(saved.replace(marker, marker + b"old mode 100644\nnew mode 100755\n", 1))
+        result = run(str(intact / "apply.sh"), str(clean), ok=False)
+        require(result.returncode != 0 and "mode" in result.stderr,
+                "Changed upstream mode was not rejected")
+        require(run("git", "status", "--porcelain", cwd=clean).stdout == "",
+                "Mode mismatch changed target")
+        print("PASS missing rank, delivery drift and mode changes rejected before writes")
 
         run("git", "checkout", "--detach", f"{PIN}^", cwd=clean)
         result = run(str(ROOT / "apply.sh"), str(clean), ok=False)
