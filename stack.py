@@ -199,11 +199,15 @@ def verify(target, index=None):
     if original != theory or (not index and original != git(target, "show", ":bend2/bend.ts")):
         raise Failure("THEORY_CHANGED", "The protected theory differs from the pin.",
                       "Preserve the change separately and use a clean pinned checkout.")
+    if not index and git(target, "diff", "--cached", "--raw", "--no-ext-diff",
+                         "--ignore-submodules=none", "--ita-visible-in-index", "HEAD"):
+        raise Failure("STAGED_INDEX", "The real index differs from the pinned tree.",
+                      "Preserve staged work separately and verify an unstaged installation.")
     if not index and git(target, "diff", "--summary", "HEAD"):
         raise Failure("FILE_MODE", "Upstream file modes changed.", "Restore the upstream file modes.")
     git(target, "diff", "--cached" if index else "--no-ext-diff", "--check", env=env)
     return dict(pin=PIN, files=len(expected), theory_unchanged=True,
-                delivery="byte-identical", checks=["pin", "scope", "bytes", "theory", "whitespace"])
+                delivery="byte-identical", checks=["pin", "scope", "bytes", "theory", "index", "whitespace"])
 
 
 if __name__ == "__main__":

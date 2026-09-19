@@ -76,6 +76,53 @@ def main():
         print(f"PASS both installation paths match all {len(expected)} delivery files")
         print("PASS exact file scope, upstream modes, real index, and theory bytes")
 
+        for name in ("README.md", "bend2/main.ts", "guide/agent/PROGRAM.md"):
+            file = installed / name
+            installed_bytes = file.read_bytes()
+            file.write_bytes(installed_bytes + b"\nStaged discrepancy\n")
+            run("git", "add", "--", name, cwd=installed)
+            file.write_bytes(installed_bytes)
+            index_before = (installed / ".git/index").read_bytes()
+            result = run(sys.executable, str(ROOT / "stack.py"), str(installed), ok=False)
+            require(result.returncode != 0 and "real index differs" in result.stderr,
+                    f"Verifier accepted staged non-theory discrepancy: {name}")
+            require((installed / ".git/index").read_bytes() == index_before,
+                    "Verifier rewrote staged caller content")
+            require(file.read_bytes() == installed_bytes,
+                    "Verifier rewrote the correct working file")
+            # Only restore this disposable fixture's index; production never resets staging.
+            run("git", "reset", "HEAD", "--", name, cwd=installed)
+        run("git", "add", "--", "bend2/main.ts", cwd=installed)
+        index_before = (installed / ".git/index").read_bytes()
+        result = run(sys.executable, str(ROOT / "stack.py"), str(installed), ok=False)
+        require(result.returncode != 0 and "real index differs" in result.stderr,
+                "Verifier accepted staging of otherwise correct delivered bytes")
+        require((installed / ".git/index").read_bytes() == index_before,
+                "Verifier changed staged delivery")
+        run("git", "reset", "HEAD", "--", "bend2/main.ts", cwd=installed)
+        run("git", "config", "diff.ignoreSubmodules", "all", cwd=installed)
+        run("git", "update-index", "--add", "--cacheinfo", f"160000,{PIN},staged-module", cwd=installed)
+        index_before = (installed / ".git/index").read_bytes()
+        result = run(sys.executable, str(ROOT / "stack.py"), str(installed), ok=False)
+        require(result.returncode != 0 and "real index differs" in result.stderr,
+                "Git configuration hid a staged gitlink")
+        require((installed / ".git/index").read_bytes() == index_before,
+                "Verifier changed staged gitlink")
+        run("git", "reset", "HEAD", "--", "staged-module", cwd=installed)
+        intention = installed / "staged-intention"
+        intention.write_text("intent to add\n")
+        run("git", "add", "--intent-to-add", "--", "staged-intention", cwd=installed)
+        intention.unlink()
+        index_before = (installed / ".git/index").read_bytes()
+        result = run(sys.executable, str(ROOT / "stack.py"), str(installed), ok=False)
+        require(result.returncode != 0 and "real index differs" in result.stderr,
+                "Intent-to-add entry escaped the pinned index policy")
+        require((installed / ".git/index").read_bytes() == index_before,
+                "Verifier changed intent-to-add staging")
+        run("git", "reset", "HEAD", "--", "staged-intention", cwd=installed)
+        run(sys.executable, str(ROOT / "stack.py"), str(installed))
+        print("PASS real index remains pinned; staged discrepancies refused without writes")
+
         run("git", "config", "core.filemode", "false", cwd=installed)
         index_path = installed / ".git/index"
         for name in ("bend2/bend.ts", "README.md", "bend2/main.ts"):
