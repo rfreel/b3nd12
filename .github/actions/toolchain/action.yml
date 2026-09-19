@@ -1,0 +1,20 @@
+name: Repository toolchain
+description: Read the repository's single runtime manifest.
+runs:
+  using: composite
+  steps:
+    - id: versions
+      shell: bash
+      run: |
+        python3 - <<'PY' >> "$GITHUB_OUTPUT"
+        import json
+        config = json.load(open('toolchain.json'))
+        print('python=' + config['python'])
+        print('bun=' + config['bun'])
+        PY
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ steps.versions.outputs.python }}
+    - uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: ${{ steps.versions.outputs.bun }}

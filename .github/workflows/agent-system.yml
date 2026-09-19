@@ -1,0 +1,30 @@
+name: agent-system
+
+on:
+  push:
+  pull_request:
+  merge_group:
+
+permissions:
+  contents: read
+
+jobs:
+  control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/toolchain
+      - name: Test contracts, evidence, state, and public commands
+        run: python3 -m unittest discover -s tests -p 'test_agent_*.py' -v
+      - name: Check retained history and evidence
+        run: python3 control.py check
+      - name: Measure the local control workload
+        run: python3 control.py benchmark --output evidence/agent-system/ci-benchmark.json
+      - name: Preserve measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-control-benchmark
+          path: evidence/agent-system/ci-benchmark.json
+          if-no-files-found: ignore

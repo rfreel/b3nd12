@@ -66,6 +66,12 @@ equivalence, actual Git effects, or whole-repository safety. Python's decision
 partition is checked against an independently expressed acceptance table.
 Missing evidence maps to the model's pending outcome.
 
+The ergonomics extension also executes all 54 model cases in Bend and compares
+them with authenticated Python gate requests. This establishes correspondence
+for the finite partition. It does not establish equivalence outside that model.
+Use `./repo verify --scope proof` to check the law inventory, generated proof,
+and runtime correspondence together.
+
 ## Reproduce
 
 With the pinned upstream checkout and overlay installed:
@@ -83,8 +89,8 @@ updates, replay, stale bases, concurrent requests, symbolic refs, and a lost
 acknowledgement after an actual commit. The last test injects a timeout after the
 transaction; it is not a power-loss durability test.
 
-Thirteen seeded faults run in disposable copies. Detection requires an assertion
-failure, so syntax/import errors do not count as killed mutants. Results record
+Thirteen seeded faults run in disposable copies. Detection requires the named
+test's assertion failure, so syntax/import errors do not count. Results record
 source fingerprints and raw outputs. Each mutant has a 30-second deadline. The
 campaign stops after this finite coverage; it makes no global completeness claim.
 
@@ -94,7 +100,7 @@ campaign stops after this finite coverage; it makes no global completeness claim
 | --- | --- | --- |
 | Application correctness | Producer evidence only | New application or contract |
 | Transitive dependency coverage | Controller responsibility | New build input |
-| Proof-to-Python correspondence | Finite decision tests only | Decision implementation changes |
+| Proof-to-Python correspondence | 54 executed Bend/Python decision cases | Decision implementation changes |
 | Producer isolation and honest execution | External assumption | Real producer deployment |
 | Atomic revocation and expiry | Not implemented | Concurrent policy/key rotation |
 | Delegation and aggregate budgets | Not implemented | Autonomous worker scheduling |

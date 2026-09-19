@@ -1,0 +1,23 @@
+{
+  "EVIDENCE_STALE": {"meaning": "Evidence names another subject or no longer matches current sources.", "next": "Compare manifests or run ./repo verify."},
+  "EVIDENCE_AUTHENTICATION": {"meaning": "Receipt authentication failed.", "next": "Inspect the configured producer and receipt; do not relabel it as passing."},
+  "EVIDENCE_PENDING": {"meaning": "A required domain has no conclusive evidence.", "next": "Complete the missing domain check and retain its result."},
+  "ARTIFACT_INVALID": {"meaning": "Artifact bytes are absent or differ from the receipt digest.", "next": "Recover the exact artifact or rerun its producer."},
+  "OBLIGATION_FAILED": {"meaning": "An authenticated receipt reports failure.", "next": "Inspect that producer's retained output and repair its cause."},
+  "POLICY_MISMATCH": {"meaning": "The manifest binds another policy.", "next": "Read current controller policy and create fresh evidence for it."},
+  "CONTEXT_MISMATCH": {"meaning": "Evaluation pins or authority epoch differ.", "next": "Inspect both manifests and resolve the changed dependency."},
+  "ACTOR_UNAUTHORIZED": {"meaning": "The configured policy does not permit this actor.", "next": "Preserve rejection; changing authority is a separate reviewed operation."},
+  "EVIDENCE_POLICY_MISMATCH": {"meaning": "Producer or evidence kind does not meet policy.", "next": "Run the required producer at the required evidence strength."},
+  "INPUT_INVALID": {"meaning": "The input violates a structural contract.", "next": "Inspect the error reason and rebuild the value through admission builders."},
+  "BASE_MOVED": {"meaning": "Target no longer matches the checked base.", "next": "Rebuild the candidate against the new base and reverify."},
+  "REQUEST_CONSUMED": {"meaning": "The request has an existing consumption marker.", "next": "Reconcile the marker and target. Do not reuse the identifier for another operation."},
+  "NOT_COMMITTED_OBSERVED": {"meaning": "No matching commit marker was observed; an in-flight operation may still exist.", "next": "Retain uncertainty; this observation does not authorize retry."},
+  "COMMIT_OUTCOME_UNRESOLVED": {"meaning": "Observed refs do not establish the requested outcome.", "next": "Inspect the controller and repository before taking another action."},
+  "CAPABILITY_MISSING": {"meaning": "The required runtime or transport is unavailable.", "next": "Use ./repo doctor, setup, or the connected GitHub fallback as appropriate."},
+  "DIRTY_TARGET": {"meaning": "Setup found an unrecognized target modification.", "next": "Preserve it and inspect the named path; use another target if needed."},
+  "UPSTREAM_PIN": {"meaning": "Checkout revision differs from upstream.json.", "next": "Use a separate target with ./repo setup."},
+  "BUN_VERSION": {"meaning": "Runtime differs from toolchain.json.", "next": "Run ./repo setup with the pinned runtime."},
+  "GENERATED_DRIFT": {"meaning": "A generated view differs from its source.", "next": "Run its generator, review the diff, then verify."},
+  "TREE_MISMATCH": {"meaning": "Published content differs from verified local content.", "next": "Compare exact trees before reporting publication success."},
+  "ENVIRONMENT_INCOMPLETE": {"meaning": "Required verification dependencies are unavailable or wrong.", "next": "Run ./repo setup and inspect ./repo doctor."}
+}

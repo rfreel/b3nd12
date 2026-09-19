@@ -1,0 +1,46 @@
+test_cold_benchmark_uses_selected_journal (test_agent_benchmarks.BenchmarkTests.test_cold_benchmark_uses_selected_journal) ... ok
+test_duplicate_metrics_rejected (test_agent_benchmarks.BenchmarkTests.test_duplicate_metrics_rejected) ... ok
+test_p95_keeps_slow_tail (test_agent_benchmarks.BenchmarkTests.test_p95_keeps_slow_tail) ... ok
+test_registry_has_diverse_scopes_and_explicit_targets (test_agent_benchmarks.BenchmarkTests.test_registry_has_diverse_scopes_and_explicit_targets) ... ok
+test_valid_json_with_wrong_shape_is_rejected (test_agent_benchmarks.BenchmarkTests.test_valid_json_with_wrong_shape_is_rejected) ... ok
+test_workload_replays_exactly_and_is_deterministic (test_agent_benchmarks.BenchmarkTests.test_workload_replays_exactly_and_is_deterministic) ... ok
+test_changes_cursor_is_bounded_and_rejects_unknown_head (test_agent_cli.CliTests.test_changes_cursor_is_bounded_and_rejects_unknown_head) ... ok
+test_end_to_end_transition_verification_and_completion (test_agent_cli.CliTests.test_end_to_end_transition_verification_and_completion) ... ok
+test_failing_verification_is_structured (test_agent_cli.CliTests.test_failing_verification_is_structured) ... ok
+test_invalid_command_returns_json (test_agent_cli.CliTests.test_invalid_command_returns_json) ... ok
+test_json_array_is_not_an_evidence_object (test_agent_cli.CliTests.test_json_array_is_not_an_evidence_object) ... ok
+test_read_commands_do_not_create_files (test_agent_cli.CliTests.test_read_commands_do_not_create_files) ... ok
+test_state_path_escape_rejected (test_agent_cli.CliTests.test_state_path_escape_rejected) ... ok
+test_unknown_task_returns_stable_error (test_agent_cli.CliTests.test_unknown_task_returns_stable_error) ... ok
+test_duplicate_missing_and_cyclic_dependencies_fail (test_agent_contracts.ContractTests.test_duplicate_missing_and_cyclic_dependencies_fail) ... ok
+test_escape_and_symlink_escape_fail (test_agent_contracts.ContractTests.test_escape_and_symlink_escape_fail) ... ok
+test_graph_accepts_valid_chain (test_agent_contracts.ContractTests.test_graph_accepts_valid_chain) ... ok
+test_invalid_budget_and_unknown_fields_fail (test_agent_contracts.ContractTests.test_invalid_budget_and_unknown_fields_fail) ... ok
+test_schema_and_empty_checks_fail (test_agent_contracts.ContractTests.test_schema_and_empty_checks_fail) ... ok
+test_duplicate_run_and_escape_rejected (test_agent_evidence.EvidenceTests.test_duplicate_run_and_escape_rejected) ... ok
+test_failure_cannot_supply_completion (test_agent_evidence.EvidenceTests.test_failure_cannot_supply_completion) ... ok
+test_output_overflow_is_not_success (test_agent_evidence.EvidenceTests.test_output_overflow_is_not_success) ... ok
+test_source_drift_during_verification_fails (test_agent_evidence.EvidenceTests.test_source_drift_during_verification_fails) ... ok
+test_success_is_bound_to_source_and_artifact (test_agent_evidence.EvidenceTests.test_success_is_bound_to_source_and_artifact) ... ok
+test_timeout_is_retained (test_agent_evidence.EvidenceTests.test_timeout_is_retained) ... ok
+test_zero_tests_is_not_evidence (test_agent_evidence.EvidenceTests.test_zero_tests_is_not_evidence) ... ok
+test_foundation_context_is_present (test_agent_integration.IntegrationTests.test_foundation_context_is_present) ... ok
+test_instruction_and_ci_routes_exist (test_agent_integration.IntegrationTests.test_instruction_and_ci_routes_exist) ... ok
+test_lesson_provenance_is_intact (test_agent_integration.IntegrationTests.test_lesson_provenance_is_intact) ... ok
+test_changed_source_makes_solved_stale (test_agent_state.StateTests.test_changed_source_makes_solved_stale) ... ok
+test_completion_needs_real_evidence (test_agent_state.StateTests.test_completion_needs_real_evidence) ... ok
+test_dependency_reopening_invalidates_dependent (test_agent_state.StateTests.test_dependency_reopening_invalidates_dependent) ... ok
+test_idempotent_retry_and_conflicting_retry (test_agent_state.StateTests.test_idempotent_retry_and_conflicting_retry) ... ok
+test_open_dependency_blocks_start (test_agent_state.StateTests.test_open_dependency_blocks_start) ... ok
+test_plan_drift_rejected (test_agent_state.StateTests.test_plan_drift_rejected) ... ok
+test_read_does_not_initialize_history (test_agent_state.StateTests.test_read_does_not_initialize_history) ... ok
+test_rehashed_impossible_transition_rejected (test_agent_state.StateTests.test_rehashed_impossible_transition_rejected) ... ok
+test_stale_head_does_not_write (test_agent_state.StateTests.test_stale_head_does_not_write) ... ok
+test_torn_tail_and_tampering_rejected (test_agent_state.StateTests.test_torn_tail_and_tampering_rejected) ... ok
+test_two_writers_have_one_winner (test_agent_state.StateTests.test_two_writers_have_one_winner) ... ok
+test_unresolved_requires_reopen_condition (test_agent_state.StateTests.test_unresolved_requires_reopen_condition) ... ok
+
+----------------------------------------------------------------------
+Ran 41 tests in 2.251s
+
+OK

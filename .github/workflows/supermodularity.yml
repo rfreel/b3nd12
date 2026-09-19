@@ -1,49 +1,28 @@
 name: verify-supermodularity
-
 on:
   push:
   pull_request:
   merge_group:
-
 permissions:
   contents: read
-
 jobs:
   pilot:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: '1.2.22'
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Acquire pinned Bend
-        shell: bash
-        run: |
-          pin=$(python3 -c 'import json; print(json.load(open("upstream.json"))["commit"])')
-          git init upstream
-          git -C upstream remote add origin https://github.com/bendlang/bend.git
-          git -C upstream fetch --depth=1 origin "$pin"
-          git -C upstream checkout --detach FETCH_HEAD
-      - name: Apply patch stack
-        run: ./apply.sh upstream
-      - name: Verify pilot
-        env:
-          SUPERMODULARITY_RESULTS_DIR: ${{ runner.temp }}/supermodularity-results
-        run: ./scripts/verify-supermodularity.sh upstream
-      - name: Verify admission laws and adversarial campaign
-        env:
-          ADMISSION_RESULTS: ${{ runner.temp }}/supermodularity-results/admission.json
-        run: ./scripts/verify-admission.sh upstream
-      - name: Preserve experiment evidence
+      - uses: ./.github/actions/toolchain
+      - name: Setup pinned upstream and overlay
+        run: ./repo setup --target upstream
+      - name: Verify complete repository
+        run: ./repo verify
+      - name: Preserve verification evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: supermodularity-results
-          path: ${{ runner.temp }}/supermodularity-results
-          if-no-files-found: ignore
+          name: repository-verification
+          path: .repo/runs/
+          include-hidden-files: true
+          if-no-files-found: error

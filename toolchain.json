@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "bun": "1.2.22",
+  "python": "3.12",
+  "git_minimum": "2.30",
+  "budgets": {
+    "total_seconds": 600,
+    "step_seconds": 180,
+    "failure_cap": 5,
+    "workers": 1
+  }
+}

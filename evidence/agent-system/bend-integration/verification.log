@@ -1,0 +1,120 @@
+verify: structure PASS; bend2/bend.ts unchanged
+supermodularity: checking Bend proofs
+{"schema":"bend.diag.v1","id":"BND000","severity":"ok","message":"All terms check.","unsafe":0}
+supermodularity: rejecting transitive unsafe imports
+{"schema":"bend.diag.v1","id":"BND000","severity":"ok","message":"All terms check.","unsafe":1}
+proof check did not confirm zero unsafe terms
+supermodularity: rejecting false acceptance claims
+{"schema":"bend.diag.v1","id":"BND110","severity":"error","message":"Error:\n- expected : ../model.Rejected{}\n- observed : ../model.Accepted{}\nLocation: false_claim\n4 | def false_claim() -> {Model.decide(Model.Proposed{Model.ConstantFalse{}, Model.Retain{}}) == Model.Accepted{} : Model.Decision}:\n5>|   {==}\n6 | ","file":"/workspace/scratch/205e3b31b205/b3nd12/pilot/supermodularity/negative/broken_accepted.bend"}
+{"schema":"bend.diag.v1","id":"BND110","severity":"error","message":"Error:\n- expected : ../model.Rejected{}\n- observed : ../model.Accepted{}\nLocation: false_claim\n4 | def false_claim() -> {Model.decide(Model.Proposed{Model.Identity{}, Model.Delete{}}) == Model.Accepted{} : Model.Decision}:\n5>|   {==}\n6 | ","file":"/workspace/scratch/205e3b31b205/b3nd12/pilot/supermodularity/negative/deletion_accepted.bend"}
+supermodularity: checking actual repair admission
+{"output": "/workspace/scratch/205e3b31b205/b3nd12/evidence/agent-system/bend-integration/checker_repair.json", "exit_code": 0}
+supermodularity: checking Python regression cases
+test_duplicate_metrics_rejected (test_agent_benchmarks.BenchmarkTests.test_duplicate_metrics_rejected) ... ok
+test_p95_keeps_slow_tail (test_agent_benchmarks.BenchmarkTests.test_p95_keeps_slow_tail) ... ok
+test_registry_has_diverse_scopes_and_explicit_targets (test_agent_benchmarks.BenchmarkTests.test_registry_has_diverse_scopes_and_explicit_targets) ... ok
+test_workload_replays_exactly_and_is_deterministic (test_agent_benchmarks.BenchmarkTests.test_workload_replays_exactly_and_is_deterministic) ... ok
+test_changes_cursor_is_bounded_and_rejects_unknown_head (test_agent_cli.CliTests.test_changes_cursor_is_bounded_and_rejects_unknown_head) ... ok
+test_end_to_end_transition_verification_and_completion (test_agent_cli.CliTests.test_end_to_end_transition_verification_and_completion) ... ok
+test_failing_verification_is_structured (test_agent_cli.CliTests.test_failing_verification_is_structured) ... ok
+test_invalid_command_returns_json (test_agent_cli.CliTests.test_invalid_command_returns_json) ... ok
+test_read_commands_do_not_create_files (test_agent_cli.CliTests.test_read_commands_do_not_create_files) ... ok
+test_state_path_escape_rejected (test_agent_cli.CliTests.test_state_path_escape_rejected) ... ok
+test_unknown_task_returns_stable_error (test_agent_cli.CliTests.test_unknown_task_returns_stable_error) ... ok
+test_duplicate_missing_and_cyclic_dependencies_fail (test_agent_contracts.ContractTests.test_duplicate_missing_and_cyclic_dependencies_fail) ... ok
+test_escape_and_symlink_escape_fail (test_agent_contracts.ContractTests.test_escape_and_symlink_escape_fail) ... ok
+test_graph_accepts_valid_chain (test_agent_contracts.ContractTests.test_graph_accepts_valid_chain) ... ok
+test_invalid_budget_and_unknown_fields_fail (test_agent_contracts.ContractTests.test_invalid_budget_and_unknown_fields_fail) ... ok
+test_schema_and_empty_checks_fail (test_agent_contracts.ContractTests.test_schema_and_empty_checks_fail) ... ok
+test_duplicate_run_and_escape_rejected (test_agent_evidence.EvidenceTests.test_duplicate_run_and_escape_rejected) ... ok
+test_failure_cannot_supply_completion (test_agent_evidence.EvidenceTests.test_failure_cannot_supply_completion) ... ok
+test_output_overflow_is_not_success (test_agent_evidence.EvidenceTests.test_output_overflow_is_not_success) ... ok
+test_source_drift_during_verification_fails (test_agent_evidence.EvidenceTests.test_source_drift_during_verification_fails) ... ok
+test_success_is_bound_to_source_and_artifact (test_agent_evidence.EvidenceTests.test_success_is_bound_to_source_and_artifact) ... ok
+test_timeout_is_retained (test_agent_evidence.EvidenceTests.test_timeout_is_retained) ... ok
+test_zero_tests_is_not_evidence (test_agent_evidence.EvidenceTests.test_zero_tests_is_not_evidence) ... ok
+test_foundation_context_is_present (test_agent_integration.IntegrationTests.test_foundation_context_is_present) ... ok
+test_instruction_and_ci_routes_exist (test_agent_integration.IntegrationTests.test_instruction_and_ci_routes_exist) ... ok
+test_lesson_provenance_is_intact (test_agent_integration.IntegrationTests.test_lesson_provenance_is_intact) ... ok
+test_changed_source_makes_solved_stale (test_agent_state.StateTests.test_changed_source_makes_solved_stale) ... ok
+test_completion_needs_real_evidence (test_agent_state.StateTests.test_completion_needs_real_evidence) ... ok
+test_dependency_reopening_invalidates_dependent (test_agent_state.StateTests.test_dependency_reopening_invalidates_dependent) ... ok
+test_idempotent_retry_and_conflicting_retry (test_agent_state.StateTests.test_idempotent_retry_and_conflicting_retry) ... ok
+test_open_dependency_blocks_start (test_agent_state.StateTests.test_open_dependency_blocks_start) ... ok
+test_plan_drift_rejected (test_agent_state.StateTests.test_plan_drift_rejected) ... ok
+test_read_does_not_initialize_history (test_agent_state.StateTests.test_read_does_not_initialize_history) ... ok
+test_rehashed_impossible_transition_rejected (test_agent_state.StateTests.test_rehashed_impossible_transition_rejected) ... ok
+test_stale_head_does_not_write (test_agent_state.StateTests.test_stale_head_does_not_write) ... ok
+test_torn_tail_and_tampering_rejected (test_agent_state.StateTests.test_torn_tail_and_tampering_rejected) ... ok
+test_two_writers_have_one_winner (test_agent_state.StateTests.test_two_writers_have_one_winner) ... ok
+test_unresolved_requires_reopen_condition (test_agent_state.StateTests.test_unresolved_requires_reopen_condition) ... ok
+test_missing_or_unsafe_attestation_rejected (test_autoresearch.AutoresearchTests.test_missing_or_unsafe_attestation_rejected) ... ok
+test_proof_surface_cannot_be_deleted_or_extended (test_autoresearch.AutoresearchTests.test_proof_surface_cannot_be_deleted_or_extended) ... ok
+test_stderr_error_overrides_stdout_success (test_autoresearch.AutoresearchTests.test_stderr_error_overrides_stdout_success) ... ok
+test_timeout_cannot_pass (test_autoresearch.AutoresearchTests.test_timeout_cannot_pass) ... ok
+test_checker_edits_cannot_hide_in_index (test_checker_guard.CheckerGuardTests.test_checker_edits_cannot_hide_in_index) ... ok
+test_context_drift (test_interaction.InteractionTests.test_context_drift) ... ok
+test_exact_fraction (test_interaction.InteractionTests.test_exact_fraction) ... ok
+test_incomplete_or_unsupported_observations (test_interaction.InteractionTests.test_incomplete_or_unsupported_observations) ... ok
+test_malformed_context (test_interaction.InteractionTests.test_malformed_context) ... ok
+test_nonzero_baseline_and_large_integer (test_interaction.InteractionTests.test_nonzero_baseline_and_large_integer) ... ok
+test_signs (test_interaction.InteractionTests.test_signs) ... ok
+test_strict_json (test_interaction.InteractionTests.test_strict_json) ... ok
+test_already_passing_target_rejected (test_repair_gate.RepairGateTests.test_already_passing_target_rejected) ... ok
+test_cli_exit_codes (test_repair_gate.RepairGateTests.test_cli_exit_codes) ... ok
+test_context_drift_rejected (test_repair_gate.RepairGateTests.test_context_drift_rejected) ... ok
+test_failed_target_rejected (test_repair_gate.RepairGateTests.test_failed_target_rejected) ... ok
+test_missing_evidence_rejected (test_repair_gate.RepairGateTests.test_missing_evidence_rejected) ... ok
+test_regression_rejected (test_repair_gate.RepairGateTests.test_regression_rejected) ... ok
+test_schema_rejects_invalid_and_extra_values (test_repair_gate.RepairGateTests.test_schema_rejects_invalid_and_extra_values) ... ok
+test_unresolved_is_preserved (test_repair_gate.RepairGateTests.test_unresolved_is_preserved) ... ok
+test_valid_repair_accepted_without_mutation (test_repair_gate.RepairGateTests.test_valid_repair_accepted_without_mutation) ... ok
+
+----------------------------------------------------------------------
+Ran 59 tests in 3.928s
+
+OK
+supermodularity: measuring the four configurations
+{
+  "classification": "additive",
+  "context": {
+    "budget": {
+      "max_cli_calls_per_case": 2,
+      "timeout_seconds_per_call": 20
+    },
+    "cases": [
+      "empty PROOF.bend beside empty LAWS.bend"
+    ],
+    "evaluation": "missing-laws-import-resolver-v1",
+    "metric": {
+      "direction": "higher_is_better",
+      "name": "correct import repair hint present",
+      "unit": "cases"
+    },
+    "system": {
+      "files_sha256": {
+        "bend2/base.bend": "dc0a00754c03715821e67da6ae5273ae2f6df139ee090e0e97251130a8a3f385",
+        "bend2/bend.ts": "6f7b5246dc029d587d144e339b0e447b521a6b30daae63a7f7adc31780e96ea0",
+        "bend2/comp.ts": "99f24d78e7854830e0a20a6eebc8bf72288c4ec2dc9216fcd79fa61df9bd6cd2",
+        "bend2/main.ts": "ed428aef215786f0201acc7b7a18392a06599562bbe43948564fd5d074c46684",
+        "experiments/diagnostic_interaction.py": "e64158d365964e0a35c4086960e873a2eeb804976c6ee6156f27e0f41c2b1448",
+        "fixtures/LAWS.bend": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "fixtures/PROOF.bend": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "guide/agent/diagnostics.json": "124dcf191328242d73f7c1e61e3ec6b1f6d9ebc2bab4ee9c953c05895e76ef05",
+        "tools/interaction.py": "a3f11c22bd7b1c6cd7dce9a603a5149bd2afcef490807a43935f353772db734b"
+      },
+      "revision": "e5a4c4cfe980c2e4e70571562efb5197fe27b2f4",
+      "runtime": "bun 1.2.22"
+    }
+  },
+  "interaction": "0",
+  "schema": "bend.interaction.v1",
+  "scope": "Recorded evaluation only; no global supermodularity claim.",
+  "scores": {
+    "a": "1",
+    "ab": "1",
+    "b": "1",
+    "baseline": "1"
+  }
+}
+supermodularity: verification passed

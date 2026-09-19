@@ -27,6 +27,22 @@ MUTANTS = {
     "timeout-is-rejection": ('return {"verdict": "UNRESOLVED", "reason": "execution timed out; inspect target and consumed-request ref"}', 'return {"verdict": "REJECTED", "reason": "timeout"}'),
 }
 
+EXPECTED_TESTS = {
+    "ignore-policy": "test_exhaustive_domain_and_context_partition",
+    "ignore-context": "test_all_context_pins_checked_even_with_fresh_signatures",
+    "ignore-actor": "test_exhaustive_domain_and_context_partition",
+    "ignore-binding": "test_all_manifest_fields_are_bound",
+    "ignore-authentication": "test_exhaustive_domain_and_context_partition",
+    "ignore-artifact": "test_receipt_attacks",
+    "accept-missing": "test_exhaustive_domain_and_context_partition",
+    "reject-everything": "test_pure_and_deterministic",
+    "ignore-tree": "test_wrong_tree_parent_repository_and_ref",
+    "ignore-parent": "test_wrong_tree_parent_repository_and_ref",
+    "allow-replay": "test_valid_commit_and_replay",
+    "stale-base-write": "test_stale_base_does_not_consume_request",
+    "timeout-is-rejection": "test_lost_acknowledgement_preserves_uncertainty",
+}
+
 
 def run(root):
     command = [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_admission_gate.py", "-q"]
@@ -57,8 +73,10 @@ def main():
             shutil.copy(ROOT / "tests/test_admission_gate.py", root / "tests")
             observation = run(root)
             # A syntax/import failure does not demonstrate detection of the fault.
-            killed = observation["exit"] != 0 and "AssertionError" in observation["stderr"]
-            result["mutants"][name] = {"killed": killed, **observation}
+            expected_test = EXPECTED_TESTS[name]
+            killed = (observation["exit"] != 0 and "AssertionError" in observation["stderr"]
+                      and ("FAIL: " + expected_test + " ") in observation["stderr"])
+            result["mutants"][name] = {"killed": killed, "expected_test": expected_test, **observation}
     result["saturated"] = all(r["killed"] for r in result["mutants"].values())
     result["stop_rule"] = "Stop after complete finite partition and all declared mutations are detected. Reopen for a new fault class or changed source; no global completeness claim."
     args.output.parent.mkdir(parents=True, exist_ok=True)

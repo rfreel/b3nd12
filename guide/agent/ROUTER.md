@@ -2,6 +2,18 @@
 
 Load one route, not the whole guide.
 
+GATE
+Use for manifests, receipts, admission, local commits, and reconciliation.
+Read: guide/agent/GATE.md.
+
+VERIFY
+Use for setup, focused checks, proof correspondence, and evidence freshness.
+Read: guide/agent/VERIFY.md.
+
+RELEASE
+Use for publication, host inspection, remote-tree comparison, and CI watching.
+Read: guide/agent/RELEASE.md.
+
 PROGRAM
 Use for implementation, compilation, runtime, IO, tests, and ordinary Bend code.
 Read: guide/agent/PROGRAM.md when present.

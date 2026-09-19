@@ -204,14 +204,19 @@ class GitExecutionTests(unittest.TestCase):
             self.assertEqual(gate.git(self.repo, "show-ref"), before)
 
     def test_competing_requests_only_one_commits(self):
-        second = copy.deepcopy(self.b)
-        second["manifest"]["request"] = "request-2"
-        resign(second, self.k)
-        with ThreadPoolExecutor(max_workers=2) as pool:
-            results = list(pool.map(self.execute, (self.b, second)))
-        self.assertEqual(sorted(r["verdict"] for r in results), ["COMMITTED", "REJECTED"])
-        self.assertEqual(self.head(), self.candidate)
-        self.assertEqual(len(gate.git(self.repo, "for-each-ref", "refs/admission/consumed").splitlines()), 1)
+        for round_id in range(8):
+            gate.git(self.repo, "update-ref", "refs/heads/main", self.base)
+            first = copy.deepcopy(self.b)
+            second = copy.deepcopy(self.b)
+            first["manifest"]["request"] = f"race-{round_id}-first"
+            second["manifest"]["request"] = f"race-{round_id}-second"
+            resign(first, self.k)
+            resign(second, self.k)
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                results = list(pool.map(self.execute, (first, second)))
+            self.assertEqual(sorted(r["verdict"] for r in results), ["COMMITTED", "REJECTED"])
+            self.assertEqual(self.head(), self.candidate)
+            self.assertEqual(len(gate.git(self.repo, "for-each-ref", "refs/admission/consumed").splitlines()), round_id + 1)
 
     def test_symbolic_target_cannot_redirect_write(self):
         gate.git(self.repo, "update-ref", "refs/heads/other", self.base)
